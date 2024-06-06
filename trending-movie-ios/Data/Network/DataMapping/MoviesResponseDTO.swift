@@ -55,19 +55,9 @@ extension MoviesResponseDTO.MovieDTO {
     func toDomain() -> Movie {
         Movie(id: Movie.Identifier(id),
               title: title,
-              genre: genre?.toDomain(),
               posterPath: posterPath,
               overview: overview,
               releaseDate: dateFormatter.date(from: releaseDate ?? ""))
-    }
-}
-
-extension MoviesResponseDTO.MovieDTO.GenreDTO {
-    func toDomain() -> Movie.Genre {
-        switch self {
-        case .adventure: return .adventure
-        case .scienceFiction: return .scienceFiction
-        }
     }
 }
 
