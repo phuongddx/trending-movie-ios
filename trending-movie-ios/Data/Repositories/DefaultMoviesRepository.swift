@@ -26,7 +26,7 @@ extension DefaultMoviesRepository: MoviesRepository {
                          page: Int,
                          cached: @escaping (MoviesPage) -> Void,
                          completion: @escaping (Result<MoviesPage, any Error>) -> Void) -> (any Cancellable)? {
-        let requestDTO = MoviesRequestDTO(query: query.query, page: page)
+        let requestDTO = MoviesQueryRequestDTO(query: query.query, page: page)
         let task = RepositoryTask()
 
         cache.getResponse(for: requestDTO) { [weak self, backgroundQueue] result in

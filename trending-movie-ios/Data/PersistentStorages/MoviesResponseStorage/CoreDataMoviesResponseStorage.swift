@@ -19,7 +19,7 @@ final class CoreDataMoviesResponseStorage {
     // MARK: - Private
 
     private func fetchRequest(
-        for requestDto: MoviesRequestDTO
+        for requestDto: MoviesQueryRequestDTO
     ) -> NSFetchRequest<MoviesRequestEntity> {
         let request: NSFetchRequest = MoviesRequestEntity.fetchRequest()
         request.predicate = NSPredicate(format: "%K = %@ AND %K = %d",
@@ -29,7 +29,7 @@ final class CoreDataMoviesResponseStorage {
     }
 
     private func deleteResponse(
-        for requestDto: MoviesRequestDTO,
+        for requestDto: MoviesQueryRequestDTO,
         in context: NSManagedObjectContext
     ) {
         let request = fetchRequest(for: requestDto)
@@ -48,7 +48,7 @@ final class CoreDataMoviesResponseStorage {
 extension CoreDataMoviesResponseStorage: MoviesResponseStorage {
 
     func getResponse(
-        for requestDto: MoviesRequestDTO,
+        for requestDto: MoviesQueryRequestDTO,
         completion: @escaping (Result<MoviesResponseDTO?, Error>) -> Void
     ) {
         coreDataStorage.performBackgroundTask { context in
@@ -65,7 +65,7 @@ extension CoreDataMoviesResponseStorage: MoviesResponseStorage {
 
     func save(
         response responseDto: MoviesResponseDTO,
-        for requestDto: MoviesRequestDTO
+        for requestDto: MoviesQueryRequestDTO
     ) {
         coreDataStorage.performBackgroundTask { context in
             do {

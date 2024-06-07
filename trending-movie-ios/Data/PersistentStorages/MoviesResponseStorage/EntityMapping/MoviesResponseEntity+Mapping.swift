@@ -22,7 +22,6 @@ extension MovieResponseEntity {
         return .init(
             id: Int(id),
             title: title,
-            genre: MoviesResponseDTO.MovieDTO.GenreDTO(rawValue: genre ?? ""),
             posterPath: posterPath,
             overview: overview,
             releaseDate: releaseDate
@@ -30,7 +29,7 @@ extension MovieResponseEntity {
     }
 }
 
-extension MoviesRequestDTO {
+extension MoviesQueryRequestDTO {
     func toEntity(in context: NSManagedObjectContext) -> MoviesRequestEntity {
         let entity: MoviesRequestEntity = .init(context: context)
         entity.query = query
@@ -53,10 +52,9 @@ extension MoviesResponseDTO {
 
 extension MoviesResponseDTO.MovieDTO {
     func toEntity(in context: NSManagedObjectContext) -> MovieResponseEntity {
-        let entity: MovieResponseEntity = .init(context: context)
+        let entity: MovieResponseEntity = MovieResponseEntity(context: context)
         entity.id = Int64(id)
         entity.title = title
-        entity.genre = genre?.rawValue
         entity.posterPath = posterPath
         entity.overview = overview
         entity.releaseDate = releaseDate
