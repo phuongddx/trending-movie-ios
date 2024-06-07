@@ -39,6 +39,14 @@ extension MoviesSceneDIContainer {
         DefaultSearchMoviesUseCase(moviesRepository: makeMoviesRepository(),
                                    moviesQueriesRepository: makeMoviesQueriesRepository())
     }
+
+    func makeTrendingMoviesUseCase() -> TrendingMoviesUseCase {
+        DefaultTrendingMoviesUseCase(moviesRepository: makeMoviesRepository())
+    }
+
+    func makeDetailsMovieUseCase() -> FetchDetailsMovieUseCase {
+        DefaultFetchDetailsMovieUseCase(moviesRepository: makeMoviesRepository())
+    }
 }
 
 // MARK:  - Repositories

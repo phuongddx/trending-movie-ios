@@ -107,7 +107,7 @@ class MoviesRepositoryMock: MoviesRepository {
     func fetchMoviesList(query: MovieQuery,
                          page: Int,
                          cached: @escaping (MoviesPage) -> Void,
-                         completion: @escaping (Result<MoviesPage, Error>) -> Void) -> Cancellable? {
+                         completion: @escaping MoviesPageResult) -> Cancellable? {
         completion(result)
         fetchCompletionCallsCount += 1
         return nil

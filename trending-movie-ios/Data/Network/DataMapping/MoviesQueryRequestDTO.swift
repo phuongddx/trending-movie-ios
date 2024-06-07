@@ -18,4 +18,8 @@ struct MoviesQueryRequestDTO: MoviesRequestable {
 
 struct DefaultMoviesRequestDTO: MoviesRequestable {
     var page: Int
+
+    init(page: Int = 1) {
+        self.page = page
+    }
 }

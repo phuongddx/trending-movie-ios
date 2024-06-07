@@ -28,6 +28,19 @@ extension StoryboardInstantiable where Self: UIViewController {
     }
 }
 
+protocol ReuseIdentifier: NSObjectProtocol {
+    static var reuseIdentifier: String { get }
+}
+
+extension ReuseIdentifier where Self: UITableViewCell {
+    static var reuseIdentifier: String {
+        return NSStringFromClass(Self.self).components(separatedBy: ".").last!
+    }
+}
+
+extension UITableViewCell: ReuseIdentifier {}
+
+
 protocol Alertable {}
 extension Alertable where Self: UIViewController {
     

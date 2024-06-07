@@ -64,6 +64,7 @@ protocol MoviesListViewModel: MoviesListViewModelInput, MoviesListViewModelOutpu
 final class DefaultMoviesListViewModel: MoviesListViewModel {
 
     private let searchMoviesUseCase: SearchMoviesUseCase
+    private let trendingMoviesUseCase: TrendingMoviesUseCase
     private let actions: MoviesListViewModelActionsProtocol?
 
     var currentPage: Int = 0
@@ -72,7 +73,11 @@ final class DefaultMoviesListViewModel: MoviesListViewModel {
     var nextPage: Int { hasMorePages ? currentPage + 1 : currentPage }
 
     private var pages: [MoviesPage] = []
-    private var moviesLoadTask: Cancellable? { willSet { moviesLoadTask?.cancel() } }
+    private var moviesLoadTask: Cancellable? {
+        willSet {
+            moviesLoadTask?.cancel()
+        }
+    }
     private let mainQueue: DispatchQueueType
 
     // MARK: - OUTPUT
@@ -90,9 +95,11 @@ final class DefaultMoviesListViewModel: MoviesListViewModel {
     // MARK: - Init
     
     init(searchMoviesUseCase: SearchMoviesUseCase,
+         trendingMoviesUseCase: TrendingMoviesUseCase,
          actions: MoviesListViewModelActionsProtocol? = nil,
          mainQueue: DispatchQueueType = DispatchQueue.main) {
         self.searchMoviesUseCase = searchMoviesUseCase
+        self.trendingMoviesUseCase = trendingMoviesUseCase
         self.actions = actions
         self.mainQueue = mainQueue
     }
@@ -122,13 +129,12 @@ final class DefaultMoviesListViewModel: MoviesListViewModel {
         query.value = movieQuery.query
 
         moviesLoadTask = searchMoviesUseCase.execute(
-            requestValue: .init(query: movieQuery, page: nextPage),
+            requestValue: SearchMoviesUseCaseRequestValue(query: movieQuery, page: nextPage),
             cached: { [weak self] page in
                 self?.mainQueue.async {
                     self?.appendPage(page)
                 }
-            },
-            completion: { [weak self] result in
+            }, completion: { [weak self] result in
                 self?.mainQueue.async {
                     switch result {
                     case .success(let page):
@@ -139,6 +145,28 @@ final class DefaultMoviesListViewModel: MoviesListViewModel {
                     self?.loading.value = .none
                 }
         })
+    }
+
+    func loadTrendingList(requestDto: DefaultMoviesRequestDTO,
+                          loading: MoviesListViewModelLoading) {
+        self.loading.value = loading
+        moviesLoadTask = trendingMoviesUseCase.execute(
+            requestable: requestDto,
+            cached: { [weak self] page in
+                self?.mainQueue.async {
+                    self?.appendPage(page)
+                }
+            }, completion: { [weak self] result in
+                self?.mainQueue.async {
+                    switch result {
+                    case .success(let page):
+                        self?.appendPage(page)
+                    case .failure(let error):
+                        self?.handle(error: error)
+                    }
+                    self?.loading.value = .none
+                }
+            })
     }
 
     private func handle(error: Error) {
@@ -157,12 +185,17 @@ final class DefaultMoviesListViewModel: MoviesListViewModel {
 
 extension DefaultMoviesListViewModel {
 
-    func viewDidLoad() { }
+    func viewDidLoad() {
+        loadTrendingList(requestDto: DefaultMoviesRequestDTO(),
+                         loading: .fullScreen)
+    }
 
     func didLoadNextPage() {
         guard hasMorePages, loading.value == .none else { return }
-        load(movieQuery: .init(query: query.value),
-             loading: .nextPage)
+//        load(movieQuery: MovieQuery(query: query.value),
+//             loading: .nextPage)
+        loadTrendingList(requestDto: DefaultMoviesRequestDTO(page: nextPage),
+                         loading: .nextPage)
     }
 
     func didSearch(query: String) {

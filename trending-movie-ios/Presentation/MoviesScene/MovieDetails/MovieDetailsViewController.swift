@@ -35,17 +35,25 @@ final class MovieDetailsViewController: ViewController,
         super.viewDidLoad()
         setupViews()
         bind(to: viewModel)
+        viewModel.viewDidLoad()
     }
 
     private func bind(to viewModel: MovieDetailsViewModel) {
-        title = viewModel.title
-        overviewLbl.text = viewModel.overview
-        posterImageView.isHidden = viewModel.shouldShowPosterImage
-
         viewModel.posterImage.observe(on: self) { [weak self] in
             self?.posterImageView.image = $0.flatMap(UIImage.init)
         }
-        viewModel.updatePosterImage(width: Int(Device.screenSize.width))
+        viewModel.loading.observe(on: self) { loading in
+            if loading == .fullScreen {
+                LoadingView.show()
+            } else {
+                LoadingView.hide()
+            }
+        }
+        viewModel.movie.observe(on: self) { [weak self] movie in
+            self?.title = movie?.title
+            self?.viewModel.updatePosterImage(posterImagePath: movie?.posterPath ?? "")
+            self?.overviewLbl.text = movie?.overview
+        }
     }
 
     private func setupViews() {

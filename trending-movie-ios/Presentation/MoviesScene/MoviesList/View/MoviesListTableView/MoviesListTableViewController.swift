@@ -7,7 +7,8 @@
 
 import UIKit
 
-final class MoviesListTableViewController: UITableViewController {
+final class MoviesListTableViewController: UITableViewController,
+                                           AppUIProvider {
 
     var viewModel: MoviesListViewModel!
 
@@ -22,7 +23,9 @@ final class MoviesListTableViewController: UITableViewController {
     }
 
     func reload() {
-        tableView.reloadData()
+        UIView.performWithoutAnimation { [weak self] in
+            self?.tableView.reloadData()
+        }
     }
 
     func updateLoading(_ loading: MoviesListViewModelLoading?) {
@@ -39,7 +42,9 @@ final class MoviesListTableViewController: UITableViewController {
     // MARK: - Private
 
     private func setupViews() {
-        tableView.estimatedRowHeight = MoviesListItemCell.height
+        tableView.register(MoviesListTableViewCell.self,
+                           forCellReuseIdentifier: MoviesListTableViewCell.reuseIdentifier)
+        tableView.estimatedRowHeight = UITableView.automaticDimension
         tableView.rowHeight = UITableView.automaticDimension
     }
 }
@@ -47,38 +52,43 @@ final class MoviesListTableViewController: UITableViewController {
 // MARK: - UITableViewDataSource, UITableViewDelegate
 
 extension MoviesListTableViewController {
-
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.items.value.count
+    override func tableView(_ tableView: UITableView,
+                            viewForHeaderInSection section: Int) -> UIView? {
+        let stack = createStack(axis: .horizontal)
+        stack.setPadding(UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16))
+        stack.addArrangedSubview(createLabel(text: "Trending", font: .systemFont(ofSize: 18, weight: .semibold)))
+        stack.backgroundColor = .white
+        return stack
     }
 
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(
-            withIdentifier: MoviesListItemCell.reuseIdentifier,
-            for: indexPath
-        ) as? MoviesListItemCell else {
-            assertionFailure("Cannot dequeue reusable cell \(MoviesListItemCell.self) with reuseIdentifier: \(MoviesListItemCell.reuseIdentifier)")
-            return UITableViewCell()
-        }
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        viewModel.items.value.count
+    }
 
-        cell.fill(with: viewModel.items.value[indexPath.row],
-                  posterImagesRepository: posterImagesRepository)
-
+    override func tableView(_ tableView: UITableView,
+                            cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: MoviesListTableViewCell.reuseIdentifier,
+                                                 for: indexPath) as? MoviesListTableViewCell
+        cell?.bind(with: viewModel.items.value[indexPath.row],
+                   posterImagesRepository: posterImagesRepository)
         if indexPath.row == viewModel.items.value.count - 1 {
             viewModel.didLoadNextPage()
         }
-
-        return cell
+        return cell ?? UITableViewCell()
     }
 
-    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return viewModel.isEmpty ? tableView.frame.height : super.tableView(tableView, heightForRowAt: indexPath)
+    override func tableView(_ tableView: UITableView,
+                            heightForRowAt indexPath: IndexPath) -> CGFloat {
+        viewModel.isEmpty ?
+        tableView.frame.height :
+        super.tableView(tableView, heightForRowAt: indexPath)
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         viewModel.didSelectItem(at: indexPath.row)
     }
 }
+
 extension UITableViewController {
     func makeActivityIndicator(size: CGSize) -> UIActivityIndicatorView {
         let activityIndicator = UIActivityIndicatorView(style: .medium)

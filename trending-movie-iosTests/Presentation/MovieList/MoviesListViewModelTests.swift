@@ -29,7 +29,7 @@ class MoviesListViewModelTests: XCTestCase {
 
         typealias ExecuteBlock = (SearchMoviesUseCaseRequestValue,
                                   (MoviesPage) -> Void,
-                                  (Result<MoviesPage, Error>) -> Void) -> Void
+                                  MoviesPageResult) -> Void
 
         lazy var _execute: ExecuteBlock = { _, _, _ in
             XCTFail("not implemented")
@@ -38,7 +38,7 @@ class MoviesListViewModelTests: XCTestCase {
         func execute(
             requestValue: SearchMoviesUseCaseRequestValue,
             cached: @escaping (MoviesPage) -> Void,
-            completion: @escaping (Result<MoviesPage, Error>) -> Void
+            completion: @escaping MoviesPageResult
         ) -> Cancellable? {
             executeCallCount += 1
             _execute(requestValue, cached, completion)

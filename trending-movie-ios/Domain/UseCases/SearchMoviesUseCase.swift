@@ -7,10 +7,12 @@
 
 import Foundation
 
+typealias MoviesPageResult = (Result<MoviesPage, any Error>) -> Void
+
 protocol SearchMoviesUseCase {
     func execute(requestValue: SearchMoviesUseCaseRequestValue,
                  cached: @escaping (MoviesPage) -> Void,
-                 completion: @escaping (Result<MoviesPage, Error>) -> Void) -> Cancellable?
+                 completion: @escaping MoviesPageResult) -> Cancellable?
 }
 
 final class DefaultSearchMoviesUseCase: SearchMoviesUseCase {
@@ -25,17 +27,14 @@ final class DefaultSearchMoviesUseCase: SearchMoviesUseCase {
 
     func execute(requestValue: SearchMoviesUseCaseRequestValue,
                  cached: @escaping (MoviesPage) -> Void,
-                 completion: @escaping (Result<MoviesPage, Error>) -> Void) -> Cancellable? {
-        return moviesRepository.fetchMoviesList(
-            query: requestValue.query,
-            page: requestValue.page,
-            cached: cached,
-            completion: { result in
-
+                 completion: @escaping MoviesPageResult) -> Cancellable? {
+        moviesRepository.fetchMoviesList(query: requestValue.query,
+                                         page: requestValue.page,
+                                         cached: cached,
+                                         completion: { result in
             if case .success = result {
                 self.moviesQueriesRepository.saveRecentQuery(query: requestValue.query) { _ in }
             }
-
             completion(result)
         })
     }

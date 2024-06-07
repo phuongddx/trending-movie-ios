@@ -8,55 +8,80 @@
 import Foundation
 
 protocol MovieDetailsViewModelInput {
-    func updatePosterImage(width: Int)
+    func viewDidLoad()
+    func updatePosterImage(posterImagePath: String)
 }
 
 protocol MovieDetailsViewModelOutput {
-    var title: String { get }
+    var movie: Observable<Movie?> { get }
     var posterImage: Observable<Data?> { get }
-    var shouldShowPosterImage: Bool { get }
-    var overview: String { get }
+    var error: Observable<String> { get }
+    var loading: Observable<MoviesListViewModelLoading?> { get }
 }
 
 protocol MovieDetailsViewModel: MovieDetailsViewModelInput,
                                 MovieDetailsViewModelOutput {}
 
 final class DefaultMovieDetailsViewModel: MovieDetailsViewModel {
-    private let posterImagePath: String?
+    private let movieId: Movie.Identifier
     private let posterImagesRepository: PosterImagesRepository
+    private let mainQueue: DispatchQueueType
+    private let detailsMovieUseCase: FetchDetailsMovieUseCase
+    private var moviesLoadTask: Cancellable? {
+        willSet {
+            moviesLoadTask?.cancel()
+        }
+    }
     private var imageLoadTask: Cancellable? {
         willSet {
             imageLoadTask?.cancel()
         }
     }
-    private let mainQueue: DispatchQueueType
 
     // MARK: - Output
-    var title: String
+    var movie: Observable<Movie?> = Observable(nil)
     var posterImage: Observable<Data?> = Observable(nil)
-    var shouldShowPosterImage: Bool
-    var overview: String
+    var loading: Observable<MoviesListViewModelLoading?> = Observable(.none)
+    var error: Observable<String> = Observable("")
 
-    init(movie: Movie,
+    init(movieId: Movie.Identifier,
+         detailsMovieUseCase: FetchDetailsMovieUseCase,
          posterImagesRepository: PosterImagesRepository,
          mainQueue: DispatchQueueType = DispatchQueue.main) {
-        self.title = movie.title ?? ""
-        self.overview = movie.overview ?? ""
-        self.posterImagePath = movie.posterPath
-        self.shouldShowPosterImage = movie.posterPath == nil
+        self.movieId = movieId
+        self.detailsMovieUseCase = detailsMovieUseCase
         self.posterImagesRepository = posterImagesRepository
         self.mainQueue = mainQueue
     }
 
-    func updatePosterImage(width: Int) {
-        guard let posterImagePath = posterImagePath else {
-            return
-        }
+    func viewDidLoad() {
+        loadDetails()
+    }
 
-        imageLoadTask = posterImagesRepository.fetchImage(with: posterImagePath,
-                                                          width: width) { [weak self] result in
+    func loadDetails() {
+        loading.value = .fullScreen
+        moviesLoadTask = detailsMovieUseCase.execute(with: movieId) { [weak self] result in
             self?.mainQueue.async {
-                guard self?.posterImagePath == posterImagePath else { return }
+                switch result {
+                case .success(let responseDto):
+                    self?.movie.value = responseDto?.toDomain()
+                case .failure(let error):
+                    self?.handle(error: error)
+                }
+                self?.loading.value = .none
+            }
+        }
+    }
+
+    private func handle(error: Error) {
+        self.error.value = error.isInternetConnectionError ?
+            NSLocalizedString("No internet connection", comment: "") :
+            NSLocalizedString("Failed loading movies", comment: "")
+    }
+
+    func updatePosterImage(posterImagePath: String) {
+        imageLoadTask = posterImagesRepository.fetchImage(with: posterImagePath) { [weak self] result in
+            self?.mainQueue.async {
                 switch result {
                 case .success(let data):
                     self?.posterImage.value = data

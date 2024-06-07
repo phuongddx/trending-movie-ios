@@ -26,6 +26,7 @@ extension MoviesResponseDTO {
             case posterPath = "poster_path"
             case overview
             case releaseDate = "release_date"
+            case voteAverage = "vote_average"
         }
 
         let id: Int
@@ -33,6 +34,7 @@ extension MoviesResponseDTO {
         let posterPath: String?
         let overview: String?
         let releaseDate: String?
+        let voteAverage: Double?
     }
 }
 
@@ -52,7 +54,8 @@ extension MoviesResponseDTO.MovieDTO {
               title: title,
               posterPath: posterPath,
               overview: overview,
-              releaseDate: dateFormatter.date(from: releaseDate ?? ""))
+              releaseDate: dateFormatter.date(from: releaseDate ?? ""),
+              voteAverage: String(describing: (voteAverage ?? 0).rounded(.up)))
     }
 }
 
