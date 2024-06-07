@@ -23,18 +23,13 @@ extension MoviesResponseDTO {
         private enum CodingKeys: String, CodingKey {
             case id
             case title
-            case genre
             case posterPath = "poster_path"
             case overview
             case releaseDate = "release_date"
         }
-        enum GenreDTO: String, Decodable {
-            case adventure
-            case scienceFiction = "science_fiction"
-        }
+
         let id: Int
         let title: String?
-        let genre: GenreDTO?
         let posterPath: String?
         let overview: String?
         let releaseDate: String?

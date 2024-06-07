@@ -8,8 +8,13 @@
 import Foundation
 
 struct APIEndpoints {
-    
-    static func getMovies(with moviesRequestDTO: MoviesRequestDTO) -> Endpoint<MoviesResponseDTO> {
+    static func getTodayTrendingMovies(with requestDTO: MoviesRequestable) -> Endpoint<MoviesResponseDTO> {
+        Endpoint(path: "3/trending/movie/day",
+                 method: .get,
+                 queryParametersEncodable: requestDTO)
+    }
+
+    static func getMovies(with moviesRequestDTO: MoviesRequestable) -> Endpoint<MoviesResponseDTO> {
         Endpoint(path: "3/search/movie",
                  method: .get,
                  queryParametersEncodable: moviesRequestDTO)

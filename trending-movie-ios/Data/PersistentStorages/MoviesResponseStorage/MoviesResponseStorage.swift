@@ -9,8 +9,8 @@ import Foundation
 
 protocol MoviesResponseStorage {
     func getResponse(
-        for request: MoviesRequestDTO,
+        for request: MoviesQueryRequestDTO,
         completion: @escaping (Result<MoviesResponseDTO?, Error>) -> Void
     )
-    func save(response: MoviesResponseDTO, for requestDto: MoviesRequestDTO)
+    func save(response: MoviesResponseDTO, for requestDto: MoviesQueryRequestDTO)
 }
