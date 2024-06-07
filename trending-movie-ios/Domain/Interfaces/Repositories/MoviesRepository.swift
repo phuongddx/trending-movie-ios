@@ -12,5 +12,13 @@ protocol MoviesRepository {
     func fetchMoviesList(query: MovieQuery,
                          page: Int,
                          cached: @escaping (MoviesPage) -> Void,
-                         completion: @escaping (Result<MoviesPage, Error>) -> Void) -> Cancellable?
+                         completion: @escaping MoviesPageResult) -> Cancellable?
+
+    @discardableResult
+    func fetchTrendingMoviesList(requestDto: MoviesRequestable,
+                                 cached: @escaping (MoviesPage) -> Void,
+                                 completion: @escaping MoviesPageResult) -> Cancellable?
+    @discardableResult
+    func fetchDetailsMovie(of movieId: Movie.Identifier,
+                           completion: @escaping DetailsMovieResult) -> Cancellable?
 }

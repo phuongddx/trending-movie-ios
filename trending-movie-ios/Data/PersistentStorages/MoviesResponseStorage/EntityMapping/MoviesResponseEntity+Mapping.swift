@@ -9,7 +9,7 @@ import CoreData
 
 extension MoviesResponseEntity {
     func toDTO() -> MoviesResponseDTO {
-        return .init(
+        MoviesResponseDTO(
             page: Int(page),
             totalPages: Int(totalPages),
             movies: movies?.allObjects.map { ($0 as! MovieResponseEntity).toDTO() } ?? []
@@ -19,13 +19,13 @@ extension MoviesResponseEntity {
 
 extension MovieResponseEntity {
     func toDTO() -> MoviesResponseDTO.MovieDTO {
-        return .init(
+        .init(
             id: Int(id),
             title: title,
             posterPath: posterPath,
             overview: overview,
-            releaseDate: releaseDate
-        )
+            releaseDate: releaseDate,
+            voteAverage: voteAverage)
     }
 }
 

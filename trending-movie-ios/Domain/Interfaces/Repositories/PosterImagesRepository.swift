@@ -7,8 +7,8 @@
 
 import Foundation
 
+typealias ImagesResult = (Result<Data, Error>) -> Void
 protocol PosterImagesRepository {
     func fetchImage(with imagePath: String,
-                    width: Int,
-                    completion: @escaping (Result<Data, Error>) -> Void) -> Cancellable?
+                    completion: @escaping ImagesResult) -> Cancellable?
 }
