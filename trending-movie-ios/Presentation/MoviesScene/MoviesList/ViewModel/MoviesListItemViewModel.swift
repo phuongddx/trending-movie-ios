@@ -11,6 +11,7 @@ struct MoviesListItemViewModel: Equatable {
     let title: String
     let overview: String
     let releaseDate: String
+    let voteAverage: String
     let posterImagePath: String?
 
     init(movie: Movie) {
@@ -22,10 +23,39 @@ struct MoviesListItemViewModel: Equatable {
         } else {
             self.releaseDate = NSLocalizedString("To be announced", comment: "")
         }
+        if let voteAverage = movie.voteAverage {
+            self.voteAverage = "\(NSLocalizedString("Vote Average: \(voteAverage)", comment: ""))"
+        } else {
+            self.voteAverage = "\(NSLocalizedString("Have no rating now", comment: ""))"
+        }
     }
 
     func displayText() -> NSAttributedString {
-        NSAttributedString(string: title)
+        let result = NSMutableAttributedString()
+        result.append(title.attributedText(textColor: .white, textFont: .systemFont(ofSize: 16, weight: .semibold)))
+        result.appendNewline()
+        result.appendNewline()
+        result.append(releaseDate.attributedText(textColor: .white, textFont: .systemFont(ofSize: 14, weight: .regular)))
+        result.appendNewline()
+        result.append(voteAverage.attributedText(textColor: .white, textFont: .systemFont(ofSize: 14, weight: .regular)))
+        return result
+    }
+
+    func displayOverviewText() -> NSAttributedString {
+        let result = NSMutableAttributedString()
+        result.append(overview.attributedText(textColor: .white, textFont: .systemFont(ofSize: 14, weight: .regular)))
+        result.appendNewline()
+        result.appendNewline()
+        result.append(releaseDate.attributedText(textColor: .white, textFont: .systemFont(ofSize: 14, weight: .regular)))
+        result.appendNewline()
+        result.append(voteAverage.attributedText(textColor: .white, textFont: .systemFont(ofSize: 14, weight: .regular)))
+        return result
+    }
+}
+
+extension NSMutableAttributedString {
+    func appendNewline() {
+        append(NSAttributedString(string: "\n"))
     }
 }
 

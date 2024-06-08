@@ -42,10 +42,14 @@ final class MoviesListTableViewController: UITableViewController,
     // MARK: - Private
 
     private func setupViews() {
+        view.backgroundColor = .appBackgroundColor
+        tableView.backgroundView?.backgroundColor = .appBackgroundColor
+        tableView.backgroundColor = .appBackgroundColor
         tableView.register(MoviesListTableViewCell.self,
                            forCellReuseIdentifier: MoviesListTableViewCell.reuseIdentifier)
         tableView.estimatedRowHeight = UITableView.automaticDimension
         tableView.rowHeight = UITableView.automaticDimension
+        tableView.separatorInset = UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)
     }
 }
 
@@ -56,21 +60,27 @@ extension MoviesListTableViewController {
                             viewForHeaderInSection section: Int) -> UIView? {
         let stack = createStack(axis: .horizontal)
         stack.setPadding(UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16))
-        stack.addArrangedSubview(createLabel(text: "Trending", font: .systemFont(ofSize: 18, weight: .semibold)))
-        stack.backgroundColor = .white
+        stack.addArrangedSubview(createLabel(text: NSLocalizedString("Trending", comment: ""),
+                                             font: .systemFont(ofSize: 20, weight: .semibold),
+                                             textColor: UIColor.white))
+        stack.backgroundColor = UIColor.clear
         return stack
     }
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        viewModel.items.value.count
+    override func tableView(_ tableView: UITableView,
+                            numberOfRowsInSection section: Int) -> Int {
+        viewModel.numberOfRows()
     }
 
     override func tableView(_ tableView: UITableView,
                             cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: MoviesListTableViewCell.reuseIdentifier,
                                                  for: indexPath) as? MoviesListTableViewCell
-        cell?.bind(with: viewModel.items.value[indexPath.row],
-                   posterImagesRepository: posterImagesRepository)
+        cell?.selectionStyle = .none
+        if let viewModelItem = viewModel.viewModelItem(at: indexPath) {
+            cell?.bind(with: viewModelItem,
+                       posterImagesRepository: self.posterImagesRepository)
+        }
         if indexPath.row == viewModel.items.value.count - 1 {
             viewModel.didLoadNextPage()
         }
@@ -79,7 +89,7 @@ extension MoviesListTableViewController {
 
     override func tableView(_ tableView: UITableView,
                             heightForRowAt indexPath: IndexPath) -> CGFloat {
-        viewModel.isEmpty ?
+        viewModel.shouldShowEmptyView() ?
         tableView.frame.height :
         super.tableView(tableView, heightForRowAt: indexPath)
     }

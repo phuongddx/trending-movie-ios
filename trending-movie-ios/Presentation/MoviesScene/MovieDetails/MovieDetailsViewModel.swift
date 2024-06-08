@@ -17,6 +17,8 @@ protocol MovieDetailsViewModelOutput {
     var posterImage: Observable<Data?> { get }
     var error: Observable<String> { get }
     var loading: Observable<MoviesListViewModelLoading?> { get }
+
+    func detailsDisplayText(movie: Movie) -> NSAttributedString
 }
 
 protocol MovieDetailsViewModel: MovieDetailsViewModelInput,
@@ -52,6 +54,11 @@ final class DefaultMovieDetailsViewModel: MovieDetailsViewModel {
         self.detailsMovieUseCase = detailsMovieUseCase
         self.posterImagesRepository = posterImagesRepository
         self.mainQueue = mainQueue
+    }
+
+    func detailsDisplayText(movie: Movie) -> NSAttributedString {
+        let viewModelItem = MoviesListItemViewModel(movie: movie)
+        return viewModelItem.displayOverviewText()
     }
 
     func viewDidLoad() {

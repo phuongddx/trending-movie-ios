@@ -8,8 +8,11 @@
 import Foundation
 import UIKit
 
+// MARK: - MoviesSearchFlowCoordinatorDependencies
+
 extension MoviesSceneDIContainer: MoviesSearchFlowCoordinatorDependencies {
     // MARK: - MoviesList
+
     func makeMovieListView(actions: MoviesListViewModelActionsProtocol) -> MoviesListViewController {
         MoviesListViewController.create(with: makeMoviesListViewModel(actions: actions),
                                         posterImagesRepository: makePosterImagesRepository())
@@ -28,6 +31,15 @@ extension MoviesSceneDIContainer: MoviesSearchFlowCoordinatorDependencies {
     
     func makeMoviesQueriesSuggestionsListViewController(didSelect: @escaping MoviesQueryListViewModelDidSelectAction) -> ViewController {
         ViewController()
+    }
+
+    // MARK: MoviesSearchResult
+    func makeMoviesSearchResultViewController(actions: MoviesListViewModelActionsProtocol) -> ViewController? {
+//        let viewModel: MoviesListViewModel = makeMoviesListViewModel(actions: actions)
+//        let repository: PosterImagesRepository = makePosterImagesRepository()
+//        return MoviesSearchResultViewController(viewModel: viewModel,
+//                                                posterImagesRepository: repository)
+        return nil
     }
 
     func makeMoviesDetailsViewModel(movieId: Movie.Identifier) -> MovieDetailsViewModel {

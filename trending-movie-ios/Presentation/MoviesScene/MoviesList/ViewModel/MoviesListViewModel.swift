@@ -21,15 +21,27 @@ extension Error {
 }
 
 protocol MoviesListViewModelActionsProtocol {
-    var showMovieDetails: (Movie) -> Void { get }
-    var showMovieQueriesSuggestions: (@escaping (_ didSelect: MovieQuery) -> Void) -> Void { get }
-    var closeMovieQueriesSuggestions: () -> Void { get }
+    var showMovieDetails: ((Movie) -> Void)? { get }
+    var showMovieQueriesSuggestions: ((@escaping (_ didSelect: MovieQuery) -> Void) -> Void)? { get }
+    var closeMovieQueriesSuggestions: (() -> Void)? { get }
+    var showMoviesSearchResult: ((MoviesListViewModel) -> Void)? { get }
 }
 
-struct DefaultMoviesListViewModelActions: MoviesListViewModelActionsProtocol {
-    let showMovieDetails: (Movie) -> Void
-    let showMovieQueriesSuggestions: (@escaping (_ didSelect: MovieQuery) -> Void) -> Void
-    let closeMovieQueriesSuggestions: () -> Void
+struct TrendingMoviesListViewModelActions: MoviesListViewModelActionsProtocol {
+    var closeMovieQueriesSuggestions: (() -> Void)?
+    var showMovieDetails: ((Movie) -> Void)?
+    var showMovieQueriesSuggestions: ((@escaping (_ didSelect: MovieQuery) -> Void) -> Void)?
+    var showMoviesSearchResult: ((any MoviesListViewModel) -> Void)?
+
+    init(closeMovieQueriesSuggestions: (() -> Void)? = nil,
+         showMovieDetails: ((Movie) -> Void)? = nil,
+         showMovieQueriesSuggestions: ((@escaping (_: MovieQuery) -> Void) -> Void)? = nil,
+         showMoviesSearchResult: ((any MoviesListViewModel) -> Void)? = nil) {
+        self.closeMovieQueriesSuggestions = closeMovieQueriesSuggestions
+        self.showMovieDetails = showMovieDetails
+        self.showMovieQueriesSuggestions = showMovieQueriesSuggestions
+        self.showMoviesSearchResult = showMoviesSearchResult
+    }
 }
 
 enum MoviesListViewModelLoading {
@@ -52,14 +64,23 @@ protocol MoviesListViewModelOutput {
     var loading: Observable<MoviesListViewModelLoading?> { get }
     var query: Observable<String> { get }
     var error: Observable<String> { get }
-    var isEmpty: Bool { get }
     var screenTitle: String { get }
     var emptyDataTitle: String { get }
     var errorTitle: String { get }
     var searchBarPlaceholder: String { get }
+
+    func numberOfRows() -> Int
+    func viewModelItem(at indexPath: IndexPath) -> MoviesListItemViewModel?
+    func shouldShowEmptyView() -> Bool
 }
 
-protocol MoviesListViewModel: MoviesListViewModelInput, MoviesListViewModelOutput {}
+protocol MoviesListViewModel: MoviesListViewModelInput,
+                              MoviesListViewModelOutput {}
+
+enum MoviesListDisplayViewType {
+    case trending
+    case search
+}
 
 final class DefaultMoviesListViewModel: MoviesListViewModel {
 
@@ -72,7 +93,10 @@ final class DefaultMoviesListViewModel: MoviesListViewModel {
     var hasMorePages: Bool { currentPage < totalPageCount }
     var nextPage: Int { hasMorePages ? currentPage + 1 : currentPage }
 
-    private var pages: [MoviesPage] = []
+//    private var pages: [MoviesPage] = []
+    private var trendingPages = [MoviesPage]()
+    private var searchResultPages = [MoviesPage]()
+
     private var moviesLoadTask: Cancellable? {
         willSet {
             moviesLoadTask?.cancel()
@@ -86,9 +110,9 @@ final class DefaultMoviesListViewModel: MoviesListViewModel {
     let loading: Observable<MoviesListViewModelLoading?> = Observable(.none)
     let query: Observable<String> = Observable("")
     let error: Observable<String> = Observable("")
-    var isEmpty: Bool { return items.value.isEmpty }
     let screenTitle = NSLocalizedString("Movies", comment: "")
-    let emptyDataTitle = NSLocalizedString("Search results", comment: "")
+    let emptyDataTitle = NSLocalizedString("No movies were found matching your search criteria. Please try again with different keywords.",
+                                           comment: "")
     let errorTitle = NSLocalizedString("Error", comment: "")
     let searchBarPlaceholder = NSLocalizedString("Search Movies", comment: "")
 
@@ -106,21 +130,35 @@ final class DefaultMoviesListViewModel: MoviesListViewModel {
 
     // MARK: - Private
 
+    private var moviesListViewType: MoviesListDisplayViewType = .trending {
+        didSet {
+            switch moviesListViewType {
+            case .trending:
+                items.value = trendingPages.movies.map(MoviesListItemViewModel.init)
+            case .search:
+                items.value = searchResultPages.movies.map(MoviesListItemViewModel.init)
+            }
+        }
+    }
+
     private func appendPage(_ moviesPage: MoviesPage) {
         currentPage = moviesPage.page
         totalPageCount = moviesPage.totalPages
 
-        pages = pages
-            .filter { $0.page != moviesPage.page }
-            + [moviesPage]
+        let isTrending = moviesListViewType == .trending
 
-        items.value = pages.movies.map(MoviesListItemViewModel.init)
+        if isTrending {
+            trendingPages = trendingPages.filter { $0.page != moviesPage.page } + [moviesPage]
+        } else {
+            searchResultPages = searchResultPages.filter { $0.page != moviesPage.page } + [moviesPage]
+        }
+        items.value = (isTrending ? trendingPages : searchResultPages).movies.map(MoviesListItemViewModel.init)
     }
 
     private func resetPages() {
         currentPage = 0
         totalPageCount = 1
-        pages.removeAll()
+        searchResultPages.removeAll() // Only reset searchResult
         items.value.removeAll()
     }
 
@@ -147,9 +185,9 @@ final class DefaultMoviesListViewModel: MoviesListViewModel {
         })
     }
 
-    func loadTrendingList(requestDto: DefaultMoviesRequestDTO,
-                          loading: MoviesListViewModelLoading) {
+    func loadTrendingList(loading: MoviesListViewModelLoading = .fullScreen) {
         self.loading.value = loading
+        let requestDto = DefaultMoviesRequestDTO(page: nextPage)
         moviesLoadTask = trendingMoviesUseCase.execute(
             requestable: requestDto,
             cached: { [weak self] page in
@@ -179,6 +217,21 @@ final class DefaultMoviesListViewModel: MoviesListViewModel {
         resetPages()
         load(movieQuery: movieQuery, loading: .fullScreen)
     }
+
+    func numberOfRows() -> Int {
+        items.value.count
+    }
+
+    func viewModelItem(at indexPath: IndexPath) -> MoviesListItemViewModel? {
+        items.value[safe: indexPath.row]
+    }
+
+    func shouldShowEmptyView() -> Bool {
+        if moviesListViewType == .trending {
+            return false
+        }
+        return items.value.isEmpty
+    }
 }
 
 // MARK: - INPUT. View event methods
@@ -186,37 +239,50 @@ final class DefaultMoviesListViewModel: MoviesListViewModel {
 extension DefaultMoviesListViewModel {
 
     func viewDidLoad() {
-        loadTrendingList(requestDto: DefaultMoviesRequestDTO(),
-                         loading: .fullScreen)
+        loadTrendingList()
     }
 
     func didLoadNextPage() {
-        guard hasMorePages, loading.value == .none else { return }
-//        load(movieQuery: MovieQuery(query: query.value),
-//             loading: .nextPage)
-        loadTrendingList(requestDto: DefaultMoviesRequestDTO(page: nextPage),
-                         loading: .nextPage)
+        guard hasMorePages,
+              loading.value == .none else { return }
+        switch moviesListViewType {
+        case .trending:
+            loadTrendingList(loading: .nextPage)
+        case .search:
+            load(movieQuery: MovieQuery(query: query.value),
+                 loading: .nextPage)
+        }
     }
 
     func didSearch(query: String) {
         guard !query.isEmpty else { return }
         update(movieQuery: MovieQuery(query: query))
+        moviesListViewType = .search
     }
 
     func didCancelSearch() {
         moviesLoadTask?.cancel()
+        moviesListViewType = .trending
+        loadTrendingList()
     }
 
     func showQueriesSuggestions() {
-        actions?.showMovieQueriesSuggestions(update(movieQuery:))
+        actions?.showMovieQueriesSuggestions?(update(movieQuery:))
     }
 
     func closeQueriesSuggestions() {
-        actions?.closeMovieQueriesSuggestions()
+        actions?.closeMovieQueriesSuggestions?()
     }
 
     func didSelectItem(at index: Int) {
-        actions?.showMovieDetails(pages.movies[index])
+        var pages: [MoviesPage]
+        switch moviesListViewType {
+        case .trending:
+            pages = trendingPages
+        case .search:
+            pages = searchResultPages
+        }
+        actions?.showMovieDetails?(pages.movies[index])
     }
 }
 

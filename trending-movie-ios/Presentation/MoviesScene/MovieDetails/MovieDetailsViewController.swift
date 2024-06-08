@@ -50,14 +50,15 @@ final class MovieDetailsViewController: ViewController,
             }
         }
         viewModel.movie.observe(on: self) { [weak self] movie in
-            self?.title = movie?.title
-            self?.viewModel.updatePosterImage(posterImagePath: movie?.posterPath ?? "")
-            self?.overviewLbl.text = movie?.overview
+            guard let movie else { return }
+            self?.title = movie.title
+            self?.viewModel.updatePosterImage(posterImagePath: movie.posterPath ?? "")
+            self?.overviewLbl.attributedText = self?.viewModel.detailsDisplayText(movie: movie)
         }
     }
 
     private func setupViews() {
-        view.backgroundColor = .white
+        view.backgroundColor = .appBackgroundColor
         view.addSubview(containerView)
         view.accessibilityIdentifier = AccessibilityIdentifier.movieDetailsView
         containerView.translatesAutoresizingMaskIntoConstraints = false
@@ -68,7 +69,8 @@ final class MovieDetailsViewController: ViewController,
             containerView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
         posterImageView.translatesAutoresizingMaskIntoConstraints = false
-        posterImageView.heightAnchor.constraint(equalToConstant: Device.screenSize.width).isActive = true
+        posterImageView.heightAnchor.constraint(equalToConstant: Device.screenSize.height * 2 / 3).isActive = true
+        posterImageView.image = UIImage(named: "placeholder-bg")
 
         overviewLbl.numberOfLines = 0
 

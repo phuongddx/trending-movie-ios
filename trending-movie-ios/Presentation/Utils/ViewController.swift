@@ -79,8 +79,4 @@ extension UIViewController {
     }
 }
 
-extension CGSize {
-    var scaledSize: CGSize {
-        CGSize(width: width * UIScreen.main.scale, height: height * UIScreen.main.scale)
-    }
-}
+extension UITableViewCell: AppUIProvider {}

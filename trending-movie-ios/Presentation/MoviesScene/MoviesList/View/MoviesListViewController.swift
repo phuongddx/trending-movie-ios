@@ -11,7 +11,7 @@ final class MoviesListViewController: UIViewController, StoryboardInstantiable, 
     
     @IBOutlet private var contentView: UIView!
     @IBOutlet private var moviesListContainer: UIView!
-    @IBOutlet private(set) var suggestionsListContainer: UIView!
+    @IBOutlet private(set) var moviesSearchResultContainer: UIView!
     @IBOutlet private var searchBarContainer: UIView!
     @IBOutlet private var emptyDataLabel: UILabel!
     
@@ -19,14 +19,12 @@ final class MoviesListViewController: UIViewController, StoryboardInstantiable, 
     private var posterImagesRepository: PosterImagesRepository?
 
     private var moviesTableViewController: MoviesListTableViewController?
-    private var searchController = UISearchController(searchResultsController: nil)
+    private lazy var searchController = UISearchController(searchResultsController: nil)
 
     // MARK: - Lifecycle
 
-    static func create(
-        with viewModel: MoviesListViewModel,
-        posterImagesRepository: PosterImagesRepository?
-    ) -> MoviesListViewController {
+    static func create(with viewModel: MoviesListViewModel,
+                       posterImagesRepository: PosterImagesRepository?) -> MoviesListViewController {
         let view = MoviesListViewController.instantiateViewController()
         view.viewModel = viewModel
         view.posterImagesRepository = posterImagesRepository
@@ -65,14 +63,18 @@ final class MoviesListViewController: UIViewController, StoryboardInstantiable, 
     // MARK: - Private
 
     private func setupViews() {
+        view.backgroundColor = .appBackgroundColor
         title = viewModel.screenTitle
         emptyDataLabel.text = viewModel.emptyDataTitle
         setupSearchController()
     }
 
     private func setupBehaviours() {
-//        addBehaviors([BackButtonEmptyTitleNavigationBarBehavior(),
-//                      BlackStyleNavigationBarBehavior()])
+        navigationItem.backBarButtonItem = UIBarButtonItem(
+            title: "",
+            style: .plain,
+            target: nil,
+            action: nil)
     }
 
     private func updateItems() {
@@ -82,19 +84,21 @@ final class MoviesListViewController: UIViewController, StoryboardInstantiable, 
     private func updateLoading(_ loading: MoviesListViewModelLoading?) {
         emptyDataLabel.isHidden = true
         moviesListContainer.isHidden = true
-        suggestionsListContainer.isHidden = true
+        moviesSearchResultContainer.isHidden = true
         LoadingView.hide()
 
         switch loading {
-        case .fullScreen: LoadingView.show()
-        case .nextPage: moviesListContainer.isHidden = false
+        case .fullScreen: 
+            LoadingView.show()
+        case .nextPage:
+            moviesListContainer.isHidden = false
         case .none:
-            moviesListContainer.isHidden = viewModel.isEmpty
-            emptyDataLabel.isHidden = !viewModel.isEmpty
+            moviesListContainer.isHidden = viewModel.shouldShowEmptyView()
+            emptyDataLabel.isHidden = !viewModel.shouldShowEmptyView()
         }
 
         moviesTableViewController?.updateLoading(loading)
-        updateQueriesSuggestions()
+//        updateQueriesSuggestions()
     }
 
     private func updateQueriesSuggestions() {
@@ -153,18 +157,25 @@ extension MoviesListViewController: UISearchBarDelegate {
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         viewModel.didCancelSearch()
     }
+
+    func searchBar(_ searchBar: UISearchBar,
+                   textDidChange searchText: String) {
+        if searchText.isEmpty {
+            viewModel.didCancelSearch()
+        }
+    }
 }
 
 extension MoviesListViewController: UISearchControllerDelegate {
     func willPresentSearchController(_ searchController: UISearchController) {
-        updateQueriesSuggestions()
+//        updateQueriesSuggestions()
     }
 
     func willDismissSearchController(_ searchController: UISearchController) {
-        updateQueriesSuggestions()
+//        updateQueriesSuggestions()
     }
 
     func didDismissSearchController(_ searchController: UISearchController) {
-        updateQueriesSuggestions()
+//        updateQueriesSuggestions()
     }
 }

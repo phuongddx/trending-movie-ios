@@ -27,7 +27,9 @@ class MoviesListTableViewCell: UITableViewCell {
     }
 
     // MARK: - UIs
-    private lazy var mainStack: UIStackView = createStack(axis: .horizontal, padding: UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16))
+    private lazy var mainStack: UIStackView = createStack(axis: .horizontal,
+                                                          spacing: 8,
+                                                          padding: UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16))
     private lazy var subStack: UIStackView = createStack(axis: .vertical)
     private lazy var posterImageView: UIImageView = createImageView(contentMode: .scaleToFill)
     private lazy var titleLbl: UILabel = createLabel(text: "")
@@ -41,10 +43,13 @@ class MoviesListTableViewCell: UITableViewCell {
 
     private func updateView() {
         titleLbl.attributedText = viewModel.displayText()
+        titleLbl.textAlignment = .left
         updatePosterImage()
     }
 
     private func commonInits() {
+        titleLbl.numberOfLines = 0
+        backgroundColor = UIColor(red: 37/255.0, green: 37/255.0, blue: 37.0/255.0, alpha: 0.8)
         setupLayouts()
         setupMainStack()
     }
@@ -78,11 +83,11 @@ class MoviesListTableViewCell: UITableViewCell {
                 guard self?.viewModel.posterImagePath == posterImagePath else { return }
                 if case let .success(data) = result {
                     self?.posterImageView.image = UIImage(data: data)
+                } else {
+                    self?.posterImageView.image = UIImage(named: "placeholder-bg")
                 }
                 self?.imageLoadTask = nil
             }
         }
     }
 }
-
-extension MoviesListTableViewCell: AppUIProvider {}

@@ -77,8 +77,8 @@
                         <outlet property="contentView" destination="URz-eU-usl" id="uqN-yv-Ufo"/>
                         <outlet property="emptyDataLabel" destination="f6J-2l-iab" id="7eT-UL-qzF"/>
                         <outlet property="moviesListContainer" destination="dgg-tT-8fn" id="RcZ-CD-wCq"/>
+                        <outlet property="moviesSearchResultContainer" destination="xZl-fe-PlP" id="6hU-xB-rVM"/>
                         <outlet property="searchBarContainer" destination="Pfu-J9-aom" id="BmD-lq-IZN"/>
-                        <outlet property="suggestionsListContainer" destination="xZl-fe-PlP" id="6hU-xB-rVM"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="LnP-m0-WZt" userLabel="First Responder" sceneMemberID="firstResponder"/>

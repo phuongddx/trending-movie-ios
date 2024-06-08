@@ -12,7 +12,8 @@ typealias MoviesQueryListViewModelDidSelectAction = (MovieQuery) -> Void
 protocol MoviesSearchFlowCoordinatorDependencies {
     func makeMovieListView(actions: MoviesListViewModelActionsProtocol) -> MoviesListViewController
     func makeMoviesDetailsViewController(movie: Movie) -> ViewController
-    func makeMoviesQueriesSuggestionsListViewController(didSelect: @escaping MoviesQueryListViewModelDidSelectAction) -> ViewController
+//    func makeMoviesQueriesSuggestionsListViewController(didSelect: @escaping MoviesQueryListViewModelDidSelectAction) -> ViewController
+    func makeMoviesSearchResultViewController(actions: MoviesListViewModelActionsProtocol) -> ViewController?
 }
 
 final class MoviesSceneDIContainer {
