@@ -24,7 +24,6 @@ final class MoviesSceneDIContainer {
     let dependencies: Dependencies
 
     // MARK: - Persistent Storage
-    lazy var moviesQueriesStorage: MoviesQueriesStorage = CoreDataMoviesQueriesStorage(maxStorageLimit: 10)
     lazy var moviesResponseCache: MoviesResponseStorage = CoreDataMoviesResponseStorage()
 
     init(dependencies: Dependencies) {
@@ -35,8 +34,7 @@ final class MoviesSceneDIContainer {
 // MARK:  - UseCases
 extension MoviesSceneDIContainer {
     func makeSearchMoviesUseCase() -> SearchMoviesUseCase {
-        DefaultSearchMoviesUseCase(moviesRepository: makeMoviesRepository(),
-                                   moviesQueriesRepository: makeMoviesQueriesRepository())
+        DefaultSearchMoviesUseCase(moviesRepository: makeMoviesRepository())
     }
 
     func makeTrendingMoviesUseCase() -> TrendingMoviesUseCase {
@@ -57,10 +55,6 @@ extension MoviesSceneDIContainer {
 
     func makePosterImagesRepository() -> PosterImagesRepository {
         DefaultPosterImagesRepository(dataTransferService: dependencies.imageDataTransferService)
-    }
-
-    func makeMoviesQueriesRepository() -> MoviesQueriesRepository {
-        DefaultMoviesQueriesRepository(moviesQueriesPersistentStorage: self.moviesQueriesStorage)
     }
 }
 
