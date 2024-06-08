@@ -13,12 +13,16 @@ final class MoviesListViewController: UIViewController {
     @IBOutlet private var moviesListContainer: UIView!
     @IBOutlet private(set) var moviesSearchResultContainer: UIView!
     @IBOutlet private var searchBarContainer: UIView!
-    @IBOutlet private var emptyDataLabel: UILabel!
     
     private var viewModel: MoviesListViewModel!
     private var posterImagesRepository: PosterImagesRepository?
 
-    private var moviesTableViewController: MoviesListTableViewController?
+    private lazy var moviesTableViewController: MoviesListTableViewController = {
+        let viewController = MoviesListTableViewController(viewModel: viewModel)
+        viewController.posterImagesRepository = posterImagesRepository
+        add(child: viewController, container: moviesListContainer)
+        return viewController
+    }()
     private lazy var searchBar: UISearchBar = {
         createSearchBar(frame: self.searchBarContainer.bounds,
                         searchBarPlaceholder: self.viewModel.searchBarPlaceholder,
@@ -49,21 +53,11 @@ final class MoviesListViewController: UIViewController {
         viewModel.error.observe(on: self) { [weak self] in self?.showError($0) }
     }
 
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == String(describing: MoviesListTableViewController.self),
-            let destinationVC = segue.destination as? MoviesListTableViewController {
-            moviesTableViewController = destinationVC
-            moviesTableViewController?.viewModel = viewModel
-            moviesTableViewController?.posterImagesRepository = posterImagesRepository
-        }
-    }
-
     // MARK: - Private
 
     private func setupViews() {
         view.backgroundColor = .appBackgroundColor
         title = viewModel.screenTitle
-//        emptyDataLabel.text = viewModel.emptyDataTitle
         searchBarContainer.addSubview(self.searchBar)
     }
 
@@ -76,11 +70,10 @@ final class MoviesListViewController: UIViewController {
     }
 
     private func updateItems() {
-        moviesTableViewController?.reload()
+        moviesTableViewController.reload()
     }
 
     private func updateLoading(_ loading: MoviesListViewModelLoading?) {
-        emptyDataLabel.isHidden = true
         moviesListContainer.isHidden = true
         moviesSearchResultContainer.isHidden = true
         LoadingView.hide()
@@ -92,10 +85,9 @@ final class MoviesListViewController: UIViewController {
             moviesListContainer.isHidden = false
         case .none:
             moviesListContainer.isHidden = false
-            emptyDataLabel.isHidden = true
         }
 
-        moviesTableViewController?.updateLoading(loading)
+        moviesTableViewController.updateLoading(loading)
     }
 
     private func showError(_ error: String) {

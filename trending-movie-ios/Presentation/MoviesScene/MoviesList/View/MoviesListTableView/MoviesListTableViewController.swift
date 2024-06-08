@@ -8,8 +8,16 @@
 import UIKit
 
 final class MoviesListTableViewController: UITableViewController {
+    private let viewModel: MoviesListViewModel
 
-    var viewModel: MoviesListViewModel!
+    init(viewModel: MoviesListViewModel) {
+        self.viewModel = viewModel
+        super.init(style: .plain)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     var posterImagesRepository: PosterImagesRepository?
     var nextPageLoadingSpinner: UIActivityIndicatorView?
@@ -50,6 +58,7 @@ final class MoviesListTableViewController: UITableViewController {
         tableView.estimatedRowHeight = UITableView.automaticDimension
         tableView.rowHeight = UITableView.automaticDimension
         tableView.separatorInset = UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)
+        tableView.separatorColor = .lightText
     }
 }
 

@@ -22,16 +22,7 @@
                                 <subviews>
                                     <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dgg-tT-8fn">
                                         <rect key="frame" x="0.0" y="56" width="375" height="591"/>
-                                        <connections>
-                                            <segue destination="dtm-sz-Zlw" kind="embed" identifier="MoviesListTableViewController" id="YTl-yh-Ilp"/>
-                                        </connections>
                                     </containerView>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="f6J-2l-iab">
-                                        <rect key="frame" x="167" y="341.5" width="41.5" height="20.5"/>
-                                        <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                        <nil key="textColor"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Pfu-J9-aom">
                                         <rect key="frame" x="0.0" y="0.0" width="375" height="56"/>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -51,16 +42,12 @@
                                     <constraint firstItem="Pfu-J9-aom" firstAttribute="leading" secondItem="URz-eU-usl" secondAttribute="leading" id="7Y3-Jt-YIK"/>
                                     <constraint firstAttribute="trailing" secondItem="dgg-tT-8fn" secondAttribute="trailing" id="7iM-kZ-QOH"/>
                                     <constraint firstAttribute="trailing" secondItem="Pfu-J9-aom" secondAttribute="trailing" id="BYM-9K-qsU"/>
-                                    <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="f6J-2l-iab" secondAttribute="trailing" constant="16" id="Gzt-QT-s9r"/>
                                     <constraint firstItem="xZl-fe-PlP" firstAttribute="top" secondItem="Pfu-J9-aom" secondAttribute="bottom" id="Vl5-tL-Xgz"/>
                                     <constraint firstItem="xZl-fe-PlP" firstAttribute="leading" secondItem="URz-eU-usl" secondAttribute="leading" id="VyA-Qu-Qy8"/>
                                     <constraint firstItem="Pfu-J9-aom" firstAttribute="top" secondItem="URz-eU-usl" secondAttribute="top" id="bcB-KD-erM"/>
                                     <constraint firstAttribute="bottom" secondItem="xZl-fe-PlP" secondAttribute="bottom" id="f7N-Yl-gLn"/>
                                     <constraint firstAttribute="trailing" secondItem="xZl-fe-PlP" secondAttribute="trailing" id="gq6-bs-Mly"/>
                                     <constraint firstItem="dgg-tT-8fn" firstAttribute="top" secondItem="Pfu-J9-aom" secondAttribute="bottom" id="qDC-ON-LYl"/>
-                                    <constraint firstItem="f6J-2l-iab" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="URz-eU-usl" secondAttribute="leading" constant="16" id="quB-06-0Nr"/>
-                                    <constraint firstItem="f6J-2l-iab" firstAttribute="centerX" secondItem="URz-eU-usl" secondAttribute="centerX" id="qye-G4-IZj"/>
-                                    <constraint firstItem="f6J-2l-iab" firstAttribute="centerY" secondItem="URz-eU-usl" secondAttribute="centerY" constant="28" id="vKu-65-f4Y"/>
                                 </constraints>
                             </view>
                         </subviews>
@@ -75,7 +62,6 @@
                     </view>
                     <connections>
                         <outlet property="contentView" destination="URz-eU-usl" id="uqN-yv-Ufo"/>
-                        <outlet property="emptyDataLabel" destination="f6J-2l-iab" id="7eT-UL-qzF"/>
                         <outlet property="moviesListContainer" destination="dgg-tT-8fn" id="RcZ-CD-wCq"/>
                         <outlet property="moviesSearchResultContainer" destination="xZl-fe-PlP" id="6hU-xB-rVM"/>
                         <outlet property="searchBarContainer" destination="Pfu-J9-aom" id="BmD-lq-IZN"/>
@@ -84,24 +70,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="LnP-m0-WZt" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-162.40000000000001" y="214.54272863568218"/>
-        </scene>
-        <!--Movies List Table View Controller-->
-        <scene sceneID="2RN-uU-Kch">
-            <objects>
-                <tableViewController useStoryboardIdentifierAsRestorationIdentifier="YES" id="dtm-sz-Zlw" customClass="MoviesListTableViewController" customModule="trending_movie_ios" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsVerticalScrollIndicator="NO" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="140" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="C0X-iN-eQJ">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="591"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="separatorColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                        <connections>
-                            <outlet property="dataSource" destination="dtm-sz-Zlw" id="tdc-fM-6vW"/>
-                            <outlet property="delegate" destination="dtm-sz-Zlw" id="b7b-TV-pM4"/>
-                        </connections>
-                    </tableView>
-                </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="XsE-IX-epx" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="568.79999999999995" y="214.54272863568218"/>
         </scene>
     </scenes>
     <resources>
