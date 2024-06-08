@@ -677,8 +677,8 @@
 			isa = PBXGroup;
 			children = (
 				79A41DC32C120C8600910974 /* MoviesListTableView */,
-				79A41DC42C120C8600910974 /* MoviesListViewController.storyboard */,
 				79A41DC52C120C8600910974 /* MoviesListViewController.swift */,
+				79A41DC42C120C8600910974 /* MoviesListViewController.storyboard */,
 			);
 			path = View;
 			sourceTree = "<group>";

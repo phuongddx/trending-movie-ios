@@ -8,8 +8,7 @@
 import Foundation
 import UIKit
 
-final class MovieDetailsViewController: ViewController,
-                                        AppUIProvider {
+final class MovieDetailsViewController: ViewController {
     static func create(with viewModel: MovieDetailsViewModel) -> MovieDetailsViewController {
         let view = MovieDetailsViewController()
         view.viewModel = viewModel

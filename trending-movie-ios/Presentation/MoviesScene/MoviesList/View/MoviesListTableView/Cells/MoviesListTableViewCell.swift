@@ -64,7 +64,6 @@ class MoviesListTableViewCell: UITableViewCell {
         ])
         posterImageView.heightAnchor.constraint(equalToConstant: posterImageViewHeight).isActive = true
         posterImageView.widthAnchor.constraint(equalToConstant: posterImageViewWidth).isActive = true
-        posterImageView.backgroundColor = UIColor.lightGray
     }
 
     private func setupMainStack() {

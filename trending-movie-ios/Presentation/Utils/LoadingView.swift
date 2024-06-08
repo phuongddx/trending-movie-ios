@@ -22,8 +22,9 @@ class LoadingView {
                let window = windowScene.windows.first(where: { $0.isKeyWindow }) {
                 let frame = UIScreen.main.bounds
                 let spinner = UIActivityIndicatorView(frame: frame)
-                spinner.backgroundColor = UIColor.black.withAlphaComponent(0.2)
+                spinner.backgroundColor = .appBackgroundColor
                 spinner.style = .large
+                spinner.color = .white
                 window.addSubview(spinner)
 
                 spinner.startAnimating()

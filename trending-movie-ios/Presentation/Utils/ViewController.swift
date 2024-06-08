@@ -59,8 +59,6 @@ extension Alertable where Self: UIViewController {
 
 class ViewController: UIViewController {}
 
-extension ViewController: StoryboardInstantiable, Alertable {}
-
 extension UIViewController {
     func add(child: UIViewController, container: UIView) {
         addChild(child)
@@ -79,4 +77,7 @@ extension UIViewController {
     }
 }
 
+extension UIViewController: Alertable,
+                            AppUIProvider,
+                            StoryboardInstantiable {}
 extension UITableViewCell: AppUIProvider {}

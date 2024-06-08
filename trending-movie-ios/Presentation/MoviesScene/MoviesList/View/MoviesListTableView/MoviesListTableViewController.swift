@@ -7,8 +7,7 @@
 
 import UIKit
 
-final class MoviesListTableViewController: UITableViewController,
-                                           AppUIProvider {
+final class MoviesListTableViewController: UITableViewController {
 
     var viewModel: MoviesListViewModel!
 
@@ -45,6 +44,7 @@ final class MoviesListTableViewController: UITableViewController,
         view.backgroundColor = .appBackgroundColor
         tableView.backgroundView?.backgroundColor = .appBackgroundColor
         tableView.backgroundColor = .appBackgroundColor
+        tableView.register(MoviesListEmptyTableViewCell.self, forCellReuseIdentifier: MoviesListEmptyTableViewCell.reuseIdentifier)
         tableView.register(MoviesListTableViewCell.self,
                            forCellReuseIdentifier: MoviesListTableViewCell.reuseIdentifier)
         tableView.estimatedRowHeight = UITableView.automaticDimension
@@ -60,7 +60,7 @@ extension MoviesListTableViewController {
                             viewForHeaderInSection section: Int) -> UIView? {
         let stack = createStack(axis: .horizontal)
         stack.setPadding(UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16))
-        stack.addArrangedSubview(createLabel(text: NSLocalizedString("Trending", comment: ""),
+        stack.addArrangedSubview(createLabel(text: NSLocalizedString(viewModel.moviesListHeaderTitle, comment: ""),
                                              font: .systemFont(ofSize: 20, weight: .semibold),
                                              textColor: UIColor.white))
         stack.backgroundColor = UIColor.clear
@@ -74,6 +74,12 @@ extension MoviesListTableViewController {
 
     override func tableView(_ tableView: UITableView,
                             cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard !viewModel.shouldShowEmptyView() else {
+            let cell = tableView.dequeueReusableCell(withIdentifier: MoviesListEmptyTableViewCell.reuseIdentifier) as? MoviesListEmptyTableViewCell
+            cell?.selectionStyle = .none
+            return cell ?? UITableViewCell()
+        }
+
         let cell = tableView.dequeueReusableCell(withIdentifier: MoviesListTableViewCell.reuseIdentifier,
                                                  for: indexPath) as? MoviesListTableViewCell
         cell?.selectionStyle = .none
@@ -89,12 +95,12 @@ extension MoviesListTableViewController {
 
     override func tableView(_ tableView: UITableView,
                             heightForRowAt indexPath: IndexPath) -> CGFloat {
-        viewModel.shouldShowEmptyView() ?
-        tableView.frame.height :
-        super.tableView(tableView, heightForRowAt: indexPath)
+        UITableView.automaticDimension
     }
 
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    override func tableView(_ tableView: UITableView,
+                            didSelectRowAt indexPath: IndexPath) {
+        guard !viewModel.shouldShowEmptyView() else { return }
         viewModel.didSelectItem(at: indexPath.row)
     }
 }

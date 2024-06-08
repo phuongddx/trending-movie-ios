@@ -13,19 +13,41 @@ protocol AppUIProvider {
                      spacing: CGFloat,
                      padding inset: UIEdgeInsets) -> UIStackView
     func createLabel(text: String,
+                     attributedString: NSAttributedString?,
                      font: UIFont,
                      textColor: UIColor) -> UILabel
     func createImageView(image: UIImage?,
                          contentMode: UIView.ContentMode,
                          translatesAutoresizingMaskIntoConstraints: Bool) -> UIImageView
+    func createSearchBar(frame: CGRect,
+                         searchBarPlaceholder: String?,
+                         delegate: UISearchBarDelegate?) -> UISearchBar
 }
 
 extension AppUIProvider {
-    func createLabel(text: String,
+    func createSearchBar(frame: CGRect,
+                         searchBarPlaceholder: String?,
+                         delegate: UISearchBarDelegate? = nil) -> UISearchBar {
+        let searchBar = UISearchBar(frame: frame)
+        searchBar.delegate = delegate
+        searchBar.placeholder = searchBarPlaceholder
+        searchBar.translatesAutoresizingMaskIntoConstraints = true
+        searchBar.barStyle = .black
+        searchBar.autoresizingMask = [.flexibleWidth]
+        searchBar.searchTextField.accessibilityIdentifier = AccessibilityIdentifier.searchField
+        return searchBar
+    }
+
+    func createLabel(text: String = "",
+                     attributedString: NSAttributedString? = nil,
                      font: UIFont = .systemFont(ofSize: 14),
                      textColor: UIColor = .black) -> UILabel {
         let label = UILabel()
         label.text = text
+        if let attributedString {
+            label.attributedText = attributedString
+            label.numberOfLines = 0
+        }
         label.font = font
         label.textColor = textColor
         return label

@@ -65,9 +65,9 @@ protocol MoviesListViewModelOutput {
     var query: Observable<String> { get }
     var error: Observable<String> { get }
     var screenTitle: String { get }
-    var emptyDataTitle: String { get }
     var errorTitle: String { get }
     var searchBarPlaceholder: String { get }
+    var moviesListHeaderTitle: String { get }
 
     func numberOfRows() -> Int
     func viewModelItem(at indexPath: IndexPath) -> MoviesListItemViewModel?
@@ -111,8 +111,6 @@ final class DefaultMoviesListViewModel: MoviesListViewModel {
     let query: Observable<String> = Observable("")
     let error: Observable<String> = Observable("")
     let screenTitle = NSLocalizedString("Movies", comment: "")
-    let emptyDataTitle = NSLocalizedString("No movies were found matching your search criteria. Please try again with different keywords.",
-                                           comment: "")
     let errorTitle = NSLocalizedString("Error", comment: "")
     let searchBarPlaceholder = NSLocalizedString("Search Movies", comment: "")
 
@@ -218,7 +216,12 @@ final class DefaultMoviesListViewModel: MoviesListViewModel {
         load(movieQuery: movieQuery, loading: .fullScreen)
     }
 
+    var moviesListHeaderTitle: String {
+        moviesListViewType == .trending ? "Trending Result" : "Search Result"
+    }
+
     func numberOfRows() -> Int {
+        shouldShowEmptyView() ? 1 :
         items.value.count
     }
 
