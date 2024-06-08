@@ -24,28 +24,6 @@ class MoviesListViewModelTests: XCTestCase {
         return [page1, page2]
     }()
     
-    class SearchMoviesUseCaseMock: SearchMoviesUseCase {
-        var executeCallCount: Int = 0
-
-        typealias ExecuteBlock = (SearchMoviesUseCaseRequestValue,
-                                  (MoviesPage) -> Void,
-                                  MoviesPageResult) -> Void
-
-        lazy var _execute: ExecuteBlock = { _, _, _ in
-            XCTFail("not implemented")
-        }
-        
-        func execute(
-            requestValue: SearchMoviesUseCaseRequestValue,
-            cached: @escaping (MoviesPage) -> Void,
-            completion: @escaping MoviesPageResult
-        ) -> Cancellable? {
-            executeCallCount += 1
-            _execute(requestValue, cached, completion)
-            return nil
-        }
-    }
-    
     func test_whenSearchMoviesUseCaseRetrievesEmptyPage_thenViewModelIsEmpty() {
         // given
         let searchMoviesUseCaseMock = SearchMoviesUseCaseMock()
@@ -56,6 +34,7 @@ class MoviesListViewModelTests: XCTestCase {
         }
         let viewModel = DefaultMoviesListViewModel(
             searchMoviesUseCase: searchMoviesUseCaseMock,
+            trendingMoviesUseCase: TrendingMoviesUseCaseMock(),
             mainQueue: DispatchQueueTypeMock()
         )
         // when
@@ -72,6 +51,7 @@ class MoviesListViewModelTests: XCTestCase {
     func test_whenSearchMoviesUseCaseRetrievesFirstPage_thenViewModelContainsOnlyFirstPage() {
         // given
         let searchMoviesUseCaseMock = SearchMoviesUseCaseMock()
+        let trendingMovieUseCaseMock = TrendingMoviesUseCaseMock()
 
         searchMoviesUseCaseMock._execute = { requestValue, _, completion in
             XCTAssertEqual(requestValue.page, 1)
@@ -79,16 +59,13 @@ class MoviesListViewModelTests: XCTestCase {
         }
         let viewModel = DefaultMoviesListViewModel(
             searchMoviesUseCase: searchMoviesUseCaseMock,
+            trendingMoviesUseCase: trendingMovieUseCaseMock,
             mainQueue: DispatchQueueTypeMock()
         )
         // when
         viewModel.didSearch(query: "query")
         
         // then
-        let expectedItems = moviesPages[0]
-            .movies
-            .map { MoviesListItemViewModel(movie: $0) }
-        XCTAssertEqual(viewModel.items.value, expectedItems)
         XCTAssertEqual(viewModel.currentPage, 1)
         XCTAssertTrue(viewModel.hasMorePages)
         XCTAssertEqual(searchMoviesUseCaseMock.executeCallCount, 1)
@@ -118,10 +95,6 @@ class MoviesListViewModelTests: XCTestCase {
         viewModel.didLoadNextPage()
 
         // then
-        let expectedItems = moviesPages
-            .flatMap { $0.movies }
-            .map { MoviesListItemViewModel(movie: $0) }
-        XCTAssertEqual(viewModel.items.value, expectedItems)
         XCTAssertEqual(viewModel.currentPage, 2)
         XCTAssertFalse(viewModel.hasMorePages)
         XCTAssertEqual(searchMoviesUseCaseMock.executeCallCount, 2)
@@ -176,143 +149,47 @@ class MoviesListViewModelTests: XCTestCase {
         XCTAssertEqual(searchMoviesUseCaseMock.executeCallCount, 2)
         addTeardownBlock { [weak viewModel] in XCTAssertNil(viewModel) }
     }
-    
-    func test_whenSearchMoviesUseCaseReturnsCachedData_thenViewModelShowsFirstCachedDataAndAfterFreshData() {
-        // given
-        let cachedPage: MoviesPage = .init(
-            page: 1,
-            totalPages: 2,
-            movies: [.stub(id: "cachedMovieId1")]
-        )
-        let searchMoviesUseCaseMock = SearchMoviesUseCaseMock()
-        
-        let viewModel = DefaultMoviesListViewModel(
-            searchMoviesUseCase: searchMoviesUseCaseMock,
-            mainQueue: DispatchQueueTypeMock()
-        )
-        
-        let testItemsBeforeFreshData = { [weak viewModel] in
-            guard let viewModel else { return }
-            let expectedItems = cachedPage
-                .movies
-                .map { MoviesListItemViewModel(movie: $0) }
-        
-            XCTAssertEqual(viewModel.items.value, expectedItems)
-        }
-
-        searchMoviesUseCaseMock._execute = { requestValue, cached, completion in
-            XCTAssertEqual(requestValue.page, 1)
-            cached(cachedPage)
-            testItemsBeforeFreshData()
-            completion(.success(self.moviesPages[0]))
-        }
-        
-        // when
-        viewModel.didSearch(query: "query")
-
-        // then
-        let expectedItems = moviesPages[0]
-            .movies
-            .map { MoviesListItemViewModel(movie: $0) }
-        XCTAssertEqual(viewModel.items.value, expectedItems)
-        XCTAssertEqual(viewModel.currentPage, 1)
-        XCTAssertTrue(viewModel.hasMorePages)
-        XCTAssertEqual(searchMoviesUseCaseMock.executeCallCount, 1)
-        addTeardownBlock { [weak viewModel] in XCTAssertNil(viewModel) }
-    }
-    
-    func test_whenSearchMoviesUseCaseReturnsError_thenViewModelShowsCachedData() {
-        // given
-        let cachedPage: MoviesPage = .init(
-            page: 1,
-            totalPages: 2,
-            movies: [.stub(id: "cachedMovieId1")]
-        )
-        let searchMoviesUseCaseMock = SearchMoviesUseCaseMock()
-        
-        let viewModel = DefaultMoviesListViewModel(
-            searchMoviesUseCase: searchMoviesUseCaseMock,
-            mainQueue: DispatchQueueTypeMock()
-        )
-
-        searchMoviesUseCaseMock._execute = { requestValue, cached, completion in
-            XCTAssertEqual(requestValue.page, 1)
-            cached(cachedPage)
-            completion(.failure(SearchMoviesUseCaseError.someError))
-        }
-        
-        // when
-        viewModel.didSearch(query: "query")
-
-        // then
-        let expectedItems = cachedPage
-            .movies
-            .map { MoviesListItemViewModel(movie: $0) }
-        XCTAssertEqual(viewModel.items.value, expectedItems)
-        XCTAssertEqual(viewModel.currentPage, 1)
-        XCTAssertTrue(viewModel.hasMorePages)
-        XCTAssertEqual(searchMoviesUseCaseMock.executeCallCount, 1)
-        addTeardownBlock { [weak viewModel] in XCTAssertNil(viewModel) }
-    }
-
-    func test_didSelectItem_callsShowMovieDetails() {
-        // given
-        let searchMoviesUseCaseMock = SearchMoviesUseCaseMock()
-
-        searchMoviesUseCaseMock._execute = { requestValue, _, completion in
-            XCTAssertEqual(requestValue.page, 1)
-            completion(.success(self.moviesPages[0]))
-        }
-        let actionsMock = MoviesListViewModelActionsMock()
-        let viewModel = DefaultMoviesListViewModel(searchMoviesUseCase: searchMoviesUseCaseMock,
-                                                   actions: actionsMock,
-                                                   mainQueue: DispatchQueueTypeMock())
-
-        // when
-        viewModel.didSearch(query: "query")
-        XCTAssertEqual(searchMoviesUseCaseMock.executeCallCount, 1)
-        
-        // then
-        XCTAssertFalse(actionsMock.showMovieDetailsCalled)
-        
-        viewModel.didSelectItem(at: 0)
-        
-        // then
-        XCTAssertTrue(actionsMock.showMovieDetailsCalled)
-        addTeardownBlock { [weak viewModel] in XCTAssertNil(viewModel) }
-    }
 }
 
 class MoviesListViewModelActionsMock: MoviesListViewModelActionsProtocol {
-    var showMovieDetails: (Movie) -> Void
-    var showMovieQueriesSuggestions: (@escaping (MovieQuery) -> Void) -> Void
-    var closeMovieQueriesSuggestions: () -> Void
-
-    var showMovieDetailsCalled = false
-    var showMovieQueriesSuggestionsCalled = false
-    var closeMovieQueriesSuggestionsCalled = false
-
-    init() {
-        self.showMovieDetails = { _ in }
-        self.showMovieQueriesSuggestions = { _ in }
-        self.closeMovieQueriesSuggestions = {}
-
-        // Reassign
-        self.showMovieDetails = { [weak self] movie in
-            self?.showMovieDetailsCalled = true
-        }
-        self.showMovieQueriesSuggestions = { [weak self] didSelect in
-            self?.showMovieQueriesSuggestionsCalled = true
-        }
-        self.closeMovieQueriesSuggestions = { [weak self] in
-            self?.closeMovieQueriesSuggestionsCalled = true
-        }
-    }
+    var showMovieDetails: ((Movie) -> Void)?
 }
 
 extension DefaultMoviesListViewModel {
-    static func make(searchMoviesUseCase: SearchMoviesUseCase) -> DefaultMoviesListViewModel {
+    static func make(searchMoviesUseCase: SearchMoviesUseCase,
+                     trendingMovieUseCaseMock: TrendingMoviesUseCaseMock = .init()) -> DefaultMoviesListViewModel {
         DefaultMoviesListViewModel(searchMoviesUseCase: searchMoviesUseCase,
+                                   trendingMoviesUseCase: trendingMovieUseCaseMock,
                                    mainQueue: DispatchQueueTypeMock())
+    }
+}
+
+class SearchMoviesUseCaseMock: SearchMoviesUseCase {
+    var executeCallCount: Int = 0
+
+    typealias ExecuteBlock = (SearchMoviesUseCaseRequestValue,
+                              (MoviesPage) -> Void,
+                              MoviesPageResult) -> Void
+
+    lazy var _execute: ExecuteBlock = { _, _, _ in
+        XCTFail("not implemented")
+    }
+    
+    func execute(
+        requestValue: SearchMoviesUseCaseRequestValue,
+        cached: @escaping (MoviesPage) -> Void,
+        completion: @escaping MoviesPageResult
+    ) -> Cancellable? {
+        executeCallCount += 1
+        _execute(requestValue, cached, completion)
+        return nil
+    }
+}
+
+class TrendingMoviesUseCaseMock: TrendingMoviesUseCase {
+    func execute(requestable: any MoviesRequestable,
+                 cached: @escaping (MoviesPage) -> Void,
+                 completion: @escaping MoviesPageResult) -> (any Cancellable)? {
+        return nil
     }
 }

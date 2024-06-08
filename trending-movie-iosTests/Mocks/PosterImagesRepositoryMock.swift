@@ -9,19 +9,18 @@ import Foundation
 @testable import trending_movie_ios
 
 class PosterImagesRepositoryMock: PosterImagesRepository {
-    var completionCalls = 0
-    var error: Error?
-    var image = Data()
-    var validateInput: ((String, Int) -> Void)?
-    
-    func fetchImage(with imagePath: String, width: Int, completion: @escaping (Result<Data, Error>) -> Void) -> Cancellable? {
-        validateInput?(imagePath, width)
-        if let error = error {
-            completion(.failure(error))
+    var shouldReturnError = false
+
+    func fetchImage(with imagePath: String, completion: @escaping ImagesResult) -> Cancellable? {
+        if shouldReturnError {
+            completion(.failure(MockError.someError))
         } else {
-            completion(.success(image))
+            let mockData = Data()
+            completion(.success(mockData))
         }
-        completionCalls += 1
         return nil
+    }
+    enum MockError: Error {
+        case someError
     }
 }

@@ -15,7 +15,10 @@ struct NetworkSessionManagerMock: NetworkSessionManager {
     
     func request(_ request: URLRequest,
                  completion: @escaping CompletionHandler) -> NetworkCancellable {
+        // Call completion handler with provided data, response, and error
         completion(data, response, error)
-        return URLSessionDataTask()
+        
+        // Return a dummy URLSessionDataTask using URLSession.shared
+        return URLSession.shared.dataTask(with: request) { _, _, _ in }
     }
 }

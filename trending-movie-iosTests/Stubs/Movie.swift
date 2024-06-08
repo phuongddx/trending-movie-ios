@@ -10,14 +10,15 @@ import Foundation
 
 extension Movie {
     static func stub(id: Movie.Identifier = "id1",
-                title: String = "title1" ,
-                posterPath: String? = "/1",
-                overview: String = "stub overview",
-                releaseDate: Date? = nil) -> Self {
+                    title: String = "title1" ,
+                    posterPath: String? = "/1",
+                    overview: String = "stub overview",
+                    releaseDate: Date? = nil) -> Self {
         Movie(id: id,
               title: title,
               posterPath: posterPath,
               overview: overview,
-              releaseDate: releaseDate)
+              releaseDate: releaseDate,
+              voteAverage: "")
     }
 }
