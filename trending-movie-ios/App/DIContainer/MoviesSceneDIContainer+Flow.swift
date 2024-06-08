@@ -28,19 +28,6 @@ extension MoviesSceneDIContainer: MoviesSearchFlowCoordinatorDependencies {
     func makeMoviesDetailsViewController(movie: Movie) -> ViewController {
         MovieDetailsViewController.create(with: makeMoviesDetailsViewModel(movieId: movie.id))
     }
-    
-    func makeMoviesQueriesSuggestionsListViewController(didSelect: @escaping MoviesQueryListViewModelDidSelectAction) -> ViewController {
-        ViewController()
-    }
-
-    // MARK: MoviesSearchResult
-    func makeMoviesSearchResultViewController(actions: MoviesListViewModelActionsProtocol) -> ViewController? {
-//        let viewModel: MoviesListViewModel = makeMoviesListViewModel(actions: actions)
-//        let repository: PosterImagesRepository = makePosterImagesRepository()
-//        return MoviesSearchResultViewController(viewModel: viewModel,
-//                                                posterImagesRepository: repository)
-        return nil
-    }
 
     func makeMoviesDetailsViewModel(movieId: Movie.Identifier) -> MovieDetailsViewModel {
         DefaultMovieDetailsViewModel(movieId: movieId,

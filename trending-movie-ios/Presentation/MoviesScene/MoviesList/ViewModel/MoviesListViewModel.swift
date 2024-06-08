@@ -20,30 +20,6 @@ extension Error {
     }
 }
 
-protocol MoviesListViewModelActionsProtocol {
-    var showMovieDetails: ((Movie) -> Void)? { get }
-    var showMovieQueriesSuggestions: ((@escaping (_ didSelect: MovieQuery) -> Void) -> Void)? { get }
-    var closeMovieQueriesSuggestions: (() -> Void)? { get }
-    var showMoviesSearchResult: ((MoviesListViewModel) -> Void)? { get }
-}
-
-struct TrendingMoviesListViewModelActions: MoviesListViewModelActionsProtocol {
-    var closeMovieQueriesSuggestions: (() -> Void)?
-    var showMovieDetails: ((Movie) -> Void)?
-    var showMovieQueriesSuggestions: ((@escaping (_ didSelect: MovieQuery) -> Void) -> Void)?
-    var showMoviesSearchResult: ((any MoviesListViewModel) -> Void)?
-
-    init(closeMovieQueriesSuggestions: (() -> Void)? = nil,
-         showMovieDetails: ((Movie) -> Void)? = nil,
-         showMovieQueriesSuggestions: ((@escaping (_: MovieQuery) -> Void) -> Void)? = nil,
-         showMoviesSearchResult: ((any MoviesListViewModel) -> Void)? = nil) {
-        self.closeMovieQueriesSuggestions = closeMovieQueriesSuggestions
-        self.showMovieDetails = showMovieDetails
-        self.showMovieQueriesSuggestions = showMovieQueriesSuggestions
-        self.showMoviesSearchResult = showMoviesSearchResult
-    }
-}
-
 enum MoviesListViewModelLoading {
     case fullScreen
     case nextPage
@@ -54,8 +30,6 @@ protocol MoviesListViewModelInput {
     func didLoadNextPage()
     func didSearch(query: String)
     func didCancelSearch()
-    func showQueriesSuggestions()
-    func closeQueriesSuggestions()
     func didSelectItem(at index: Int)
 }
 
@@ -267,14 +241,6 @@ extension DefaultMoviesListViewModel {
         moviesLoadTask?.cancel()
         moviesListViewType = .trending
         loadTrendingList()
-    }
-
-    func showQueriesSuggestions() {
-        actions?.showMovieQueriesSuggestions?(update(movieQuery:))
-    }
-
-    func closeQueriesSuggestions() {
-        actions?.closeMovieQueriesSuggestions?()
     }
 
     func didSelectItem(at index: Int) {

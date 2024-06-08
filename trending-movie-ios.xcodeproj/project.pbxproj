@@ -13,6 +13,7 @@
 		7904A8922C1447990051A7B9 /* UIColor+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7904A8912C1447990051A7B9 /* UIColor+Ext.swift */; };
 		7904A8942C14701D0051A7B9 /* MoviesListEmptyTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7904A8932C14701D0051A7B9 /* MoviesListEmptyTableViewCell.swift */; };
 		7904A8972C1494E80051A7B9 /* InMemoryImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7904A8962C1494E80051A7B9 /* InMemoryImageCache.swift */; };
+		7904A8992C14A9A50051A7B9 /* MoviesListViewModelActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7904A8982C14A9A50051A7B9 /* MoviesListViewModelActions.swift */; };
 		79A41CDF2C10103500910974 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79A41CDE2C10103500910974 /* AppDelegate.swift */; };
 		79A41CE12C10103500910974 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79A41CE02C10103500910974 /* SceneDelegate.swift */; };
 		79A41CE32C10103500910974 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79A41CE22C10103500910974 /* ViewController.swift */; };
@@ -120,6 +121,7 @@
 		7904A8912C1447990051A7B9 /* UIColor+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+Ext.swift"; sourceTree = "<group>"; };
 		7904A8932C14701D0051A7B9 /* MoviesListEmptyTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoviesListEmptyTableViewCell.swift; sourceTree = "<group>"; };
 		7904A8962C1494E80051A7B9 /* InMemoryImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InMemoryImageCache.swift; sourceTree = "<group>"; };
+		7904A8982C14A9A50051A7B9 /* MoviesListViewModelActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoviesListViewModelActions.swift; sourceTree = "<group>"; };
 		79A41CDB2C10103500910974 /* trending-movie-ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "trending-movie-ios.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		79A41CDE2C10103500910974 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		79A41CE02C10103500910974 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -688,6 +690,7 @@
 			children = (
 				79A41DC72C120C8600910974 /* MoviesListItemViewModel.swift */,
 				79A41DC82C120C8600910974 /* MoviesListViewModel.swift */,
+				7904A8982C14A9A50051A7B9 /* MoviesListViewModelActions.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -877,6 +880,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7904A8992C14A9A50051A7B9 /* MoviesListViewModelActions.swift in Sources */,
 				79A41CE32C10103500910974 /* ViewController.swift in Sources */,
 				79A41D692C1153DF00910974 /* MoviesRepository.swift in Sources */,
 				79A41DD52C1295AE00910974 /* MovieDetailsViewController.swift in Sources */,

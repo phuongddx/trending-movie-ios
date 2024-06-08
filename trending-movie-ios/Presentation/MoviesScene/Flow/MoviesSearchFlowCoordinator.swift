@@ -26,14 +26,7 @@ final class MoviesSearchFlowCoordinator: Coordinator {
     }
 
     private var trendingMoviesListActions: MoviesListViewModelActionsProtocol {
-        TrendingMoviesListViewModelActions(closeMovieQueriesSuggestions: closeMovieQueriesSuggestions,
-                                          showMovieDetails: showMovieDetails(movie:),
-                                          showMovieQueriesSuggestions: showMovieQueriesSuggestions(didSelect:))
-    }
-
-    private var moviesSearchResultActions: MoviesListViewModelActionsProtocol {
-        TrendingMoviesListViewModelActions(closeMovieQueriesSuggestions: closeMovieQueriesSuggestions,
-                                          showMovieDetails: showMovieDetails(movie:))
+        TrendingMoviesListViewModelActions(showMovieDetails: showMovieDetails(movie:))
     }
 
     func start() {
@@ -45,38 +38,6 @@ final class MoviesSearchFlowCoordinator: Coordinator {
     private func showMovieDetails(movie: Movie) {
         let vc = dependencies.makeMoviesDetailsViewController(movie: movie)
         navigationController?.pushViewController(vc, animated: true)
-    }
-
-    private func showMovieQueriesSuggestions(didSelect: @escaping (MovieQuery) -> Void) {
-//        guard let moviesTrendingListViewController,
-//              moviesListSearchResultViewViewController == nil,
-//            let moviesSearchResultContainer = moviesTrendingListViewController.moviesSearchResultContainer else { return }
-//
-////        let vc = dependencies.makeMoviesQueriesSuggestionsListViewController(didSelect: didSelect)
-//        let vc = ViewController() // MovisesSearch
-//        vc.view.backgroundColor = .blue
-//
-//        moviesTrendingListViewController.add(child: vc,
-//                                             container: moviesSearchResultContainer)
-//        moviesListSearchResultViewViewController = vc
-//        moviesSearchResultContainer.isHidden = false
-    }
-
-//    private func showMoviesSearchResult() {
-//        guard let moviesTrendingListViewController,
-//              moviesListSearchResultViewViewController == nil,
-//            let moviesSearchResultContainer = moviesTrendingListViewController.moviesSearchResultContainer else { return }
-//
-//        let vc = dependencies.makeMoviesSearchResultViewController(actions: moviesSearchResultActions)
-//        moviesTrendingListViewController.add(child: vc, container: moviesSearchResultContainer)
-//        moviesListSearchResultViewViewController = vc
-//        moviesSearchResultContainer.show()
-//    }
-
-    private func closeMovieQueriesSuggestions() {
-        moviesListSearchResultViewViewController?.remove()
-        moviesListSearchResultViewViewController = nil
-        moviesTrendingListViewController?.moviesSearchResultContainer.hide()
     }
 }
 
