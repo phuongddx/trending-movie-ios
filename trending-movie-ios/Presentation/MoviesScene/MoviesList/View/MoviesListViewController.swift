@@ -96,11 +96,6 @@ final class MoviesListViewController: UIViewController {
     }
 }
 
-struct AccessibilityIdentifier {
-    static let movieDetailsView = "AccessibilityIdentifierMovieDetailsView"
-    static let searchField = "AccessibilityIdentifierSearchMovies"
-}
-
 extension MoviesListViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         guard let searchText = searchBar.text,

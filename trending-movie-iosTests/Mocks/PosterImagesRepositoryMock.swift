@@ -13,14 +13,15 @@ class PosterImagesRepositoryMock: PosterImagesRepository {
 
     func fetchImage(with imagePath: String, completion: @escaping ImagesResult) -> Cancellable? {
         if shouldReturnError {
-            completion(.failure(MockError.someError))
+            completion(.failure(ConnectionErrorMock()))
         } else {
             let mockData = Data()
             completion(.success(mockData))
         }
         return nil
     }
-    enum MockError: Error {
-        case someError
-    }
+}
+
+class ConnectionErrorMock: ConnectionError {
+    var isInternetConnectionError: Bool = true
 }
