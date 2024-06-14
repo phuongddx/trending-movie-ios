@@ -13,8 +13,8 @@ This is an iOS application designed to showcase today's trending movies using th
 ## Requirements
 
 - iOS 14.0+
-- Xcode 15.0+
-- Swift 5.5
+- Xcode 15.4
+- Swift 5.10
 
 ## Installation
 
