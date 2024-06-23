@@ -26,7 +26,7 @@ jobs:
           bundle install
 
       - name: Install Fastlane
-        run: bundle exec fastlane install          
+        run: gem install fastlane
 
       - name: Run unit tests
         run: bundle exec fastlane tests
