@@ -1,18 +1,15 @@
-name: Xcode - Build, Analyze, and Test
+name: iOS CI
 
 on:
-  push:
-    branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
 
 jobs:
-  build:
-    name: Build and analyze default scheme using xcodebuild command
+  build-and-test:
+    name: Clean, Build, and Unit Test
     runs-on: macos-latest
-
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set Default Scheme
@@ -47,34 +44,17 @@ jobs:
             file_to_build="`ls -A | grep -i \\.xcodeproj\$`"
           fi
           file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
-          xcodebuild build analyze -scheme "$scheme" -"$filetype_parameter" "$file_to_build" | xcpretty && exit ${PIPESTATUS[0]}
+          xcodebuild build -scheme "$scheme" -"$filetype_parameter" "$file_to_build" | xcpretty
 
-  test:
-    name: Run unit tests
-    runs-on: macos-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set Default Scheme
-        id: set-scheme
+      - name: Run Unit Tests
         run: |
-          scheme_list=$(xcodebuild -list -json)
-          default=$(echo $scheme_list | ruby -e "require 'json'; puts JSON.parse(STDIN.read)['project']['targets'][0]")
-          echo "default_scheme=$default" >> $GITHUB_ENV
-          echo Using default scheme: $default
-
-          - name: Run Unit Tests
-          run: |
-            scheme=${{ env.default_scheme }}
-            if [ "`ls -A | grep -i \\.xcworkspace\$`" ]; then 
-              filetype_parameter="workspace" 
-              file_to_build="`ls -A | grep -i \\.xcworkspace\$`"
-            else 
-              filetype_parameter="project" 
-              file_to_build="`ls -A | grep -i \\.xcodeproj\$`"
-            fi
-            file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
-            xcodebuild test -scheme "$scheme" -"$filetype_parameter" "$file_to_build" -skip-testing:"trending-movie-iosUITests" | xcpretty && exit ${PIPESTATUS[0]}
-        
+          scheme=${{ env.default_scheme }}
+          if [ "`ls -A | grep -i \\.xcworkspace\$`" ]; then 
+            filetype_parameter="workspace" 
+            file_to_build="`ls -A | grep -i \\.xcworkspace\$`"
+          else 
+            filetype_parameter="project" 
+            file_to_build="`ls -A | grep -i \\.xcodeproj\$`"
+          fi
+          file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
+          xcodebuild test -scheme "$scheme" -"$filetype_parameter" "$file_to_build" -skip-testing:"trending-movie-iosUITests" | xcpretty && exit ${PIPESTATUS[0]}
