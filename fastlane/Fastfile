@@ -18,6 +18,6 @@ default_platform(:ios)
 platform :ios do
   desc "Run unit tests"
   lane :tests do
-    run_tests(scheme: "trending-movie-ios")
+    scan
   end
 end

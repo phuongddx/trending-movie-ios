@@ -24,7 +24,6 @@
 		79A41CE92C10103500910974 /* trending_movie_ios.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 79A41CE72C10103500910974 /* trending_movie_ios.xcdatamodeld */; };
 		79A41CEB2C10103700910974 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 79A41CEA2C10103700910974 /* Assets.xcassets */; };
 		79A41CEE2C10103700910974 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 79A41CED2C10103700910974 /* Base */; };
-		79A41CF92C10103700910974 /* trending_movie_iosTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79A41CF82C10103700910974 /* trending_movie_iosTests.swift */; };
 		79A41D032C10103700910974 /* trending_movie_iosUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79A41D022C10103700910974 /* trending_movie_iosUITests.swift */; };
 		79A41D132C1011E300910974 /* AppConfigurations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79A41D122C1011E300910974 /* AppConfigurations.swift */; };
 		79A41D152C101B9400910974 /* AppAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79A41D142C101B9400910974 /* AppAppearance.swift */; };
@@ -129,7 +128,6 @@
 		79A41CED2C10103700910974 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		79A41CEF2C10103700910974 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		79A41CF42C10103700910974 /* trending-movie-iosTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "trending-movie-iosTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		79A41CF82C10103700910974 /* trending_movie_iosTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = trending_movie_iosTests.swift; sourceTree = "<group>"; };
 		79A41CFE2C10103700910974 /* trending-movie-iosUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "trending-movie-iosUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		79A41D022C10103700910974 /* trending_movie_iosUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = trending_movie_iosUITests.swift; sourceTree = "<group>"; };
 		79A41D122C1011E300910974 /* AppConfigurations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfigurations.swift; sourceTree = "<group>"; };
@@ -285,7 +283,6 @@
 				79A41D802C11722A00910974 /* Stubs */,
 				79A41D7B2C11617600910974 /* Mocks */,
 				79A41D202C1048AD00910974 /* Presentation */,
-				79A41CF82C10103700910974 /* trending_movie_iosTests.swift */,
 			);
 			path = "trending-movie-iosTests";
 			sourceTree = "<group>";
@@ -920,7 +917,6 @@
 				79A41DE42C12B08A00910974 /* MovieDetailsViewModelTests.swift in Sources */,
 				79A41D942C11899C00910974 /* NetworkConfigurableMock.swift in Sources */,
 				79A41D822C11723700910974 /* Movie.swift in Sources */,
-				79A41CF92C10103700910974 /* trending_movie_iosTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
