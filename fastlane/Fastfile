@@ -17,7 +17,7 @@ default_platform(:ios)
 
 platform :ios do
   desc "Run unit tests"
-  lane :run_tests do
+  lane :custom_run_tests do
     scan
   end
 end
