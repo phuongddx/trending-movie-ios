@@ -1,34 +1,32 @@
-name: iOS CI
+# .github/workflows/ios-tests.yml
+
+name: iOS Unit Tests
 
 on:
   pull_request:
-    branches: [ "master" ]
+    branches:
+      - master
 
 jobs:
-  run-unit-tests:
-    name: Run Unit Tests
+  test:
     runs-on: macos-latest
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
 
-      - name: Set Default Scheme
-        id: set-scheme
-        run: |
-          scheme_list=$(xcodebuild -list -json)
-          default=$(echo $scheme_list | ruby -e "require 'json'; puts JSON.parse(STDIN.read)['project']['targets'][0]")
-          echo "default_scheme=$default" >> $GITHUB_ENV
-          echo Using default scheme: $default
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '2.7'  # Specify the Ruby version you are using
 
-      - name: Run Unit Tests
+      - name: Set up Bundler
         run: |
-          scheme=${{ env.default_scheme }}
-          if [ "`ls -A | grep -i \\.xcworkspace\$`" ]; then 
-            filetype_parameter="workspace" 
-            file_to_build="`ls -A | grep -i \\.xcworkspace\$`"
-          else 
-            filetype_parameter="project" 
-            file_to_build="`ls -A | grep -i \\.xcodeproj\$`"
-          fi
-          file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
-          xcodebuild test -scheme "$scheme" -"$filetype_parameter" "$file_to_build" -destination 'platform=iOS Simulator,name=iPhone 14,OS=16.4' -skip-testing:"trending-movie-iosUITests" | xcpretty && exit ${PIPESTATUS[0]}
+          gem install bundler
+          bundle install
+
+      - name: Install Fastlane
+        run: bundle exec fastlane install          
+
+      - name: Run unit tests
+        run: bundle exec fastlane run_tests
