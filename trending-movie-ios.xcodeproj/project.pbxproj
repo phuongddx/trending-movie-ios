@@ -24,7 +24,6 @@
 		79A41CE92C10103500910974 /* trending_movie_ios.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 79A41CE72C10103500910974 /* trending_movie_ios.xcdatamodeld */; };
 		79A41CEB2C10103700910974 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 79A41CEA2C10103700910974 /* Assets.xcassets */; };
 		79A41CEE2C10103700910974 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 79A41CED2C10103700910974 /* Base */; };
-		79A41CF92C10103700910974 /* trending_movie_iosTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79A41CF82C10103700910974 /* trending_movie_iosTests.swift */; };
 		79A41D032C10103700910974 /* trending_movie_iosUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79A41D022C10103700910974 /* trending_movie_iosUITests.swift */; };
 		79A41D132C1011E300910974 /* AppConfigurations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79A41D122C1011E300910974 /* AppConfigurations.swift */; };
 		79A41D152C101B9400910974 /* AppAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79A41D142C101B9400910974 /* AppAppearance.swift */; };
@@ -129,7 +128,6 @@
 		79A41CED2C10103700910974 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		79A41CEF2C10103700910974 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		79A41CF42C10103700910974 /* trending-movie-iosTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "trending-movie-iosTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		79A41CF82C10103700910974 /* trending_movie_iosTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = trending_movie_iosTests.swift; sourceTree = "<group>"; };
 		79A41CFE2C10103700910974 /* trending-movie-iosUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "trending-movie-iosUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		79A41D022C10103700910974 /* trending_movie_iosUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = trending_movie_iosUITests.swift; sourceTree = "<group>"; };
 		79A41D122C1011E300910974 /* AppConfigurations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfigurations.swift; sourceTree = "<group>"; };
@@ -285,7 +283,6 @@
 				79A41D802C11722A00910974 /* Stubs */,
 				79A41D7B2C11617600910974 /* Mocks */,
 				79A41D202C1048AD00910974 /* Presentation */,
-				79A41CF82C10103700910974 /* trending_movie_iosTests.swift */,
 			);
 			path = "trending-movie-iosTests";
 			sourceTree = "<group>";
@@ -716,6 +713,8 @@
 			dependencies = (
 			);
 			name = "trending-movie-ios";
+			packageProductDependencies = (
+			);
 			productName = "trending-movie-ios";
 			productReference = 79A41CDB2C10103500910974 /* trending-movie-ios.app */;
 			productType = "com.apple.product-type.application";
@@ -788,6 +787,8 @@
 				Base,
 			);
 			mainGroup = 79A41CD22C10103500910974;
+			packageReferences = (
+			);
 			productRefGroup = 79A41CDC2C10103500910974 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -916,7 +917,6 @@
 				79A41DE42C12B08A00910974 /* MovieDetailsViewModelTests.swift in Sources */,
 				79A41D942C11899C00910974 /* NetworkConfigurableMock.swift in Sources */,
 				79A41D822C11723700910974 /* Movie.swift in Sources */,
-				79A41CF92C10103700910974 /* trending_movie_iosTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1097,14 +1097,14 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K2TYLYAWMK;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "trending-movie-ios/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Trending Movie";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1113,6 +1113,10 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.trending.movie.trending-movie-ios";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1127,14 +1131,14 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K2TYLYAWMK;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "trending-movie-ios/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Trending Movie";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1143,6 +1147,10 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.trending.movie.trending-movie-ios";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1156,14 +1164,19 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K2TYLYAWMK;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.trending.movie.trending-movie-iosTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/trending-movie-ios.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/trending-movie-ios";
 			};
 			name = Debug;
@@ -1175,14 +1188,19 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K2TYLYAWMK;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.trending.movie.trending-movie-iosTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/trending-movie-ios.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/trending-movie-ios";
 			};
 			name = Release;
@@ -1193,10 +1211,15 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K2TYLYAWMK;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.trending.movie.trending-movie-iosUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1210,10 +1233,15 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K2TYLYAWMK;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.trending.movie.trending-movie-iosUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

@@ -1,0 +1,32 @@
+# .github/workflows/ios-tests.yml
+
+name: iOS Unit Tests
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'  # Specify the Ruby version you are using
+
+      - name: Set up Bundler
+        run: |
+          gem install bundler
+          bundle install
+
+      - name: Install Fastlane
+        run: gem install fastlane
+
+      - name: Run unit tests
+        run: bundle exec fastlane tests
