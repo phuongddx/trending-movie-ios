@@ -18,7 +18,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '2.7'  # Specify the Ruby version you are using
+          ruby-version: '3.0'  # Specify the Ruby version you are using
 
       - name: Set up Bundler
         run: |
