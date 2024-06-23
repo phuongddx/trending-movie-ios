@@ -5,8 +5,8 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build-and-test:
-    name: Clean, Build, and Unit Test
+  run-unit-tests:
+    name: Run Unit Tests
     runs-on: macos-latest
     steps:
       - name: Checkout code
@@ -20,32 +20,6 @@ jobs:
           echo "default_scheme=$default" >> $GITHUB_ENV
           echo Using default scheme: $default
 
-      - name: Clean Build Folder
-        run: |
-          scheme=${{ env.default_scheme }}
-          if [ "`ls -A | grep -i \\.xcworkspace\$`" ]; then 
-            filetype_parameter="workspace" 
-            file_to_build="`ls -A | grep -i \\.xcworkspace\$`"
-          else 
-            filetype_parameter="project" 
-            file_to_build="`ls -A | grep -i \\.xcodeproj\$`"
-          fi
-          file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
-          xcodebuild clean -scheme "$scheme" -"$filetype_parameter" "$file_to_build"
-
-      - name: Build
-        run: |
-          scheme=${{ env.default_scheme }}
-          if [ "`ls -A | grep -i \\.xcworkspace\$`" ]; then 
-            filetype_parameter="workspace" 
-            file_to_build="`ls -A | grep -i \\.xcworkspace\$`"
-          else 
-            filetype_parameter="project" 
-            file_to_build="`ls -A | grep -i \\.xcodeproj\$`"
-          fi
-          file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
-          xcodebuild build -scheme "$scheme" -"$filetype_parameter" "$file_to_build" | xcpretty
-
       - name: Run Unit Tests
         run: |
           scheme=${{ env.default_scheme }}
@@ -57,4 +31,4 @@ jobs:
             file_to_build="`ls -A | grep -i \\.xcodeproj\$`"
           fi
           file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
-          xcodebuild test -scheme "$scheme" -"$filetype_parameter" "$file_to_build" -skip-testing:"trending-movie-iosUITests" | xcpretty && exit ${PIPESTATUS[0]}
+          xcodebuild test -scheme "$scheme" -"$filetype_parameter" "$file_to_build" -destination 'platform=iOS Simulator,name=iPhone 14,OS=16.4' -skip-testing:"trending-movie-iosUITests" | xcpretty && exit ${PIPESTATUS[0]}
