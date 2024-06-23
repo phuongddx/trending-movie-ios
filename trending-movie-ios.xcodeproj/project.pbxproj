@@ -17,6 +17,7 @@
 		7904A89B2C14C2910051A7B9 /* AccessibilityIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7904A89A2C14C2910051A7B9 /* AccessibilityIdentifier.swift */; };
 		7904A89C2C14C2910051A7B9 /* AccessibilityIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7904A89A2C14C2910051A7B9 /* AccessibilityIdentifier.swift */; };
 		7904A89D2C14C2910051A7B9 /* AccessibilityIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7904A89A2C14C2910051A7B9 /* AccessibilityIdentifier.swift */; };
+		793F59942C232F920016A7E0 /* SwiftNetworkWrap in Frameworks */ = {isa = PBXBuildFile; productRef = 793F59932C232F920016A7E0 /* SwiftNetworkWrap */; };
 		79A41CDF2C10103500910974 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79A41CDE2C10103500910974 /* AppDelegate.swift */; };
 		79A41CE12C10103500910974 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79A41CE02C10103500910974 /* SceneDelegate.swift */; };
 		79A41CE32C10103500910974 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79A41CE22C10103500910974 /* ViewController.swift */; };
@@ -204,6 +205,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				793F59942C232F920016A7E0 /* SwiftNetworkWrap in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -716,6 +718,9 @@
 			dependencies = (
 			);
 			name = "trending-movie-ios";
+			packageProductDependencies = (
+				793F59932C232F920016A7E0 /* SwiftNetworkWrap */,
+			);
 			productName = "trending-movie-ios";
 			productReference = 79A41CDB2C10103500910974 /* trending-movie-ios.app */;
 			productType = "com.apple.product-type.application";
@@ -788,6 +793,9 @@
 				Base,
 			);
 			mainGroup = 79A41CD22C10103500910974;
+			packageReferences = (
+				793F59922C232F920016A7E0 /* XCRemoteSwiftPackageReference "SwiftNetworkWrap" */,
+			);
 			productRefGroup = 79A41CDC2C10103500910974 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -1261,6 +1269,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		793F59922C232F920016A7E0 /* XCRemoteSwiftPackageReference "SwiftNetworkWrap" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/phuongddx/SwiftNetworkWrap.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		793F59932C232F920016A7E0 /* SwiftNetworkWrap */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 793F59922C232F920016A7E0 /* XCRemoteSwiftPackageReference "SwiftNetworkWrap" */;
+			productName = SwiftNetworkWrap;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		79A41CE72C10103500910974 /* trending_movie_ios.xcdatamodeld */ = {
