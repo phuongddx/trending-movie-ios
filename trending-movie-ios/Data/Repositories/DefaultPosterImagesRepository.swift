@@ -33,16 +33,17 @@ final class DefaultPosterImagesRepository: PosterImagesRepository {
 //            completion(.success(placeholderImage.pngData() ?? Data()))
 //        }
 
-        let endpoint = APIEndpoints.getMoviePoster(path: imagePath)
-        let task = RepositoryTask()
-        task.networkTask = dataTransferService.request(with: endpoint,
-                                                       on: backgroundQueue) { [weak self] (result: Result<Data, DataTransferError>) in
-            let result = result.map { data in
-                self?.inMemoryCache.store(data as NSData, forKey: imagePath)
-                return data
-            }.mapError { $0 as Error}
-            completion(result)
-        }
-        return task
+//        let endpoint = APIEndpoints.getMoviePoster(path: imagePath)
+//        let task = RepositoryTask()
+//        task.networkTask = dataTransferService.request(with: endpoint,
+//                                                       on: backgroundQueue) { [weak self] (result: Result<Data, DataTransferError>) in
+//            let result = result.map { data in
+//                self?.inMemoryCache.store(data as NSData, forKey: imagePath)
+//                return data
+//            }.mapError { $0 as Error}
+//            completion(result)
+//        }
+//        return task
+        nil
     }
 }

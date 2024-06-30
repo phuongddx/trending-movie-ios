@@ -6,6 +6,13 @@
 //
 
 import Foundation
+import SwiftThemoviedbWrap
+
+extension Resolver: ResolverRegistering {
+    public static func registerAllServices() {
+        
+    }
+}
 
 final class AppDIContainer {
     
@@ -17,14 +24,15 @@ final class AppDIContainer {
                                           queryParameters: [
                                             "api_key": appConfiguration.apiKey,
                                             "language": NSLocale.preferredLanguages.first ?? "en"])
-        let apiDataNetwork = DefaultNetworkService(config: config)
-        return DefaultDataTransferService(with: apiDataNetwork)
+        NetworkWrapConfigurationTmdb.apiKey = appConfiguration.apiKey
+        NetworkWrapConfigurationTmdb.language = NSLocale.preferredLanguages.first ?? "en-US"
+        return DefaultDataTransferService()
     }()
 
     lazy var imageDataTransferService: DataTransferService = {
         let config = ApiDataNetworkConfig(baseURL: URL(string: appConfiguration.imagesBaseURL)!)
         let imagesDataNetwork = DefaultNetworkService(config: config)
-        return DefaultDataTransferService(with: imagesDataNetwork)
+        return DefaultDataTransferService()
     }()
 
     // MARK: - DIContainers of scenes
