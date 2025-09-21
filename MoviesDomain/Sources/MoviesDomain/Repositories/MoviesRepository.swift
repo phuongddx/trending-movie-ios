@@ -16,6 +16,26 @@ public protocol MoviesRepository {
                                  completion: @escaping MoviesPageResult) -> Cancellable?
 
     @discardableResult
+    func fetchPopularMoviesList(page: Int,
+                                cached: @escaping (MoviesPage) -> Void,
+                                completion: @escaping MoviesPageResult) -> Cancellable?
+
+    @discardableResult
+    func fetchNowPlayingMoviesList(page: Int,
+                                   cached: @escaping (MoviesPage) -> Void,
+                                   completion: @escaping MoviesPageResult) -> Cancellable?
+
+    @discardableResult
+    func fetchTopRatedMoviesList(page: Int,
+                                 cached: @escaping (MoviesPage) -> Void,
+                                 completion: @escaping MoviesPageResult) -> Cancellable?
+
+    @discardableResult
+    func fetchUpcomingMoviesList(page: Int,
+                                 cached: @escaping (MoviesPage) -> Void,
+                                 completion: @escaping MoviesPageResult) -> Cancellable?
+
+    @discardableResult
     func fetchDetailsMovie(of movieId: Movie.Identifier,
                            completion: @escaping MovieDetailsResult) -> Cancellable?
 }
