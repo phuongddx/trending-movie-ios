@@ -66,6 +66,110 @@ public final class DefaultMoviesRepository: MoviesRepository {
         return cancellable
     }
 
+    public func fetchPopularMoviesList(page: Int,
+                                       cached: @escaping (MoviesPage) -> Void,
+                                       completion: @escaping MoviesPageResult) -> MoviesDomain.Cancellable? {
+        // Check cache first
+        if let cachedResponse = cache?.getResponse(for: RequestCacheKey(query: "popular", page: page)) {
+            cached(cachedResponse)
+        }
+
+        // Fetch from network
+        let cancellable = networkService.request(
+            .popularMovies(page: page),
+            type: MoviesResponseDTO.self
+        ) { [weak self] result in
+            switch result {
+            case .success(let responseDTO):
+                let moviesPage = responseDTO.toDomain()
+                self?.cache?.save(response: moviesPage, for: RequestCacheKey(query: "popular", page: page))
+                completion(.success(moviesPage))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+
+        return cancellable
+    }
+
+    public func fetchNowPlayingMoviesList(page: Int,
+                                          cached: @escaping (MoviesPage) -> Void,
+                                          completion: @escaping MoviesPageResult) -> MoviesDomain.Cancellable? {
+        // Check cache first
+        if let cachedResponse = cache?.getResponse(for: RequestCacheKey(query: "now_playing", page: page)) {
+            cached(cachedResponse)
+        }
+
+        // Fetch from network
+        let cancellable = networkService.request(
+            .nowPlayingMovies(page: page),
+            type: MoviesResponseDTO.self
+        ) { [weak self] result in
+            switch result {
+            case .success(let responseDTO):
+                let moviesPage = responseDTO.toDomain()
+                self?.cache?.save(response: moviesPage, for: RequestCacheKey(query: "now_playing", page: page))
+                completion(.success(moviesPage))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+
+        return cancellable
+    }
+
+    public func fetchTopRatedMoviesList(page: Int,
+                                        cached: @escaping (MoviesPage) -> Void,
+                                        completion: @escaping MoviesPageResult) -> MoviesDomain.Cancellable? {
+        // Check cache first
+        if let cachedResponse = cache?.getResponse(for: RequestCacheKey(query: "top_rated", page: page)) {
+            cached(cachedResponse)
+        }
+
+        // Fetch from network
+        let cancellable = networkService.request(
+            .topRatedMovies(page: page),
+            type: MoviesResponseDTO.self
+        ) { [weak self] result in
+            switch result {
+            case .success(let responseDTO):
+                let moviesPage = responseDTO.toDomain()
+                self?.cache?.save(response: moviesPage, for: RequestCacheKey(query: "top_rated", page: page))
+                completion(.success(moviesPage))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+
+        return cancellable
+    }
+
+    public func fetchUpcomingMoviesList(page: Int,
+                                        cached: @escaping (MoviesPage) -> Void,
+                                        completion: @escaping MoviesPageResult) -> MoviesDomain.Cancellable? {
+        // Check cache first
+        if let cachedResponse = cache?.getResponse(for: RequestCacheKey(query: "upcoming", page: page)) {
+            cached(cachedResponse)
+        }
+
+        // Fetch from network
+        let cancellable = networkService.request(
+            .upcomingMovies(page: page),
+            type: MoviesResponseDTO.self
+        ) { [weak self] result in
+            switch result {
+            case .success(let responseDTO):
+                let moviesPage = responseDTO.toDomain()
+                self?.cache?.save(response: moviesPage, for: RequestCacheKey(query: "upcoming", page: page))
+                completion(.success(moviesPage))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+
+        return cancellable
+    }
+
     public func fetchDetailsMovie(of movieId: Movie.Identifier,
                                  completion: @escaping MovieDetailsResult) -> MoviesDomain.Cancellable? {
         let cancellable = networkService.request(
