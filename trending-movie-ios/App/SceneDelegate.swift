@@ -16,6 +16,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Cinemax uses dark-only theme
         DSThemeManager.shared.updateAppearance()
 
+        // Debug font loading
+        #if DEBUG
+        DSTypography.debugAvailableFonts()
+        #endif
+
         // Create the SwiftUI view
         let contentView: AnyView
         if #available(iOS 16.0, *) {
