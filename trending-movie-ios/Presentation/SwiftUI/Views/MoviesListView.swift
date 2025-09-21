@@ -133,53 +133,15 @@ struct MoviesListView: View {
 @available(iOS 15.0, *)
 struct MoviesListView_Previews: PreviewProvider {
     static var previews: some View {
-        let mockContainer = PreviewMockContainer()
+        let container = AppContainer.shared
 
         let viewModel = ObservableMoviesListViewModel(
-            searchMoviesUseCase: mockContainer.searchMoviesUseCase(),
-            trendingMoviesUseCase: mockContainer.trendingMoviesUseCase(),
-            posterImagesRepository: mockContainer.posterImagesRepository()
+            searchMoviesUseCase: container.searchMoviesUseCase(),
+            trendingMoviesUseCase: container.trendingMoviesUseCase(),
+            posterImagesRepository: container.posterImagesRepository()
         )
 
         return MoviesListView(viewModel: viewModel)
             .environment(\.dsTheme, DSTheme.dark)
-    }
-}
-
-// MARK: - Mock Objects for Preview
-private class PreviewMockContainer {
-    func searchMoviesUseCase() -> SearchMoviesUseCaseProtocol { PreviewMockSearchMoviesUseCase() }
-    func trendingMoviesUseCase() -> TrendingMoviesUseCaseProtocol { PreviewMockTrendingMoviesUseCase() }
-    func posterImagesRepository() -> PosterImagesRepository { PreviewMockPosterImagesRepository() }
-    func fetchDetailsMovieUseCase() -> FetchDetailsMovieUseCaseProtocol { PreviewMockFetchDetailsMovieUseCase() }
-}
-
-private class PreviewMockPosterImagesRepository: PosterImagesRepository {
-    func fetchImage(with imagePath: String, completion: @escaping (Result<Data, Error>) -> Void) -> Cancellable? {
-        completion(.failure(NSError(domain: "Mock", code: 0)))
-        return nil
-    }
-}
-
-private class PreviewMockSearchMoviesUseCase: SearchMoviesUseCaseProtocol {
-    func execute(requestValue: SearchMoviesUseCaseRequestValue,
-                cached: @escaping (MoviesPage) -> Void,
-                completion: @escaping (Result<MoviesPage, Error>) -> Void) -> Cancellable? {
-        return nil
-    }
-}
-
-private class PreviewMockTrendingMoviesUseCase: TrendingMoviesUseCaseProtocol {
-    func execute(request: MoviesRequest,
-                cached: @escaping (MoviesPage) -> Void,
-                completion: @escaping (Result<MoviesPage, Error>) -> Void) -> Cancellable? {
-        return nil
-    }
-}
-
-private class PreviewMockFetchDetailsMovieUseCase: FetchDetailsMovieUseCaseProtocol {
-    func execute(with movieId: Movie.Identifier,
-                completion: @escaping (Result<Movie, Error>) -> Void) -> Cancellable? {
-        return nil
     }
 }

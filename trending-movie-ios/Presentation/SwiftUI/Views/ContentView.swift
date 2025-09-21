@@ -10,21 +10,10 @@ struct ContentView: View {
     }
 
     var body: some View {
-        NavigationView {
-            createMoviesListView()
-        }
-        .environment(\.dsTheme, themeManager.currentTheme)
-        .environmentObject(themeManager)
-        .preferredColorScheme(themeManager.currentTheme == .dark ? .dark : .light)
-    }
-
-    private func createMoviesListView() -> some View {
-        let viewModel = ObservableMoviesListViewModel(
-            searchMoviesUseCase: container.searchMoviesUseCase(),
-            trendingMoviesUseCase: container.trendingMoviesUseCase(),
-            posterImagesRepository: container.posterImagesRepository()
-        )
-        return MoviesListView(viewModel: viewModel)
+        TabNavigationView(container: container)
+            .environment(\.dsTheme, themeManager.currentTheme)
+            .environmentObject(themeManager)
+            .preferredColorScheme(themeManager.currentTheme == .dark ? .dark : .light)
     }
 }
 
@@ -39,21 +28,10 @@ struct ContentViewLegacy: View {
     }
 
     var body: some View {
-        NavigationView {
-            createMoviesListView()
-        }
-        .environment(\.dsTheme, themeManager.currentTheme)
-        .environmentObject(themeManager)
-        .preferredColorScheme(themeManager.currentTheme == .dark ? .dark : .light)
-    }
-
-    private func createMoviesListView() -> some View {
-        let viewModel = ObservableMoviesListViewModel(
-            searchMoviesUseCase: container.searchMoviesUseCase(),
-            trendingMoviesUseCase: container.trendingMoviesUseCase(),
-            posterImagesRepository: container.posterImagesRepository()
-        )
-        return MoviesListView(viewModel: viewModel)
+        TabNavigationView(container: container)
+            .environment(\.dsTheme, themeManager.currentTheme)
+            .environmentObject(themeManager)
+            .preferredColorScheme(themeManager.currentTheme == .dark ? .dark : .light)
     }
 }
 

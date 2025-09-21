@@ -14,22 +14,61 @@ extension AppContainer {
         self { AppConfig() }.singleton
     }
 
+    // MARK: - Network
+    var tmdbNetworkService: Factory<TMDBNetworkService> {
+        self {
+            TMDBNetworkService()
+        }.singleton
+    }
+
     // MARK: - Repositories
     var posterImagesRepository: Factory<PosterImagesRepository> {
-        self { MockPosterImagesRepository() }.singleton
+        self {
+            RealPosterImagesRepository(networkService: self.tmdbNetworkService())
+        }.singleton
     }
 
     // MARK: - Use Cases
     var searchMoviesUseCase: Factory<SearchMoviesUseCaseProtocol> {
-        self { MockSearchMoviesUseCase() }
+        self {
+            RealSearchMoviesUseCase(networkService: self.tmdbNetworkService())
+        }
     }
 
     var trendingMoviesUseCase: Factory<TrendingMoviesUseCaseProtocol> {
-        self { MockTrendingMoviesUseCase() }
+        self {
+            RealTrendingMoviesUseCase(networkService: self.tmdbNetworkService())
+        }
+    }
+
+    var popularMoviesUseCase: Factory<PopularMoviesUseCaseProtocol> {
+        self {
+            RealPopularMoviesUseCase(networkService: self.tmdbNetworkService())
+        }
+    }
+
+    var nowPlayingMoviesUseCase: Factory<NowPlayingMoviesUseCaseProtocol> {
+        self {
+            RealNowPlayingMoviesUseCase(networkService: self.tmdbNetworkService())
+        }
+    }
+
+    var topRatedMoviesUseCase: Factory<TopRatedMoviesUseCaseProtocol> {
+        self {
+            RealTopRatedMoviesUseCase(networkService: self.tmdbNetworkService())
+        }
+    }
+
+    var upcomingMoviesUseCase: Factory<UpcomingMoviesUseCaseProtocol> {
+        self {
+            RealUpcomingMoviesUseCase(networkService: self.tmdbNetworkService())
+        }
     }
 
     var fetchDetailsMovieUseCase: Factory<FetchDetailsMovieUseCaseProtocol> {
-        self { MockFetchDetailsMovieUseCase() }
+        self {
+            RealFetchDetailsMovieUseCase(networkService: self.tmdbNetworkService())
+        }
     }
 }
 
@@ -37,23 +76,14 @@ extension AppContainer {
 
 public struct AppConfig {
     lazy var apiKey: String = {
-        guard let apiKey = Bundle.main.object(forInfoDictionaryKey: "ApiKey") as? String else {
-            return "mock_api_key" // fallback for compilation
-        }
-        return apiKey
+        return "bbc142c0087fef1df2ad2e3230101822"
     }()
 
     lazy var apiBaseURL: String = {
-        guard let apiBaseURL = Bundle.main.object(forInfoDictionaryKey: "ApiBaseURL") as? String else {
-            return "https://api.themoviedb.org/3/" // fallback
-        }
-        return apiBaseURL
+        return "https://api.themoviedb.org/3/"
     }()
 
     lazy var imagesBaseURL: String = {
-        guard let imageBaseURL = Bundle.main.object(forInfoDictionaryKey: "ImageBaseURL") as? String else {
-            return "https://image.tmdb.org/t/p/" // fallback
-        }
-        return imageBaseURL
+        return "https://image.tmdb.org/t/p/"
     }()
 }

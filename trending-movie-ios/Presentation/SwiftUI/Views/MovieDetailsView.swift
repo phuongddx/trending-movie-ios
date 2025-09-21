@@ -5,6 +5,7 @@ struct MovieDetailsView: View {
     @StateObject var viewModel: ObservableMovieDetailsViewModel
     @Environment(\.dsTheme) private var theme
     @Environment(\.presentationMode) var presentationMode
+    @StateObject private var storage = MovieStorage.shared
 
     init(viewModel: ObservableMovieDetailsViewModel) {
         self._viewModel = StateObject(wrappedValue: viewModel)
@@ -21,8 +22,7 @@ struct MovieDetailsView: View {
                 contentView
             }
         }
-        .navigationTitle(viewModel.screenTitle)
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarHidden(true)
         .refreshable {
             await viewModel.refreshDetails()
         }
@@ -38,25 +38,13 @@ struct MovieDetailsView: View {
 
     private var loadingView: some View {
         VStack(spacing: DSSpacing.lg) {
-            // Poster skeleton
-            DSSkeletonView(
-                width: UIScreen.main.bounds.width - (DSSpacing.Padding.container * 2),
-                height: UIScreen.main.bounds.height * 2 / 3,
-                cornerRadius: DSSpacing.CornerRadius.large
-            )
+            DSHeroCarouselSkeleton()
 
-            VStack(alignment: .leading, spacing: DSSpacing.md) {
-                // Title skeleton
-                DSSkeletonView(width: 250, height: 24)
-
-                // Details skeletons
-                DSSkeletonView(width: 180, height: 16)
-                DSSkeletonView(width: 150, height: 16)
-
-                // Overview skeletons
-                DSSkeletonView(width: UIScreen.main.bounds.width - (DSSpacing.Padding.container * 2), height: 16)
-                DSSkeletonView(width: UIScreen.main.bounds.width - (DSSpacing.Padding.container * 2), height: 16)
-                DSSkeletonView(width: 200, height: 16)
+            ForEach(0..<3, id: \.self) { _ in
+                DSSkeletonView(
+                    width: UIScreen.main.bounds.width - (DSSpacing.Padding.container * 2),
+                    height: 16
+                )
             }
 
             Spacer()
@@ -65,132 +53,55 @@ struct MovieDetailsView: View {
     }
 
     private var contentView: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: DSSpacing.lg) {
-                posterImageView
-                movieDetailsContent
+        VStack(spacing: 0) {
+            // Hero section
+            if let movie = viewModel.movie {
+                MovieDetailHero(
+                    movie: movie,
+                    posterImage: viewModel.posterImage,
+                    onWatchlistTap: {
+                        handleWatchlistTap(movie)
+                    },
+                    onFavoriteTap: {
+                        handleFavoriteTap(movie)
+                    },
+                    onShareTap: {
+                        handleShareTap(movie)
+                    }
+                )
             }
-            .padding(DSSpacing.Padding.container)
-        }
-    }
 
-    private var posterImageView: some View {
-        Group {
-            if let posterImage = viewModel.posterImage {
-                Image(uiImage: posterImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-            } else {
-                Rectangle()
-                    .fill(DSColors.shimmerBackground(for: theme).swiftUIColor)
-                    .aspectRatio(2/3, contentMode: .fit)
-                    .overlay(
-                        VStack(spacing: DSSpacing.md) {
-                            DSLoadingSpinner()
-                            Text("Loading poster...")
-                                .font(DSTypography.caption1SwiftUI())
-                                .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
-                        }
-                    )
-            }
-        }
-        .frame(maxHeight: UIScreen.main.bounds.height * 2 / 3)
-        .cornerRadius(DSSpacing.CornerRadius.large)
-        .clipped()
-    }
-
-    private var movieDetailsContent: some View {
-        VStack(alignment: .leading, spacing: DSSpacing.lg) {
-            movieTitleSection
-            movieMetadataSection
-            movieOverviewSection
-            Spacer(minLength: DSSpacing.xxl)
-        }
-    }
-
-    private var movieTitleSection: some View {
-        VStack(alignment: .leading, spacing: DSSpacing.xs) {
-            Text(viewModel.movieTitle)
-                .font(DSTypography.title1SwiftUI(weight: .bold))
-                .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
-                .lineLimit(nil)
-
-            HStack {
-                ratingView
-                Spacer()
-                favoriteButton
+            // Tabs section
+            if let movie = viewModel.movie {
+                MovieDetailTabs(movie: movie)
             }
         }
     }
 
-    private var ratingView: some View {
-        HStack(spacing: DSSpacing.xxs) {
-            Image(systemName: "star.fill")
-                .foregroundColor(.yellow)
-                .font(DSTypography.caption1SwiftUI())
-
-            Text(viewModel.voteAverage)
-                .font(DSTypography.subheadlineSwiftUI(weight: .medium))
-                .foregroundColor(DSColors.accentSwiftUI(for: theme))
+    private func handleWatchlistTap(_ movie: Movie) {
+        if storage.isInWatchlist(movie) {
+            storage.removeFromWatchlist(movie)
+        } else {
+            storage.addToWatchlist(movie)
         }
     }
 
-    private var favoriteButton: some View {
-        Button(action: {
-            // TODO: Implement favorite functionality
-        }) {
-            Image(systemName: "heart")
-                .font(.title2)
-                .foregroundColor(DSColors.accentSwiftUI(for: theme))
+    private func handleFavoriteTap(_ movie: Movie) {
+        if storage.isFavorite(movie) {
+            storage.removeFromFavorites(movie)
+        } else {
+            storage.addToFavorites(movie)
         }
     }
 
-    private var movieMetadataSection: some View {
-        VStack(alignment: .leading, spacing: DSSpacing.sm) {
-            Text("Details")
-                .font(DSTypography.title3SwiftUI(weight: .semibold))
-                .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+    private func handleShareTap(_ movie: Movie) {
+        // Implement sharing functionality
+        let shareText = "Check out \(movie.title ?? "this movie")!"
+        let activityVC = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
 
-            VStack(alignment: .leading, spacing: DSSpacing.xs) {
-                metadataRow(title: "Release Date", value: viewModel.releaseDate)
-            }
-        }
-        .padding(DSSpacing.Padding.card)
-        .background(DSColors.secondaryBackgroundSwiftUI(for: theme))
-        .cornerRadius(DSSpacing.CornerRadius.card)
-    }
-
-    private func metadataRow(title: String, value: String) -> some View {
-        HStack {
-            Text(title)
-                .font(DSTypography.subheadlineSwiftUI(weight: .medium))
-                .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
-
-            Spacer()
-
-            Text(value)
-                .font(DSTypography.subheadlineSwiftUI())
-                .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
-        }
-    }
-
-    private var movieOverviewSection: some View {
-        VStack(alignment: .leading, spacing: DSSpacing.md) {
-            Text("Overview")
-                .font(DSTypography.title3SwiftUI(weight: .semibold))
-                .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
-
-            if !viewModel.movieOverview.isEmpty {
-                Text(viewModel.movieOverview)
-                    .font(DSTypography.bodySwiftUI())
-                    .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
-                    .lineSpacing(4)
-            } else {
-                Text("No overview available")
-                    .font(DSTypography.bodySwiftUI())
-                    .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
-                    .italic()
-            }
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootViewController = windowScene.windows.first?.rootViewController {
+            rootViewController.present(activityVC, animated: true)
         }
     }
 }
@@ -208,10 +119,11 @@ struct MovieDetailsView_Previews: PreviewProvider {
             voteAverage: "8.5"
         )
 
+        let container = AppContainer.shared
         let viewModel = ObservableMovieDetailsViewModel(
             movie: mockMovie,
-            fetchDetailsMovieUseCase: PreviewMockFetchDetailsMovieUseCase(),
-            posterImagesRepository: PreviewMockPosterImagesRepository()
+            fetchDetailsMovieUseCase: container.fetchDetailsMovieUseCase(),
+            posterImagesRepository: container.posterImagesRepository()
         )
 
         return NavigationView {
@@ -222,17 +134,3 @@ struct MovieDetailsView_Previews: PreviewProvider {
     }
 }
 
-// MARK: - Preview Mock Classes
-private class PreviewMockFetchDetailsMovieUseCase: FetchDetailsMovieUseCaseProtocol {
-    func execute(with movieId: Movie.Identifier,
-                completion: @escaping (Result<Movie, Error>) -> Void) -> Cancellable? {
-        return nil
-    }
-}
-
-private class PreviewMockPosterImagesRepository: PosterImagesRepository {
-    func fetchImage(with imagePath: String, completion: @escaping (Result<Data, Error>) -> Void) -> Cancellable? {
-        completion(.failure(NSError(domain: "Mock", code: 0)))
-        return nil
-    }
-}
