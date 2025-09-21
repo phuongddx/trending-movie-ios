@@ -43,6 +43,35 @@ struct DSTypography {
         return UIFont.systemFont(ofSize: size, weight: systemWeight)
     }
 
+    // MARK: - Font Debug Helper
+    static func debugAvailableFonts() {
+        print("=== Available Fonts Debug ===")
+
+        // Check if Montserrat fonts are available
+        let requiredFonts = ["Montserrat-Regular", "Montserrat-Medium", "Montserrat-SemiBold"]
+
+        for fontName in requiredFonts {
+            if let font = UIFont(name: fontName, size: 16) {
+                print("✅ \(fontName): Available")
+                print("   Family: \(font.familyName)")
+                print("   Font Name: \(font.fontName)")
+            } else {
+                print("❌ \(fontName): NOT FOUND")
+            }
+        }
+
+        // List all available Montserrat variants
+        let allFonts = UIFont.fontNames(forFamilyName: "Montserrat")
+        if !allFonts.isEmpty {
+            print("📝 Available Montserrat variants:")
+            allFonts.forEach { print("   - \($0)") }
+        } else {
+            print("❌ No Montserrat fonts found in system")
+        }
+
+        print("=== End Debug ===")
+    }
+
     // MARK: - Cinemax Typography Hierarchy
 
     // Heading Styles
