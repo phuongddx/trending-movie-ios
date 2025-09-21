@@ -15,14 +15,15 @@ struct MoviesListItemViewModel: Equatable {
         self.posterImagesRepository = posterImagesRepository
 
         if let releaseDate = movie.releaseDate {
-            self.releaseDate = "\(NSLocalizedString("Release Date", comment: "")): \(dateFormatter.string(from: releaseDate))"
+            self.releaseDate = dateFormatter.string(from: releaseDate)
         } else {
             self.releaseDate = NSLocalizedString("To be announced", comment: "")
         }
+
         if let voteAverage = movie.voteAverage {
-            self.voteAverage = "\(NSLocalizedString("Vote Average: \(voteAverage)", comment: ""))"
+            self.voteAverage = voteAverage
         } else {
-            self.voteAverage = "\(NSLocalizedString("Have no rating now", comment: ""))"
+            self.voteAverage = NSLocalizedString("No rating", comment: "")
         }
     }
 
@@ -34,40 +35,12 @@ struct MoviesListItemViewModel: Equatable {
         return posterImagesRepository.fetchImage(with: posterPath, completion: completion)
     }
 
-    func displayText() -> NSAttributedString {
-        let result = NSMutableAttributedString()
-        result.append(title.attributedText(textColor: .white, textFont: .systemFont(ofSize: 16, weight: .semibold)))
-        result.appendNewline()
-        result.appendNewline()
-        result.append(releaseDate.attributedText(textColor: .white, textFont: .systemFont(ofSize: 14, weight: .regular)))
-        result.appendNewline()
-        result.append(voteAverage.attributedText(textColor: .white, textFont: .systemFont(ofSize: 14, weight: .regular)))
-        return result
-    }
-
-    func displayOverviewText() -> NSAttributedString {
-        let result = NSMutableAttributedString()
-        result.append(overview.attributedText(textColor: .white, textFont: .systemFont(ofSize: 14, weight: .regular)))
-        result.appendNewline()
-        result.appendNewline()
-        result.append(releaseDate.attributedText(textColor: .white, textFont: .systemFont(ofSize: 14, weight: .regular)))
-        result.appendNewline()
-        result.append(voteAverage.attributedText(textColor: .white, textFont: .systemFont(ofSize: 14, weight: .regular)))
-        return result
-    }
-
     static func == (lhs: MoviesListItemViewModel, rhs: MoviesListItemViewModel) -> Bool {
         return lhs.title == rhs.title &&
                lhs.overview == rhs.overview &&
                lhs.releaseDate == rhs.releaseDate &&
                lhs.voteAverage == rhs.voteAverage &&
                lhs.posterImagePath == rhs.posterImagePath
-    }
-}
-
-extension NSMutableAttributedString {
-    func appendNewline() {
-        append(NSAttributedString(string: "\n"))
     }
 }
 

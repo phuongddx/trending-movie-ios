@@ -4,11 +4,12 @@ import UIKit
 
 extension AppContainer {
 
-    // MARK: - ViewModels
 
-    var moviesListViewModel: Factory<DefaultMoviesListViewModel> {
+    // MARK: - SwiftUI ViewModels
+
+    var observableMoviesListViewModel: Factory<ObservableMoviesListViewModel> {
         self {
-            DefaultMoviesListViewModel(
+            ObservableMoviesListViewModel(
                 searchMoviesUseCase: self.searchMoviesUseCase(),
                 trendingMoviesUseCase: self.trendingMoviesUseCase(),
                 posterImagesRepository: self.posterImagesRepository()
@@ -16,18 +17,11 @@ extension AppContainer {
         }
     }
 
-    func movieDetailsViewModel(movie: Movie) -> DefaultMovieDetailsViewModel {
-        DefaultMovieDetailsViewModel(
+    func observableMovieDetailsViewModel(movie: Movie) -> ObservableMovieDetailsViewModel {
+        ObservableMovieDetailsViewModel(
             movie: movie,
             fetchDetailsMovieUseCase: self.fetchDetailsMovieUseCase(),
             posterImagesRepository: self.posterImagesRepository()
-        )
-    }
-
-    func moviesSearchFlowCoordinator(navigationController: UINavigationController) -> MoviesSearchFlowCoordinator {
-        MoviesSearchFlowCoordinator(
-            navigationController: navigationController,
-            container: self
         )
     }
 }

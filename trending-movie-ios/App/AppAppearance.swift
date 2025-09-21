@@ -9,26 +9,17 @@ import Foundation
 import UIKit
 
 final class AppAppearance {
-    
+
     static func setupAppearance() {
-        if #available(iOS 15, *) {
-            let appearance = UINavigationBarAppearance()
-            appearance.configureWithOpaqueBackground()
-            appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
-            appearance.backgroundColor = .appBackgroundColor
-            UINavigationBar.appearance().standardAppearance = appearance
-            UINavigationBar.appearance().scrollEdgeAppearance = appearance
-        } else {
-            UINavigationBar.appearance().barTintColor = .black
-            UINavigationBar.appearance().tintColor = .white
-            UINavigationBar.appearance().titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
-        }
+        // This is now handled by DSThemeManager for SwiftUI
+        // Keeping this for any legacy UIKit components that might still exist
+        DSThemeManager.shared.currentTheme = .dark
     }
 }
 
 extension UINavigationController {
     @objc override open var preferredStatusBarStyle: UIStatusBarStyle {
-        return .lightContent
+        return DSThemeManager.shared.currentTheme == .dark ? .lightContent : .darkContent
     }
 }
 

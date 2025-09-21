@@ -1,24 +1,31 @@
 import UIKit
+import SwiftUI
 import Factory
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
-    var appFlowCoordinator: AppFlowCoordinator?
     var window: UIWindow?
+    private let container = AppContainer.shared
 
     func scene(_ scene: UIScene,
                willConnectTo session: UISceneSession,
                options connectionOptions: UIScene.ConnectionOptions) {
-        guard let scene = (scene as? UIWindowScene) else { return }
+        guard let windowScene = (scene as? UIWindowScene) else { return }
 
-        AppAppearance.setupAppearance()
+        // Initialize theme manager early
+        DSThemeManager.shared.currentTheme = .dark
 
-        window = UIWindow(windowScene: scene)
-        let navigationController = UINavigationController()
+        // Create the SwiftUI view
+        let contentView: AnyView
+        if #available(iOS 16.0, *) {
+            contentView = AnyView(ContentView(container: container))
+        } else {
+            contentView = AnyView(ContentViewLegacy(container: container))
+        }
 
-        window?.rootViewController = navigationController
-        appFlowCoordinator = AppFlowCoordinator(navigationController: navigationController)
-        appFlowCoordinator?.start()
+        // Create the window using the specified window scene
+        window = UIWindow(windowScene: windowScene)
+        window?.rootViewController = UIHostingController(rootView: contentView)
         window?.makeKeyAndVisible()
     }
 
