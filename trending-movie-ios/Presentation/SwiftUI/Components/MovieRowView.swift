@@ -127,7 +127,7 @@ struct MovieRowView_Previews: PreviewProvider {
                 releaseDate: Date(),
                 voteAverage: "8.5"
             ),
-            posterImagesRepository: PreviewMockPosterImagesRepository()
+            posterImagesRepository: AppContainer.shared.posterImagesRepository()
         )
 
         return VStack {
@@ -139,13 +139,5 @@ struct MovieRowView_Previews: PreviewProvider {
         .background(DSColors.primaryBackgroundSwiftUI(for: .dark))
         .environment(\.dsTheme, .dark)
         .previewLayout(.sizeThatFits)
-    }
-}
-
-// MARK: - Mock Repository for Preview
-private class PreviewMockPosterImagesRepository: PosterImagesRepository {
-    func fetchImage(with imagePath: String, completion: @escaping (Result<Data, Error>) -> Void) -> Cancellable? {
-        completion(.failure(NSError(domain: "Mock", code: 0)))
-        return nil
     }
 }
