@@ -93,19 +93,41 @@ struct CinemaxTabButton: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 4) {
-                CinemaxIconView(
-                    tab.icon,
-                    size: .medium,
-                    color: isSelected ? DSColors.accentSwiftUI : DSColors.secondaryTextSwiftUI
-                )
-
-                Text(tab.title)
-                    .font(DSTypography.captionSwiftUI())
-                    .foregroundColor(isSelected ? DSColors.accentSwiftUI : DSColors.secondaryTextSwiftUI)
+            if isSelected {
+                activeTabContent
+            } else {
+                inactiveTabContent
             }
         }
         .frame(minWidth: 48, minHeight: 40)
+    }
+
+    // Active tab: icon + label with background pill
+    private var activeTabContent: some View {
+        HStack(spacing: 4) {
+            CinemaxIconView(
+                tab.icon,
+                size: .medium,
+                color: DSColors.accentSwiftUI
+            )
+
+            Text(tab.title)
+                .font(DSTypography.h6SwiftUI(weight: .medium))
+                .foregroundColor(DSColors.accentSwiftUI)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(DSColors.surfaceSwiftUI)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    // Inactive tab: icon only
+    private var inactiveTabContent: some View {
+        CinemaxIconView(
+            tab.icon,
+            size: .medium,
+            color: DSColors.secondaryTextSwiftUI
+        )
     }
 }
 
