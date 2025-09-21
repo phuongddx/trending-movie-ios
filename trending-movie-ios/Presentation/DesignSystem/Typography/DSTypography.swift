@@ -8,14 +8,12 @@ struct DSTypography {
         case regular
         case medium
         case semibold
-        case bold
 
-        var uiKitWeight: UIFont.Weight {
+        var montserratName: String {
             switch self {
-            case .regular: return .regular
-            case .medium: return .medium
-            case .semibold: return .semibold
-            case .bold: return .bold
+            case .regular: return "Montserrat-Regular"
+            case .medium: return "Montserrat-Medium"
+            case .semibold: return "Montserrat-SemiBold"
             }
         }
 
@@ -25,102 +23,131 @@ struct DSTypography {
             case .regular: return .regular
             case .medium: return .medium
             case .semibold: return .semibold
-            case .bold: return .bold
             }
         }
     }
 
-    // MARK: - Typography Styles
-    static func largeTitle(weight: Weight = .bold) -> UIFont {
-        return UIFont.systemFont(ofSize: 34, weight: weight.uiKitWeight)
+    // MARK: - Montserrat Font Helper
+    private static func montserratFont(size: CGFloat, weight: Weight) -> UIFont {
+        if let customFont = UIFont(name: weight.montserratName, size: size) {
+            return customFont
+        }
+        // Fallback to system font with equivalent weight
+        let systemWeight: UIFont.Weight = {
+            switch weight {
+            case .regular: return .regular
+            case .medium: return .medium
+            case .semibold: return .semibold
+            }
+        }()
+        return UIFont.systemFont(ofSize: size, weight: systemWeight)
     }
 
-    static func title1(weight: Weight = .bold) -> UIFont {
-        return UIFont.systemFont(ofSize: 28, weight: weight.uiKitWeight)
+    // MARK: - Cinemax Typography Hierarchy
+
+    // Heading Styles
+    static func h1(weight: Weight = .semibold) -> UIFont {
+        return montserratFont(size: 28, weight: weight)
     }
 
-    static func title2(weight: Weight = .bold) -> UIFont {
-        return UIFont.systemFont(ofSize: 22, weight: weight.uiKitWeight)
+    static func h2(weight: Weight = .semibold) -> UIFont {
+        return montserratFont(size: 24, weight: weight)
     }
 
-    static func title3(weight: Weight = .semibold) -> UIFont {
-        return UIFont.systemFont(ofSize: 20, weight: weight.uiKitWeight)
+    static func h3(weight: Weight = .semibold) -> UIFont {
+        return montserratFont(size: 18, weight: weight)
     }
 
-    static func headline(weight: Weight = .semibold) -> UIFont {
-        return UIFont.systemFont(ofSize: 17, weight: weight.uiKitWeight)
+    static func h4(weight: Weight = .semibold) -> UIFont {
+        return montserratFont(size: 16, weight: weight)
     }
 
-    static func body(weight: Weight = .regular) -> UIFont {
-        return UIFont.systemFont(ofSize: 17, weight: weight.uiKitWeight)
+    static func h5(weight: Weight = .semibold) -> UIFont {
+        return montserratFont(size: 14, weight: weight)
     }
 
-    static func callout(weight: Weight = .regular) -> UIFont {
-        return UIFont.systemFont(ofSize: 16, weight: weight.uiKitWeight)
+    static func h6(weight: Weight = .semibold) -> UIFont {
+        return montserratFont(size: 12, weight: weight)
     }
 
-    static func subheadline(weight: Weight = .regular) -> UIFont {
-        return UIFont.systemFont(ofSize: 15, weight: weight.uiKitWeight)
+    static func h7(weight: Weight = .semibold) -> UIFont {
+        return montserratFont(size: 10, weight: weight)
     }
 
-    static func footnote(weight: Weight = .regular) -> UIFont {
-        return UIFont.systemFont(ofSize: 13, weight: weight.uiKitWeight)
+    // Body Styles
+    static func bodyLarge(weight: Weight = .medium) -> UIFont {
+        return montserratFont(size: 16, weight: weight)
     }
 
-    static func caption1(weight: Weight = .regular) -> UIFont {
-        return UIFont.systemFont(ofSize: 12, weight: weight.uiKitWeight)
+    static func bodyMedium(weight: Weight = .medium) -> UIFont {
+        return montserratFont(size: 14, weight: weight)
     }
 
-    static func caption2(weight: Weight = .regular) -> UIFont {
-        return UIFont.systemFont(ofSize: 11, weight: weight.uiKitWeight)
+    static func bodySmall(weight: Weight = .medium) -> UIFont {
+        return montserratFont(size: 12, weight: weight)
+    }
+
+    static func caption(weight: Weight = .regular) -> UIFont {
+        return montserratFont(size: 10, weight: weight)
     }
 }
 
 // MARK: - SwiftUI Font Extensions
 @available(iOS 13.0, *)
 extension DSTypography {
-    static func largeTitleSwiftUI(weight: Weight = .bold) -> Font {
-        return .system(size: 34, weight: weight.swiftUIWeight)
+
+    private static func montserratSwiftUI(size: CGFloat, weight: Weight) -> Font {
+        if let _ = UIFont(name: weight.montserratName, size: size) {
+            return .custom(weight.montserratName, size: size)
+        }
+        // Fallback to system font
+        return .system(size: size, weight: weight.swiftUIWeight)
     }
 
-    static func title1SwiftUI(weight: Weight = .bold) -> Font {
-        return .system(size: 28, weight: weight.swiftUIWeight)
+    // Heading Styles SwiftUI
+    static func h1SwiftUI(weight: Weight = .semibold) -> Font {
+        return montserratSwiftUI(size: 28, weight: weight)
     }
 
-    static func title2SwiftUI(weight: Weight = .bold) -> Font {
-        return .system(size: 22, weight: weight.swiftUIWeight)
+    static func h2SwiftUI(weight: Weight = .semibold) -> Font {
+        return montserratSwiftUI(size: 24, weight: weight)
     }
 
-    static func title3SwiftUI(weight: Weight = .semibold) -> Font {
-        return .system(size: 20, weight: weight.swiftUIWeight)
+    static func h3SwiftUI(weight: Weight = .semibold) -> Font {
+        return montserratSwiftUI(size: 18, weight: weight)
     }
 
-    static func headlineSwiftUI(weight: Weight = .semibold) -> Font {
-        return .system(size: 17, weight: weight.swiftUIWeight)
+    static func h4SwiftUI(weight: Weight = .semibold) -> Font {
+        return montserratSwiftUI(size: 16, weight: weight)
     }
 
-    static func bodySwiftUI(weight: Weight = .regular) -> Font {
-        return .system(size: 17, weight: weight.swiftUIWeight)
+    static func h5SwiftUI(weight: Weight = .semibold) -> Font {
+        return montserratSwiftUI(size: 14, weight: weight)
     }
 
-    static func calloutSwiftUI(weight: Weight = .regular) -> Font {
-        return .system(size: 16, weight: weight.swiftUIWeight)
+    static func h6SwiftUI(weight: Weight = .semibold) -> Font {
+        return montserratSwiftUI(size: 12, weight: weight)
     }
 
-    static func subheadlineSwiftUI(weight: Weight = .regular) -> Font {
-        return .system(size: 15, weight: weight.swiftUIWeight)
+    static func h7SwiftUI(weight: Weight = .semibold) -> Font {
+        return montserratSwiftUI(size: 10, weight: weight)
     }
 
-    static func footnoteSwiftUI(weight: Weight = .regular) -> Font {
-        return .system(size: 13, weight: weight.swiftUIWeight)
+    // Body Styles SwiftUI
+    static func bodyLargeSwiftUI(weight: Weight = .medium) -> Font {
+        return montserratSwiftUI(size: 16, weight: weight)
     }
 
-    static func caption1SwiftUI(weight: Weight = .regular) -> Font {
-        return .system(size: 12, weight: weight.swiftUIWeight)
+    static func bodyMediumSwiftUI(weight: Weight = .medium) -> Font {
+        return montserratSwiftUI(size: 14, weight: weight)
     }
 
-    static func caption2SwiftUI(weight: Weight = .regular) -> Font {
-        return .system(size: 11, weight: weight.swiftUIWeight)
+    static func bodySmallSwiftUI(weight: Weight = .medium) -> Font {
+        return montserratSwiftUI(size: 12, weight: weight)
+    }
+
+    static func captionSwiftUI(weight: Weight = .regular) -> Font {
+        return montserratSwiftUI(size: 10, weight: weight)
     }
 }
 
@@ -154,35 +181,51 @@ struct DSTextStyle {
 
 // MARK: - Predefined Text Styles
 extension DSTextStyle {
-    static func movieTitle(theme: DSTheme = .dark) -> DSTextStyle {
+    static func movieTitle() -> DSTextStyle {
         return DSTextStyle(
-            font: DSTypography.title2(),
-            color: DSColors.primaryText(for: theme),
+            font: DSTypography.h2(),
+            color: DSColors.primaryText,
             lineHeight: 28
         )
     }
 
-    static func movieSubtitle(theme: DSTheme = .dark) -> DSTextStyle {
+    static func movieSubtitle() -> DSTextStyle {
         return DSTextStyle(
-            font: DSTypography.subheadline(),
-            color: DSColors.secondaryText(for: theme),
+            font: DSTypography.bodyMedium(),
+            color: DSColors.secondaryText,
             lineHeight: 20
         )
     }
 
-    static func bodyText(theme: DSTheme = .dark) -> DSTextStyle {
+    static func bodyText() -> DSTextStyle {
         return DSTextStyle(
-            font: DSTypography.body(),
-            color: DSColors.primaryText(for: theme),
+            font: DSTypography.bodyMedium(),
+            color: DSColors.primaryText,
             lineHeight: 24
         )
     }
 
-    static func captionText(theme: DSTheme = .dark) -> DSTextStyle {
+    static func captionText() -> DSTextStyle {
         return DSTextStyle(
-            font: DSTypography.caption1(),
-            color: DSColors.secondaryText(for: theme),
+            font: DSTypography.caption(),
+            color: DSColors.secondaryText,
             lineHeight: 16
+        )
+    }
+
+    static func heroTitle() -> DSTextStyle {
+        return DSTextStyle(
+            font: DSTypography.h1(),
+            color: DSColors.primaryText,
+            lineHeight: 34
+        )
+    }
+
+    static func sectionHeader() -> DSTextStyle {
+        return DSTextStyle(
+            font: DSTypography.h3(),
+            color: DSColors.primaryText,
+            lineHeight: 22
         )
     }
 }
@@ -194,18 +237,26 @@ extension UILabel {
     }
 
     func applyMovieTitleStyle(_ text: String) {
-        applyStyle(.movieTitle(theme: DSThemeManager.shared.currentTheme), text: text)
+        applyStyle(.movieTitle(), text: text)
     }
 
     func applyMovieSubtitleStyle(_ text: String) {
-        applyStyle(.movieSubtitle(theme: DSThemeManager.shared.currentTheme), text: text)
+        applyStyle(.movieSubtitle(), text: text)
     }
 
     func applyBodyTextStyle(_ text: String) {
-        applyStyle(.bodyText(theme: DSThemeManager.shared.currentTheme), text: text)
+        applyStyle(.bodyText(), text: text)
     }
 
     func applyCaptionTextStyle(_ text: String) {
-        applyStyle(.captionText(theme: DSThemeManager.shared.currentTheme), text: text)
+        applyStyle(.captionText(), text: text)
+    }
+
+    func applyHeroTitleStyle(_ text: String) {
+        applyStyle(.heroTitle(), text: text)
+    }
+
+    func applySectionHeaderStyle(_ text: String) {
+        applyStyle(.sectionHeader(), text: text)
     }
 }

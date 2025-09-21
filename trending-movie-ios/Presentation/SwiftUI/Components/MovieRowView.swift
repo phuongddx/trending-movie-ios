@@ -3,7 +3,6 @@ import SwiftUI
 @available(iOS 15.0, *)
 struct MovieRowView: View {
     let movie: MoviesListItemViewModel
-    @Environment(\.dsTheme) private var theme
     @State private var posterImage: UIImage?
     @State private var imageLoadTask: Cancellable?
 
@@ -14,7 +13,7 @@ struct MovieRowView: View {
             Spacer()
         }
         .padding(DSSpacing.Padding.card)
-        .background(DSColors.secondaryBackgroundSwiftUI(for: theme))
+        .background(DSColors.surfaceSwiftUI)
         .cornerRadius(DSSpacing.CornerRadius.card)
         .onAppear {
             loadPosterImage()
@@ -32,7 +31,7 @@ struct MovieRowView: View {
                     .aspectRatio(contentMode: .fill)
             } else {
                 Rectangle()
-                    .fill(DSColors.shimmerBackground(for: theme).swiftUIColor)
+                    .fill(DSColors.shimmerBackgroundSwiftUI)
                     .overlay(
                         DSLoadingSpinner()
                             .scaleEffect(0.5)
@@ -47,24 +46,24 @@ struct MovieRowView: View {
     private var movieInfoView: some View {
         VStack(alignment: .leading, spacing: DSSpacing.xs) {
             Text(movie.title)
-                .font(DSTypography.headlineSwiftUI(weight: .semibold))
-                .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+                .font(DSTypography.h4SwiftUI(weight: .semibold))
+                .foregroundColor(DSColors.primaryTextSwiftUI)
                 .lineLimit(2)
 
             Text(movie.releaseDate)
-                .font(DSTypography.subheadlineSwiftUI())
-                .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                .font(DSTypography.bodyMediumSwiftUI())
+                .foregroundColor(DSColors.secondaryTextSwiftUI)
                 .lineLimit(1)
 
             Text(movie.voteAverage)
-                .font(DSTypography.caption1SwiftUI())
-                .foregroundColor(DSColors.accentSwiftUI(for: theme))
+                .font(DSTypography.bodySmallSwiftUI())
+                .foregroundColor(DSColors.accentSwiftUI)
                 .lineLimit(1)
 
             if !movie.overview.isEmpty {
                 Text(movie.overview)
-                    .font(DSTypography.caption1SwiftUI())
-                    .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                    .font(DSTypography.bodySmallSwiftUI())
+                    .foregroundColor(DSColors.secondaryTextSwiftUI)
                     .lineLimit(3)
                     .padding(.top, DSSpacing.xxs)
             }
@@ -87,18 +86,17 @@ struct MovieRowView: View {
 
 @available(iOS 13.0, *)
 struct EmptyMoviesView: View {
-    @Environment(\.dsTheme) private var theme
     let message: String
 
     var body: some View {
         VStack(spacing: DSSpacing.lg) {
             Image(systemName: "film")
                 .font(.system(size: 60))
-                .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                .foregroundColor(DSColors.secondaryTextSwiftUI)
 
             Text(message)
-                .font(DSTypography.bodySwiftUI())
-                .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                .font(DSTypography.bodyMediumSwiftUI())
+                .foregroundColor(DSColors.secondaryTextSwiftUI)
                 .multilineTextAlignment(.center)
         }
         .padding(DSSpacing.xxl)
@@ -136,8 +134,7 @@ struct MovieRowView_Previews: PreviewProvider {
             EmptyMoviesView(message: "No movies found")
         }
         .padding()
-        .background(DSColors.primaryBackgroundSwiftUI(for: .dark))
-        .environment(\.dsTheme, .dark)
+        .background(DSColors.backgroundSwiftUI)
         .previewLayout(.sizeThatFits)
     }
 }

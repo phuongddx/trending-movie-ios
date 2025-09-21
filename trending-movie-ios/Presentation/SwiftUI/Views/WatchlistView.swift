@@ -6,7 +6,6 @@ struct WatchlistView: View {
     @StateObject private var storage = MovieStorage.shared
     @State private var selectedSegment = 0
     @State private var selectedMovie: HomeViewModel.MovieWrapper?
-    @Environment(\.dsTheme) private var theme
 
     private let segments = ["Watchlist", "Favorites"]
 
@@ -17,24 +16,32 @@ struct WatchlistView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                DSColors.primaryBackgroundSwiftUI(for: theme)
+                DSColors.backgroundSwiftUI
                     .ignoresSafeArea()
 
                 VStack(spacing: 0) {
                     // Header with segmented control
-                    VStack(spacing: DSSpacing.md) {
+                    VStack(spacing: 16) {
                         Text("My Movies")
-                            .font(DSTypography.largeTitleSwiftUI(weight: .bold))
-                            .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+                            .font(DSTypography.h1SwiftUI(weight: .semibold))
+                            .foregroundColor(DSColors.primaryTextSwiftUI)
                             .frame(maxWidth: .infinity, alignment: .leading)
 
-                        DSSegmentedControl(
-                            segments: segments,
-                            selection: $selectedSegment
-                        )
+                        HStack(spacing: 0) {
+                            ForEach(0..<segments.count, id: \.self) { index in
+                                DSTag(
+                                    title: segments[index],
+                                    isSelected: selectedSegment == index,
+                                    action: { selectedSegment = index }
+                                )
+                                if index < segments.count - 1 {
+                                    Spacer(minLength: 8)
+                                }
+                            }
+                        }
                     }
-                    .padding(DSSpacing.Padding.container)
-                    .background(DSColors.primaryBackgroundSwiftUI(for: theme))
+                    .padding(20)
+                    .background(DSColors.backgroundSwiftUI)
 
                     // Content
                     TabView(selection: $selectedSegment) {
@@ -80,8 +87,6 @@ struct WatchlistTab: View {
     let onMovieTap: (Movie) -> Void
     let onRemove: (Movie) -> Void
 
-    @Environment(\.dsTheme) private var theme
-
     var body: some View {
         if movies.isEmpty {
             emptyWatchlistView
@@ -97,15 +102,15 @@ struct WatchlistTab: View {
             VStack(spacing: DSSpacing.md) {
                 Image(systemName: "bookmark")
                     .font(.system(size: 60))
-                    .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                    .foregroundColor(DSColors.secondaryTextSwiftUI)
 
                 Text("Your Watchlist is Empty")
-                    .font(DSTypography.title2SwiftUI(weight: .semibold))
-                    .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+                    .font(DSTypography.h3SwiftUI(weight: .semibold))
+                    .foregroundColor(DSColors.primaryTextSwiftUI)
 
                 Text("Movies you want to watch will appear here")
-                    .font(DSTypography.bodySwiftUI())
-                    .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                    .font(DSTypography.bodyMediumSwiftUI())
+                    .foregroundColor(DSColors.secondaryTextSwiftUI)
                     .multilineTextAlignment(.center)
             }
 
@@ -116,7 +121,7 @@ struct WatchlistTab: View {
 
     private var moviesList: some View {
         ScrollView {
-            LazyVStack(spacing: DSSpacing.md) {
+            LazyVStack(spacing: 16) {
                 ForEach(movies, id: \.id) { movie in
                     WatchlistMovieRow(
                         movie: movie,
@@ -125,8 +130,8 @@ struct WatchlistTab: View {
                     )
                 }
             }
-            .padding(.horizontal, DSSpacing.Padding.container)
-            .padding(.vertical, DSSpacing.md)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
         }
     }
 }
@@ -137,8 +142,6 @@ struct FavoritesTab: View {
     let onMovieTap: (Movie) -> Void
     let onRemove: (Movie) -> Void
 
-    @Environment(\.dsTheme) private var theme
-
     var body: some View {
         if movies.isEmpty {
             emptyFavoritesView
@@ -148,32 +151,30 @@ struct FavoritesTab: View {
     }
 
     private var emptyFavoritesView: some View {
-        VStack(spacing: DSSpacing.lg) {
+        VStack(spacing: 24) {
             Spacer()
 
-            VStack(spacing: DSSpacing.md) {
-                Image(systemName: "heart")
-                    .font(.system(size: 60))
-                    .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+            VStack(spacing: 16) {
+                CinemaxIconView(.heart, size: .extraLarge, color: DSColors.secondaryTextSwiftUI)
 
                 Text("No Favorite Movies")
-                    .font(DSTypography.title2SwiftUI(weight: .semibold))
-                    .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+                    .font(DSTypography.h3SwiftUI(weight: .semibold))
+                    .foregroundColor(DSColors.primaryTextSwiftUI)
 
                 Text("Movies you love will appear here")
-                    .font(DSTypography.bodySwiftUI())
-                    .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                    .font(DSTypography.bodyMediumSwiftUI())
+                    .foregroundColor(DSColors.secondaryTextSwiftUI)
                     .multilineTextAlignment(.center)
             }
 
             Spacer()
         }
-        .padding(DSSpacing.Padding.container)
+        .padding(20)
     }
 
     private var moviesList: some View {
         ScrollView {
-            LazyVStack(spacing: DSSpacing.md) {
+            LazyVStack(spacing: 16) {
                 ForEach(movies, id: \.id) { movie in
                     WatchlistMovieRow(
                         movie: movie,
@@ -182,8 +183,8 @@ struct FavoritesTab: View {
                     )
                 }
             }
-            .padding(.horizontal, DSSpacing.Padding.container)
-            .padding(.vertical, DSSpacing.md)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
         }
     }
 }
@@ -194,13 +195,12 @@ struct WatchlistMovieRow: View {
     let onTap: () -> Void
     let onRemove: () -> Void
 
-    @Environment(\.dsTheme) private var theme
     @State private var posterImage: UIImage?
     @State private var showingRemoveAlert = false
 
     var body: some View {
         Button(action: onTap) {
-            HStack(spacing: DSSpacing.md) {
+            HStack(spacing: 16) {
                 // Poster thumbnail
                 Group {
                     if let posterImage = posterImage {
@@ -209,46 +209,41 @@ struct WatchlistMovieRow: View {
                             .aspectRatio(contentMode: .fill)
                     } else {
                         Rectangle()
-                            .fill(DSColors.shimmerBackground(for: theme).swiftUIColor)
+                            .fill(DSColors.surfaceSwiftUI)
                             .overlay(
-                                DSLoadingSpinner()
-                                    .scaleEffect(0.5)
+                                CinemaxIconView(.film, size: .medium, color: DSColors.tertiaryTextSwiftUI)
                             )
                     }
                 }
                 .frame(width: 60, height: 90)
-                .cornerRadius(DSSpacing.CornerRadius.small)
-                .clipped()
+                .clipShape(RoundedRectangle(cornerRadius: 8))
 
                 // Movie info
-                VStack(alignment: .leading, spacing: DSSpacing.xs) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text(movie.title ?? "Unknown Title")
-                        .font(DSTypography.headlineSwiftUI(weight: .semibold))
-                        .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+                        .font(DSTypography.h5SwiftUI(weight: .semibold))
+                        .foregroundColor(DSColors.primaryTextSwiftUI)
                         .lineLimit(2)
 
                     if let releaseDate = movie.releaseDate {
                         Text(dateFormatter.string(from: releaseDate))
-                            .font(DSTypography.subheadlineSwiftUI())
-                            .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                            .font(DSTypography.bodyMediumSwiftUI())
+                            .foregroundColor(DSColors.secondaryTextSwiftUI)
                     }
 
                     if let voteAverage = movie.voteAverage {
-                        HStack(spacing: DSSpacing.xxs) {
-                            Image(systemName: "star.fill")
-                                .font(.caption)
-                                .foregroundColor(.yellow)
-
-                            Text(voteAverage)
-                                .font(DSTypography.caption1SwiftUI(weight: .medium))
-                                .foregroundColor(DSColors.accentSwiftUI(for: theme))
-                        }
+                        DSRating(
+                            rating: parseRating(voteAverage),
+                            maxRating: 5,
+                            size: .small,
+                            showValue: true
+                        )
                     }
 
                     if let overview = movie.overview, !overview.isEmpty {
                         Text(overview)
-                            .font(DSTypography.caption1SwiftUI())
-                            .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                            .font(DSTypography.bodySmallSwiftUI())
+                            .foregroundColor(DSColors.secondaryTextSwiftUI)
                             .lineLimit(2)
                     }
                 }
@@ -256,21 +251,16 @@ struct WatchlistMovieRow: View {
                 Spacer()
 
                 // Remove button
-                Button {
-                    showingRemoveAlert = true
-                } label: {
-                    Image(systemName: "trash")
-                        .font(.title3)
-                        .foregroundColor(.red)
-                        .frame(width: 44, height: 44)
-                        .background(Color.red.opacity(0.1))
-                        .cornerRadius(DSSpacing.CornerRadius.medium)
-                }
-                .buttonStyle(PlainButtonStyle())
+                DSIconButton(
+                    icon: .trashBin,
+                    style: .destructive,
+                    size: .medium,
+                    action: { showingRemoveAlert = true }
+                )
             }
-            .padding(DSSpacing.Padding.card)
-            .background(DSColors.secondaryBackgroundSwiftUI(for: theme))
-            .cornerRadius(DSSpacing.CornerRadius.card)
+            .padding(16)
+            .background(DSColors.surfaceSwiftUI)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .alert("Remove Movie", isPresented: $showingRemoveAlert) {
             Button("Cancel", role: .cancel) { }
@@ -289,6 +279,13 @@ struct WatchlistMovieRow: View {
         // This would load the poster image from the movie's posterPath
         // For now, we'll use a placeholder
         posterImage = UIImage(systemName: "photo")
+    }
+
+    private func parseRating(_ voteAverage: String) -> Double {
+        if let doubleValue = Double(voteAverage) {
+            return min(doubleValue / 2.0, 5.0) // Convert from 10-point to 5-point scale
+        }
+        return 0.0
     }
 
     private let dateFormatter: DateFormatter = {

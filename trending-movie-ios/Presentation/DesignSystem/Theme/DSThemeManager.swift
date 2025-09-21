@@ -1,41 +1,27 @@
 import UIKit
 import SwiftUI
 
+// MARK: - Cinemax Theme Manager (Dark Only)
 class DSThemeManager: ObservableObject {
     static let shared = DSThemeManager()
 
-    @Published var currentTheme: DSTheme = .dark {
-        didSet {
-            updateAppAppearance()
-            saveThemePreference()
-        }
-    }
-
-    private let themeKey = "DSThemePreference"
+    // Cinemax is always dark theme
+    let currentTheme: CinemaxTheme = .dark
 
     private init() {
-        loadThemePreference()
-        observeSystemTheme()
+        updateAppAppearance()
     }
 
     // MARK: - Theme Management
-    func setTheme(_ theme: DSTheme) {
-        currentTheme = theme
+    // Cinemax doesn't support theme switching - always dark
+    func updateAppearance() {
+        updateAppAppearance()
     }
 
+    // No theme toggle for Cinemax - always dark
+    @available(*, deprecated, message: "Cinemax uses dark theme only")
     func toggleTheme() {
-        currentTheme = currentTheme == .light ? .dark : .light
-    }
-
-    // MARK: - System Theme Observation
-    private func observeSystemTheme() {
-        NotificationCenter.default.addObserver(
-            forName: UIApplication.willEnterForegroundNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            self?.updateAppAppearance()
-        }
+        // No-op - Cinemax is dark only
     }
 
     // MARK: - Appearance Updates
@@ -46,11 +32,8 @@ class DSThemeManager: ObservableObject {
             // Update navigation bar
             self.updateNavigationBarAppearance()
 
-            // Update status bar
+            // Update status bar (always light content for dark theme)
             self.updateStatusBarAppearance()
-
-            // Notify views of theme change
-            NotificationCenter.default.post(name: .themeDidChange, object: self.currentTheme)
         }
     }
 
@@ -58,73 +41,58 @@ class DSThemeManager: ObservableObject {
         if #available(iOS 15, *) {
             let appearance = UINavigationBarAppearance()
             appearance.configureWithOpaqueBackground()
-            appearance.titleTextAttributes = [.foregroundColor: DSColors.primaryText(for: currentTheme)]
-            appearance.backgroundColor = DSColors.primaryBackground(for: currentTheme)
+            appearance.titleTextAttributes = [.foregroundColor: DSColors.primaryText]
+            appearance.backgroundColor = DSColors.background
             UINavigationBar.appearance().standardAppearance = appearance
             UINavigationBar.appearance().scrollEdgeAppearance = appearance
         } else {
-            UINavigationBar.appearance().barTintColor = DSColors.primaryBackground(for: currentTheme)
-            UINavigationBar.appearance().tintColor = DSColors.primaryText(for: currentTheme)
+            UINavigationBar.appearance().barTintColor = DSColors.background
+            UINavigationBar.appearance().tintColor = DSColors.primaryText
             UINavigationBar.appearance().titleTextAttributes = [
-                NSAttributedString.Key.foregroundColor: DSColors.primaryText(for: currentTheme)
+                NSAttributedString.Key.foregroundColor: DSColors.primaryText
             ]
         }
     }
 
     private func updateStatusBarAppearance() {
-        let style: UIStatusBarStyle = currentTheme == .dark ? .lightContent : .darkContent
+        // Always light content for Cinemax dark theme
         if #available(iOS 13.0, *) {
-            UIApplication.shared.windows.first?.rootViewController?.overrideUserInterfaceStyle =
-                currentTheme == .dark ? .dark : .light
-        }
-    }
-
-    // MARK: - Persistence
-    private func saveThemePreference() {
-        UserDefaults.standard.set(currentTheme.rawValue, forKey: themeKey)
-    }
-
-    private func loadThemePreference() {
-        if let savedTheme = UserDefaults.standard.object(forKey: themeKey) as? String,
-           let theme = DSTheme(rawValue: savedTheme) {
-            currentTheme = theme
+            UIApplication.shared.windows.first?.rootViewController?.overrideUserInterfaceStyle = .dark
         }
     }
 }
 
-// MARK: - DSTheme Extension
-extension DSTheme: RawRepresentable {
+// MARK: - Cinemax Theme Enum
+enum CinemaxTheme {
+    case dark // Cinemax only supports dark theme
+}
+
+// MARK: - Cinemax Theme Extension
+extension CinemaxTheme: RawRepresentable {
     var rawValue: String {
         switch self {
-        case .light: return "light"
         case .dark: return "dark"
         }
     }
 
     init?(rawValue: String) {
         switch rawValue {
-        case "light": self = .light
         case "dark": self = .dark
         default: return nil
         }
     }
 }
 
-// MARK: - Notification Names
-extension Notification.Name {
-    static let themeDidChange = Notification.Name("themeDidChange")
-}
-
-// MARK: - SwiftUI Environment
+// MARK: - SwiftUI Environment for Cinemax
 @available(iOS 13.0, *)
-struct ThemeKey: EnvironmentKey {
-    static let defaultValue = DSTheme.dark
+struct CinemaxThemeKey: EnvironmentKey {
+    static let defaultValue = CinemaxTheme.dark
 }
 
 @available(iOS 13.0, *)
 extension EnvironmentValues {
-    var dsTheme: DSTheme {
-        get { self[ThemeKey.self] }
-        set { self[ThemeKey.self] = newValue }
+    var cinemaxTheme: CinemaxTheme {
+        get { self[CinemaxThemeKey.self] }
+        set { self[CinemaxThemeKey.self] = newValue }
     }
 }

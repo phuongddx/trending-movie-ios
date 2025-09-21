@@ -6,7 +6,6 @@ struct DSTabView<Content: View>: View {
     @Binding var selection: Int
     let content: Content
 
-    @Environment(\.dsTheme) private var theme
 
     init(tabs: [DSTabItem], selection: Binding<Int>, @ViewBuilder content: () -> Content) {
         self.tabs = tabs
@@ -30,13 +29,13 @@ struct DSTabView<Content: View>: View {
                                     .font(.body)
 
                                 Text(tab.title)
-                                    .font(DSTypography.bodySwiftUI(weight: selection == index ? .semibold : .regular))
+                                    .font(DSTypography.bodyMediumSwiftUI(weight: selection == index ? .semibold : .regular))
                             }
-                            .foregroundColor(selection == index ? DSColors.accentSwiftUI(for: theme) : DSColors.secondaryTextSwiftUI(for: theme))
+                            .foregroundColor(selection == index ? DSColors.accentSwiftUI : DSColors.secondaryTextSwiftUI)
 
                             // Active indicator
                             Rectangle()
-                                .fill(DSColors.accentSwiftUI(for: theme))
+                                .fill(DSColors.accentSwiftUI)
                                 .frame(height: 2)
                                 .opacity(selection == index ? 1 : 0)
                         }
@@ -46,7 +45,7 @@ struct DSTabView<Content: View>: View {
                 }
             }
             .padding(.horizontal, DSSpacing.md)
-            .background(DSColors.secondaryBackgroundSwiftUI(for: theme))
+            .background(DSColors.surfaceSwiftUI)
 
             // Content
             content
@@ -69,7 +68,6 @@ struct DSSegmentedControl: View {
     let segments: [String]
     @Binding var selection: Int
 
-    @Environment(\.dsTheme) private var theme
 
     var body: some View {
         HStack(spacing: 0) {
@@ -80,19 +78,19 @@ struct DSSegmentedControl: View {
                     }
                 } label: {
                     Text(segment)
-                        .font(DSTypography.subheadlineSwiftUI(weight: selection == index ? .semibold : .regular))
-                        .foregroundColor(selection == index ? DSColors.accentSwiftUI(for: theme) : DSColors.secondaryTextSwiftUI(for: theme))
+                        .font(DSTypography.bodyMediumSwiftUI(weight: selection == index ? .semibold : .regular))
+                        .foregroundColor(selection == index ? DSColors.accentSwiftUI : DSColors.secondaryTextSwiftUI)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, DSSpacing.sm)
                         .background(
                             selection == index
-                                ? DSColors.accentSwiftUI(for: theme).opacity(0.1)
+                                ? DSColors.accentSwiftUI.opacity(0.1)
                                 : Color.clear
                         )
                 }
             }
         }
-        .background(DSColors.secondaryBackgroundSwiftUI(for: theme))
+        .background(DSColors.surfaceSwiftUI)
         .cornerRadius(DSSpacing.CornerRadius.medium)
     }
 }

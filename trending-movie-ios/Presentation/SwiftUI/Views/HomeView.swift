@@ -5,7 +5,6 @@ struct HomeView: View {
     private let container: AppContainer
     @StateObject private var viewModel: HomeViewModel
     @StateObject private var storage = MovieStorage.shared
-    @Environment(\.dsTheme) private var theme
 
     init(container: AppContainer) {
         self.container = container
@@ -22,7 +21,7 @@ struct HomeView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                DSColors.primaryBackgroundSwiftUI(for: theme)
+                DSColors.backgroundSwiftUI
                     .ignoresSafeArea()
 
                 if viewModel.isLoading && viewModel.heroMovies.isEmpty {
@@ -43,7 +42,7 @@ struct HomeView: View {
 
     private var loadingView: some View {
         ScrollView {
-            VStack(spacing: DSSpacing.lg) {
+            VStack(spacing: 24) {
                 DSHeroCarouselSkeleton()
 
                 ForEach(0..<3, id: \.self) { _ in
@@ -55,7 +54,7 @@ struct HomeView: View {
 
     private var contentView: some View {
         ScrollView {
-            VStack(spacing: DSSpacing.lg) {
+            VStack(spacing: 24) {
                 // Hero Carousel
                 HeroCarousel(
                     movies: viewModel.heroMovies,
@@ -71,7 +70,7 @@ struct HomeView: View {
                 )
 
                 // Category Carousels
-                VStack(spacing: DSSpacing.xl) {
+                VStack(spacing: 32) {
                     CategoryCarousel(
                         title: "Popular Movies",
                         movies: viewModel.popularMovies,

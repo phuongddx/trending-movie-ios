@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 struct MoviesListItemViewModel: Equatable {
     let title: String

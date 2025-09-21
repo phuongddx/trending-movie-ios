@@ -92,13 +92,13 @@ extension UIView {
 
     func applyCardStyling() {
         self.layer.cornerRadius = DSSpacing.CornerRadius.card
-        self.backgroundColor = .dsSecondaryBackground
+        self.backgroundColor = DSColors.surface
         applyCardPadding()
     }
 
     func applyButtonStyling() {
         self.layer.cornerRadius = DSSpacing.CornerRadius.medium
-        self.backgroundColor = .dsAccent
+        self.backgroundColor = DSColors.accent
 
         // Ensure minimum touch target
         if frame.height < DSSpacing.Layout.minTouchTarget {
