@@ -5,7 +5,59 @@ public final class TMDBNetworkService {
     private let provider: MoyaProvider<TMDBTarget>
 
     public init() {
+        #if DEBUG
+        let networkLogger = NetworkLoggerPlugin(configuration: .init(
+            formatter: .init(
+                requestData: { data in
+                    return String(decoding: data, as: UTF8.self)
+                },
+                responseData: { data in
+                    return String(decoding: data, as: UTF8.self)
+                }
+            ),
+            output: { target, items in
+                // Print custom TMDB request info
+                print("🌐 TMDB API Request:")
+                print("Method: \(target.method.rawValue)")
+                print("URL: \(target.baseURL.appendingPathComponent(target.path))")
+
+                // Print curl-like command
+                var curlCommand = "curl -X \(target.method.rawValue)"
+
+                // Add headers
+                if let headers = target.headers {
+                    for (key, value) in headers {
+                        curlCommand += " -H '\(key): \(value)'"
+                    }
+                }
+
+                // Add URL with parameters
+                let fullURL = target.baseURL.appendingPathComponent(target.path)
+                if case .requestParameters(let parameters, _) = target.task {
+                    var urlComponents = URLComponents(url: fullURL, resolvingAgainstBaseURL: false)
+                    urlComponents?.queryItems = parameters.map { URLQueryItem(name: $0.key, value: "\($0.value)") }
+                    if let finalURL = urlComponents?.url {
+                        curlCommand += " '\(finalURL.absoluteString)'"
+                    }
+                } else {
+                    curlCommand += " '\(fullURL.absoluteString)'"
+                }
+
+                print("Curl: \(curlCommand)")
+
+                // Print response items
+                for item in items {
+                    print("📡 TMDB Response: \(item)")
+                }
+                print("---")
+            },
+            logOptions: [.requestBody, .requestHeaders, .requestMethod, .successResponseBody, .errorResponseBody]
+        ))
+
+        self.provider = MoyaProvider<TMDBTarget>(plugins: [networkLogger])
+        #else
         self.provider = MoyaProvider<TMDBTarget>()
+        #endif
     }
 
     public func request<T: Decodable>(_ target: TMDBTarget,
