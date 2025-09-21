@@ -11,7 +11,6 @@ struct ContentView: View {
 
     var body: some View {
         TabNavigationView(container: container)
-            .environment(\.dsTheme, themeManager.currentTheme)
             .environmentObject(themeManager)
             .preferredColorScheme(themeManager.currentTheme == .dark ? .dark : .light)
     }
@@ -29,7 +28,6 @@ struct ContentViewLegacy: View {
 
     var body: some View {
         TabNavigationView(container: container)
-            .environment(\.dsTheme, themeManager.currentTheme)
             .environmentObject(themeManager)
             .preferredColorScheme(themeManager.currentTheme == .dark ? .dark : .light)
     }

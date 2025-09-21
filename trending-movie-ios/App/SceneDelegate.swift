@@ -13,7 +13,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
 
         // Initialize theme manager early
-        DSThemeManager.shared.currentTheme = .dark
+        // Cinemax uses dark-only theme
+        DSThemeManager.shared.updateAppearance()
 
         // Create the SwiftUI view
         let contentView: AnyView

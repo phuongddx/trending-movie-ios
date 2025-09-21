@@ -6,20 +6,19 @@ struct DSSearchBar: View {
     let placeholder: String
     let onCommit: () -> Void
 
-    @Environment(\.dsTheme) private var theme
     @FocusState private var isFocused: Bool
 
     var body: some View {
         HStack(spacing: DSSpacing.sm) {
             HStack(spacing: DSSpacing.sm) {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                    .foregroundColor(DSColors.secondaryTextSwiftUI)
                     .font(.body)
 
                 TextField(placeholder, text: $text)
                     .textFieldStyle(PlainTextFieldStyle())
-                    .font(DSTypography.bodySwiftUI())
-                    .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+                    .font(DSTypography.bodyMediumSwiftUI())
+                    .foregroundColor(DSColors.primaryTextSwiftUI)
                     .focused($isFocused)
                     .onSubmit {
                         onCommit()
@@ -30,19 +29,19 @@ struct DSSearchBar: View {
                         text = ""
                     } label: {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                            .foregroundColor(DSColors.secondaryTextSwiftUI)
                             .font(.body)
                     }
                 }
             }
             .padding(.horizontal, DSSpacing.md)
             .padding(.vertical, DSSpacing.sm)
-            .background(DSColors.secondaryBackgroundSwiftUI(for: theme))
+            .background(DSColors.surfaceSwiftUI)
             .cornerRadius(DSSpacing.CornerRadius.medium)
             .overlay(
                 RoundedRectangle(cornerRadius: DSSpacing.CornerRadius.medium)
                     .stroke(
-                        isFocused ? DSColors.accentSwiftUI(for: theme) : Color.clear,
+                        isFocused ? DSColors.accentSwiftUI : Color.clear,
                         lineWidth: 2
                     )
             )
@@ -52,8 +51,8 @@ struct DSSearchBar: View {
                     text = ""
                     isFocused = false
                 }
-                .font(DSTypography.bodySwiftUI())
-                .foregroundColor(DSColors.accentSwiftUI(for: theme))
+                .font(DSTypography.bodyMediumSwiftUI())
+                .foregroundColor(DSColors.accentSwiftUI)
                 .transition(.move(edge: .trailing))
             }
         }
@@ -66,7 +65,6 @@ struct SearchSuggestionsList: View {
     let suggestions: [String]
     let onSuggestionTap: (String) -> Void
 
-    @Environment(\.dsTheme) private var theme
 
     var body: some View {
         VStack(spacing: 0) {
@@ -76,16 +74,16 @@ struct SearchSuggestionsList: View {
                 } label: {
                     HStack {
                         Image(systemName: "magnifyingglass")
-                            .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                            .foregroundColor(DSColors.secondaryTextSwiftUI)
                             .font(.caption)
 
                         Text(suggestion)
-                            .font(DSTypography.bodySwiftUI())
-                            .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+                            .font(DSTypography.bodyMediumSwiftUI())
+                            .foregroundColor(DSColors.primaryTextSwiftUI)
                             .frame(maxWidth: .infinity, alignment: .leading)
 
                         Image(systemName: "arrow.up.left")
-                            .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                            .foregroundColor(DSColors.secondaryTextSwiftUI)
                             .font(.caption)
                     }
                     .padding(.horizontal, DSSpacing.md)
@@ -94,14 +92,14 @@ struct SearchSuggestionsList: View {
 
                 if suggestion != suggestions.last {
                     Divider()
-                        .background(DSColors.secondaryTextSwiftUI(for: theme).opacity(0.3))
+                        .background(DSColors.secondaryTextSwiftUI.opacity(0.3))
                 }
             }
         }
-        .background(DSColors.secondaryBackgroundSwiftUI(for: theme))
+        .background(DSColors.surfaceSwiftUI)
         .cornerRadius(DSSpacing.CornerRadius.medium)
         .shadow(
-            color: theme == .dark ? Color.clear : Color.black.opacity(0.1),
+            color: Color.clear,
             radius: 8,
             x: 0,
             y: 4

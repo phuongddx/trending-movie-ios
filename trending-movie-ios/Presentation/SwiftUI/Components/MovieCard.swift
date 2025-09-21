@@ -14,7 +14,6 @@ struct MovieCard: View {
     let onWatchlistTap: (() -> Void)?
     let onFavoriteTap: (() -> Void)?
 
-    @Environment(\.dsTheme) private var theme
     @State private var posterImage: UIImage?
     @State private var imageLoadTask: Cancellable?
     @StateObject private var storage = MovieStorage.shared
@@ -53,10 +52,9 @@ struct MovieCard: View {
                             .aspectRatio(contentMode: .fill)
                     } else {
                         Rectangle()
-                            .fill(DSColors.shimmerBackground(for: theme).swiftUIColor)
+                            .fill(DSColors.surfaceSwiftUI)
                             .overlay(
-                                DSLoadingSpinner()
-                                    .scaleEffect(0.8)
+                                CinemaxIconView(.film, size: .extraLarge, color: DSColors.tertiaryTextSwiftUI)
                             )
                     }
                 }
@@ -67,55 +65,50 @@ struct MovieCard: View {
                 LinearGradient(
                     colors: [
                         Color.clear,
-                        DSColors.primaryBackgroundSwiftUI(for: theme).opacity(0.8),
-                        DSColors.primaryBackgroundSwiftUI(for: theme)
+                        DSColors.backgroundSwiftUI.opacity(0.8),
+                        DSColors.backgroundSwiftUI
                     ],
                     startPoint: .top,
                     endPoint: .bottom
                 )
 
                 // Content overlay
-                VStack(alignment: .leading, spacing: DSSpacing.sm) {
+                VStack(alignment: .leading, spacing: 16) {
                     HStack {
-                        VStack(alignment: .leading, spacing: DSSpacing.xs) {
+                        VStack(alignment: .leading, spacing: 8) {
                             Text(movie.title)
-                                .font(DSTypography.title1SwiftUI(weight: .bold))
-                                .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+                                .font(DSTypography.h2SwiftUI(weight: .semibold))
+                                .foregroundColor(DSColors.primaryTextSwiftUI)
                                 .lineLimit(2)
 
                             Text(movie.releaseDate)
-                                .font(DSTypography.subheadlineSwiftUI())
-                                .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                                .font(DSTypography.bodyMediumSwiftUI())
+                                .foregroundColor(DSColors.secondaryTextSwiftUI)
 
-                            Text(movie.voteAverage)
-                                .font(DSTypography.caption1SwiftUI(weight: .medium))
-                                .foregroundColor(DSColors.accentSwiftUI(for: theme))
+                            DSRating(rating: parseRating(movie.voteAverage), size: .medium)
                         }
 
                         Spacer()
-
-                        // Rating chip
-                        ratingChip
                     }
 
                     // Action buttons
-                    HStack(spacing: DSSpacing.md) {
-                        DSActionButton(title: "Play", style: .primary, icon: "play.fill") {
+                    HStack(spacing: 12) {
+                        DSActionButton(title: "Play", style: .primary, icon: .pause) {
                             onTap()
                         }
 
                         if let onWatchlistTap = onWatchlistTap {
                             DSIconButton(
-                                icon: isInWatchlist ? "bookmark.fill" : "bookmark",
-                                style: .ghost,
+                                icon: isInWatchlist ? .download : .downloadOffline,
+                                style: .secondary,
                                 action: onWatchlistTap
                             )
                         }
 
                         if let onFavoriteTap = onFavoriteTap {
                             DSIconButton(
-                                icon: isFavorite ? "heart.fill" : "heart",
-                                style: .ghost,
+                                icon: isFavorite ? .heart : .heart,
+                                style: .secondary,
                                 action: onFavoriteTap
                             )
                         }
@@ -123,7 +116,7 @@ struct MovieCard: View {
                         Spacer()
                     }
                 }
-                .padding(DSSpacing.Padding.container)
+                .padding(20)
             }
         }
         .onAppear { loadPosterImage() }
@@ -132,7 +125,7 @@ struct MovieCard: View {
 
     private var standardCard: some View {
         Button(action: onTap) {
-            VStack(alignment: .leading, spacing: DSSpacing.xs) {
+            VStack(alignment: .leading, spacing: 8) {
                 // Poster image
                 Group {
                     if let posterImage = posterImage {
@@ -141,33 +134,34 @@ struct MovieCard: View {
                             .aspectRatio(2/3, contentMode: .fill)
                     } else {
                         Rectangle()
-                            .fill(DSColors.shimmerBackground(for: theme).swiftUIColor)
+                            .fill(DSColors.surfaceSwiftUI)
                             .aspectRatio(2/3, contentMode: .fill)
                             .overlay(
-                                DSLoadingSpinner()
-                                    .scaleEffect(0.5)
+                                CinemaxIconView(.film, size: .large, color: DSColors.tertiaryTextSwiftUI)
                             )
                     }
                 }
                 .frame(width: 140)
-                .cornerRadius(DSSpacing.CornerRadius.medium)
-                .clipped()
+                .clipShape(RoundedRectangle(cornerRadius: 12))
 
                 // Movie info
-                VStack(alignment: .leading, spacing: DSSpacing.xxs) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(movie.title)
-                        .font(DSTypography.subheadlineSwiftUI(weight: .semibold))
-                        .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+                        .font(DSTypography.bodyMediumSwiftUI(weight: .semibold))
+                        .foregroundColor(DSColors.primaryTextSwiftUI)
                         .lineLimit(2)
 
                     Text(movie.releaseDate)
-                        .font(DSTypography.caption1SwiftUI())
-                        .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                        .font(DSTypography.bodySmallSwiftUI())
+                        .foregroundColor(DSColors.secondaryTextSwiftUI)
                         .lineLimit(1)
 
-                    Text(movie.voteAverage)
-                        .font(DSTypography.caption2SwiftUI(weight: .medium))
-                        .foregroundColor(DSColors.accentSwiftUI(for: theme))
+                    DSRating(
+                        rating: parseRating(movie.voteAverage),
+                        maxRating: 5,
+                        size: .small,
+                        showValue: false
+                    )
                 }
                 .frame(width: 140, alignment: .leading)
             }
@@ -178,7 +172,7 @@ struct MovieCard: View {
 
     private var compactCard: some View {
         Button(action: onTap) {
-            HStack(spacing: DSSpacing.md) {
+            HStack(spacing: 12) {
                 // Poster thumbnail
                 Group {
                     if let posterImage = posterImage {
@@ -187,36 +181,37 @@ struct MovieCard: View {
                             .aspectRatio(contentMode: .fill)
                     } else {
                         Rectangle()
-                            .fill(DSColors.shimmerBackground(for: theme).swiftUIColor)
+                            .fill(DSColors.surfaceSwiftUI)
                             .overlay(
-                                DSLoadingSpinner()
-                                    .scaleEffect(0.5)
+                                CinemaxIconView(.film, size: .medium, color: DSColors.tertiaryTextSwiftUI)
                             )
                     }
                 }
                 .frame(width: 60, height: 90)
-                .cornerRadius(DSSpacing.CornerRadius.small)
-                .clipped()
+                .clipShape(RoundedRectangle(cornerRadius: 8))
 
                 // Movie info
-                VStack(alignment: .leading, spacing: DSSpacing.xs) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text(movie.title)
-                        .font(DSTypography.headlineSwiftUI(weight: .semibold))
-                        .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+                        .font(DSTypography.h5SwiftUI(weight: .semibold))
+                        .foregroundColor(DSColors.primaryTextSwiftUI)
                         .lineLimit(2)
 
                     Text(movie.releaseDate)
-                        .font(DSTypography.subheadlineSwiftUI())
-                        .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                        .font(DSTypography.bodyMediumSwiftUI())
+                        .foregroundColor(DSColors.secondaryTextSwiftUI)
 
-                    Text(movie.voteAverage)
-                        .font(DSTypography.caption1SwiftUI(weight: .medium))
-                        .foregroundColor(DSColors.accentSwiftUI(for: theme))
+                    DSRating(
+                        rating: parseRating(movie.voteAverage),
+                        maxRating: 5,
+                        size: .small,
+                        showValue: true
+                    )
 
                     if !movie.overview.isEmpty {
                         Text(movie.overview)
-                            .font(DSTypography.caption1SwiftUI())
-                            .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                            .font(DSTypography.bodySmallSwiftUI())
+                            .foregroundColor(DSColors.secondaryTextSwiftUI)
                             .lineLimit(2)
                     }
                 }
@@ -224,46 +219,39 @@ struct MovieCard: View {
                 Spacer()
 
                 // Action buttons
-                VStack(spacing: DSSpacing.xs) {
+                VStack(spacing: 8) {
                     if let onWatchlistTap = onWatchlistTap {
                         DSIconButton(
-                            icon: isInWatchlist ? "bookmark.fill" : "bookmark",
+                            icon: isInWatchlist ? .download : .downloadOffline,
                             style: .secondary,
+                            size: .small,
                             action: onWatchlistTap
                         )
                     }
 
                     if let onFavoriteTap = onFavoriteTap {
                         DSIconButton(
-                            icon: isFavorite ? "heart.fill" : "heart",
+                            icon: .heart,
                             style: .secondary,
+                            size: .small,
                             action: onFavoriteTap
                         )
                     }
                 }
             }
-            .padding(DSSpacing.Padding.card)
-            .background(DSColors.secondaryBackgroundSwiftUI(for: theme))
-            .cornerRadius(DSSpacing.CornerRadius.card)
+            .padding(16)
+            .background(DSColors.surfaceSwiftUI)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .onAppear { loadPosterImage() }
         .onDisappear { imageLoadTask?.cancel() }
     }
 
-    private var ratingChip: some View {
-        HStack(spacing: DSSpacing.xxs) {
-            Image(systemName: "star.fill")
-                .font(.caption)
-                .foregroundColor(.yellow)
-
-            Text(movie.voteAverage)
-                .font(DSTypography.caption1SwiftUI(weight: .semibold))
-                .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+    private func parseRating(_ voteAverage: String) -> Double {
+        if let doubleValue = Double(voteAverage) {
+            return min(doubleValue / 2.0, 5.0) // Convert from 10-point to 5-point scale
         }
-        .padding(.horizontal, DSSpacing.sm)
-        .padding(.vertical, DSSpacing.xs)
-        .background(Color.black.opacity(0.6))
-        .cornerRadius(DSSpacing.CornerRadius.small)
+        return 0.0
     }
 
     private var isInWatchlist: Bool {

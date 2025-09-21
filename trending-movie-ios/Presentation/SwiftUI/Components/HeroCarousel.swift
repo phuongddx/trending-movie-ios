@@ -66,32 +66,30 @@ struct CategoryCarousel: View {
     let onTap: (MoviesListItemViewModel) -> Void
     let onSeeAll: (() -> Void)?
 
-    @Environment(\.dsTheme) private var theme
-
     var body: some View {
-        VStack(alignment: .leading, spacing: DSSpacing.sm) {
+        VStack(alignment: .leading, spacing: 12) {
             // Section header
             HStack {
                 Text(title)
-                    .font(DSTypography.title3SwiftUI(weight: .semibold))
-                    .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+                    .font(DSTypography.h4SwiftUI(weight: .semibold))
+                    .foregroundColor(DSColors.primaryTextSwiftUI)
 
                 Spacer()
 
                 if let onSeeAll = onSeeAll {
                     Button("See All", action: onSeeAll)
-                        .font(DSTypography.subheadlineSwiftUI(weight: .medium))
-                        .foregroundColor(DSColors.accentSwiftUI(for: theme))
+                        .font(DSTypography.bodyMediumSwiftUI(weight: .medium))
+                        .foregroundColor(DSColors.accentSwiftUI)
                 }
             }
-            .padding(.horizontal, DSSpacing.Padding.container)
+            .padding(.horizontal, 20)
 
             // Horizontal scroll view
             if movies.isEmpty {
                 DSCarouselSkeleton()
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: DSSpacing.md) {
+                    HStack(spacing: 16) {
                         ForEach(movies, id: \.title) { movie in
                             MovieCard(
                                 movie: movie,
@@ -100,7 +98,7 @@ struct CategoryCarousel: View {
                             )
                         }
                     }
-                    .padding(.horizontal, DSSpacing.Padding.container)
+                    .padding(.horizontal, 20)
                 }
             }
         }
@@ -112,17 +110,15 @@ struct CastCarousel: View {
     let cast: [CastMember]
     let onTap: ((CastMember) -> Void)?
 
-    @Environment(\.dsTheme) private var theme
-
     var body: some View {
-        VStack(alignment: .leading, spacing: DSSpacing.sm) {
+        VStack(alignment: .leading, spacing: 12) {
             Text("Cast & Crew")
-                .font(DSTypography.title3SwiftUI(weight: .semibold))
-                .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
-                .padding(.horizontal, DSSpacing.Padding.container)
+                .font(DSTypography.h4SwiftUI(weight: .semibold))
+                .foregroundColor(DSColors.primaryTextSwiftUI)
+                .padding(.horizontal, 20)
 
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: DSSpacing.md) {
+                HStack(spacing: 16) {
                     ForEach(cast, id: \.id) { member in
                         CastMemberCard(
                             member: member,
@@ -130,7 +126,7 @@ struct CastCarousel: View {
                         )
                     }
                 }
-                .padding(.horizontal, DSSpacing.Padding.container)
+                .padding(.horizontal, 20)
             }
         }
     }
@@ -148,12 +144,11 @@ struct CastMemberCard: View {
     let member: CastMember
     let onTap: (() -> Void)?
 
-    @Environment(\.dsTheme) private var theme
     @State private var profileImage: UIImage?
 
     var body: some View {
         Button(action: onTap ?? {}) {
-            VStack(spacing: DSSpacing.xs) {
+            VStack(spacing: 8) {
                 // Profile image
                 Group {
                     if let profileImage = profileImage {
@@ -162,11 +157,9 @@ struct CastMemberCard: View {
                             .aspectRatio(contentMode: .fill)
                     } else {
                         Circle()
-                            .fill(DSColors.shimmerBackground(for: theme).swiftUIColor)
+                            .fill(DSColors.surfaceSwiftUI)
                             .overlay(
-                                Image(systemName: "person.fill")
-                                    .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
-                                    .font(.title2)
+                                CinemaxIconView(.person, size: .large, color: DSColors.secondaryTextSwiftUI)
                             )
                     }
                 }
@@ -174,17 +167,17 @@ struct CastMemberCard: View {
                 .clipShape(Circle())
 
                 // Name and character
-                VStack(spacing: DSSpacing.xxs) {
+                VStack(spacing: 4) {
                     Text(member.name)
-                        .font(DSTypography.caption1SwiftUI(weight: .semibold))
-                        .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+                        .font(DSTypography.bodySmallSwiftUI(weight: .semibold))
+                        .foregroundColor(DSColors.primaryTextSwiftUI)
                         .lineLimit(2)
                         .multilineTextAlignment(.center)
 
                     if let character = member.character {
                         Text(character)
-                            .font(DSTypography.caption2SwiftUI())
-                            .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                            .font(DSTypography.captionSwiftUI())
+                            .foregroundColor(DSColors.secondaryTextSwiftUI)
                             .lineLimit(2)
                             .multilineTextAlignment(.center)
                     }

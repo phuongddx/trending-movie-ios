@@ -1,5 +1,8 @@
 import Foundation
 
+// Importing Movie from the Domain layer
+// Assuming Movie is defined elsewhere in the project
+
 enum AppDestination: Hashable {
     case moviesList
     case movieDetails(Movie)

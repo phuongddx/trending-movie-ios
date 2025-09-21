@@ -4,14 +4,13 @@ import UIKit
 // MARK: - SwiftUI Loading Components
 @available(iOS 13.0, *)
 struct DSLoadingSpinner: View {
-    @Environment(\.dsTheme) private var theme
     @State private var isAnimating = false
 
     var body: some View {
         Circle()
             .trim(from: 0, to: 0.75)
             .stroke(
-                DSColors.spinnerPrimary(for: theme).swiftUIColor,
+                DSColors.accentSwiftUI,
                 style: StrokeStyle(lineWidth: 3, lineCap: .round)
             )
             .frame(width: DSSpacing.Height.loadingSpinner, height: DSSpacing.Height.loadingSpinner)
@@ -29,11 +28,10 @@ struct DSLoadingSpinner: View {
 
 @available(iOS 13.0, *)
 struct DSFullScreenLoading: View {
-    @Environment(\.dsTheme) private var theme
 
     var body: some View {
         ZStack {
-            DSColors.primaryBackgroundSwiftUI(for: theme)
+            DSColors.backgroundSwiftUI
                 .ignoresSafeArea()
 
             DSLoadingSpinner()
@@ -43,7 +41,6 @@ struct DSFullScreenLoading: View {
 
 @available(iOS 13.0, *)
 struct DSSkeletonView: View {
-    @Environment(\.dsTheme) private var theme
     @State private var isAnimating = false
 
     let width: CGFloat
@@ -61,9 +58,9 @@ struct DSSkeletonView: View {
             .fill(
                 LinearGradient(
                     colors: [
-                        DSColors.shimmerBackground(for: theme).swiftUIColor,
-                        DSColors.shimmerHighlight(for: theme).swiftUIColor,
-                        DSColors.shimmerBackground(for: theme).swiftUIColor
+                        DSColors.shimmerBackgroundSwiftUI,
+                        DSColors.shimmerHighlightSwiftUI,
+                        DSColors.shimmerBackgroundSwiftUI
                     ],
                     startPoint: .leading,
                     endPoint: .trailing
@@ -128,9 +125,9 @@ class DSLoadingViewController: UIViewController {
     }
 
     private func setupUI() {
-        view.backgroundColor = DSColors.primaryBackground(for: DSThemeManager.shared.currentTheme)
+        view.backgroundColor = DSColors.background
 
-        spinner.color = DSColors.spinnerPrimary(for: DSThemeManager.shared.currentTheme)
+        spinner.color = DSColors.accent
         spinner.translatesAutoresizingMaskIntoConstraints = false
 
         view.addSubview(spinner)
@@ -187,10 +184,3 @@ class EnhancedLoadingView {
     }
 }
 
-// MARK: - UIColor Extension for SwiftUI
-@available(iOS 13.0, *)
-extension UIColor {
-    var swiftUIColor: Color {
-        return Color(self)
-    }
-}

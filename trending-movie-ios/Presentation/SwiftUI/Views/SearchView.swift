@@ -4,7 +4,6 @@ import SwiftUI
 struct SearchView: View {
     private let container: AppContainer
     @StateObject private var viewModel: SearchViewModel
-    @Environment(\.dsTheme) private var theme
 
     init(container: AppContainer) {
         self.container = container
@@ -17,16 +16,16 @@ struct SearchView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                DSColors.primaryBackgroundSwiftUI(for: theme)
+                DSColors.backgroundSwiftUI
                     .ignoresSafeArea()
 
                 VStack(spacing: 0) {
                     // Search header
-                    VStack(spacing: DSSpacing.md) {
-                        DSSearchBar(
+                    VStack(spacing: 16) {
+                        DSSearchField(
                             text: $viewModel.searchQuery,
                             placeholder: "Search movies...",
-                            onCommit: {
+                            onSearchTap: {
                                 viewModel.performSearch()
                             }
                         )
@@ -43,8 +42,8 @@ struct SearchView: View {
                             .transition(.move(edge: .top).combined(with: .opacity))
                         }
                     }
-                    .padding(DSSpacing.Padding.container)
-                    .background(DSColors.primaryBackgroundSwiftUI(for: theme))
+                    .padding(20)
+                    .background(DSColors.backgroundSwiftUI)
                     .zIndex(1)
 
                     // Content
@@ -71,103 +70,105 @@ struct SearchView: View {
     }
 
     private var emptySearchView: some View {
-        VStack(spacing: DSSpacing.lg) {
+        VStack(spacing: 24) {
             Spacer()
 
-            VStack(spacing: DSSpacing.md) {
-                Image(systemName: "magnifyingglass")
-                    .font(.system(size: 60))
-                    .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+            VStack(spacing: 16) {
+                CinemaxIconView(.search, size: .extraLarge, color: DSColors.secondaryTextSwiftUI)
 
                 Text("Discover Movies")
-                    .font(DSTypography.title2SwiftUI(weight: .semibold))
-                    .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+                    .font(DSTypography.h3SwiftUI(weight: .semibold))
+                    .foregroundColor(DSColors.primaryTextSwiftUI)
 
                 Text("Search for your favorite movies and discover new ones")
-                    .font(DSTypography.bodySwiftUI())
-                    .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                    .font(DSTypography.bodyMediumSwiftUI())
+                    .foregroundColor(DSColors.secondaryTextSwiftUI)
                     .multilineTextAlignment(.center)
             }
 
             Spacer()
 
             // Recent searches or popular searches could go here
-            VStack(alignment: .leading, spacing: DSSpacing.sm) {
+            VStack(alignment: .leading, spacing: 12) {
                 Text("Popular Searches")
-                    .font(DSTypography.title3SwiftUI(weight: .semibold))
-                    .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+                    .font(DSTypography.h5SwiftUI(weight: .semibold))
+                    .foregroundColor(DSColors.primaryTextSwiftUI)
 
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: DSSpacing.sm) {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
                     ForEach(viewModel.popularSearches, id: \.self) { search in
-                        Button {
-                            viewModel.searchQuery = search
-                            viewModel.performSearch()
-                        } label: {
-                            Text(search)
-                                .font(DSTypography.subheadlineSwiftUI())
-                                .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
-                                .padding(.horizontal, DSSpacing.md)
-                                .padding(.vertical, DSSpacing.sm)
-                                .frame(maxWidth: .infinity)
-                                .background(DSColors.secondaryBackgroundSwiftUI(for: theme))
-                                .cornerRadius(DSSpacing.CornerRadius.medium)
-                        }
+                        DSTag(
+                            title: search,
+                            action: {
+                                viewModel.searchQuery = search
+                                viewModel.performSearch()
+                            }
+                        )
                     }
                 }
             }
-            .padding(DSSpacing.Padding.container)
+            .padding(20)
         }
     }
 
     private var loadingView: some View {
         ScrollView {
-            VStack(spacing: DSSpacing.md) {
+            VStack(spacing: 16) {
                 ForEach(0..<8, id: \.self) { _ in
-                    HStack(spacing: DSSpacing.md) {
-                        DSSkeletonView(width: 60, height: 90, cornerRadius: DSSpacing.CornerRadius.small)
+                    HStack(spacing: 16) {
+                        Rectangle()
+                            .fill(DSColors.surfaceSwiftUI)
+                            .frame(width: 60, height: 90)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
 
-                        VStack(alignment: .leading, spacing: DSSpacing.xs) {
-                            DSSkeletonView(width: 200, height: 16)
-                            DSSkeletonView(width: 150, height: 14)
-                            DSSkeletonView(width: 100, height: 14)
+                        VStack(alignment: .leading, spacing: 8) {
+                            Rectangle()
+                                .fill(DSColors.surfaceSwiftUI)
+                                .frame(width: 200, height: 16)
+                                .clipShape(RoundedRectangle(cornerRadius: 4))
+                            Rectangle()
+                                .fill(DSColors.surfaceSwiftUI)
+                                .frame(width: 150, height: 14)
+                                .clipShape(RoundedRectangle(cornerRadius: 4))
+                            Rectangle()
+                                .fill(DSColors.surfaceSwiftUI)
+                                .frame(width: 100, height: 14)
+                                .clipShape(RoundedRectangle(cornerRadius: 4))
                         }
 
                         Spacer()
                     }
-                    .padding(.horizontal, DSSpacing.Padding.container)
+                    .padding(.horizontal, 20)
                 }
             }
-            .padding(.vertical, DSSpacing.md)
+            .padding(.vertical, 16)
         }
     }
 
     private var noResultsView: some View {
-        VStack(spacing: DSSpacing.lg) {
+        VStack(spacing: 24) {
             Spacer()
 
-            VStack(spacing: DSSpacing.md) {
-                Image(systemName: "film.stack")
-                    .font(.system(size: 60))
-                    .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+            VStack(spacing: 16) {
+                CinemaxIconView(.noResults, size: .extraLarge, color: DSColors.secondaryTextSwiftUI)
 
                 Text("No Results Found")
-                    .font(DSTypography.title2SwiftUI(weight: .semibold))
-                    .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+                    .font(DSTypography.h3SwiftUI(weight: .semibold))
+                    .foregroundColor(DSColors.primaryTextSwiftUI)
 
                 Text("Try searching with different keywords or check your spelling")
-                    .font(DSTypography.bodySwiftUI())
-                    .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                    .font(DSTypography.bodyMediumSwiftUI())
+                    .foregroundColor(DSColors.secondaryTextSwiftUI)
                     .multilineTextAlignment(.center)
             }
 
             Spacer()
         }
-        .padding(DSSpacing.Padding.container)
+        .padding(20)
     }
 
     private var searchResultsList: some View {
         ScrollView {
-            LazyVStack(spacing: DSSpacing.md) {
+            LazyVStack(spacing: 16) {
                 ForEach(viewModel.searchResults, id: \.title) { movie in
                     MovieCard(
                         movie: movie,
@@ -186,16 +187,16 @@ struct SearchView: View {
 
                 if viewModel.isLoadingMore {
                     HStack {
-                        DSLoadingSpinner()
+                        CinemaxIconView(.clock, size: .medium, color: DSColors.secondaryTextSwiftUI)
                         Text("Loading more...")
-                            .font(DSTypography.caption1SwiftUI())
-                            .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                            .font(DSTypography.bodySmallSwiftUI())
+                            .foregroundColor(DSColors.secondaryTextSwiftUI)
                     }
-                    .padding(DSSpacing.lg)
+                    .padding(24)
                 }
             }
-            .padding(.horizontal, DSSpacing.Padding.container)
-            .padding(.vertical, DSSpacing.md)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
         }
         .onAppear {
             if viewModel.searchResults.count >= 15 {

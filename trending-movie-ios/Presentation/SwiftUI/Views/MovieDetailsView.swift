@@ -3,7 +3,6 @@ import SwiftUI
 @available(iOS 15.0, *)
 struct MovieDetailsView: View {
     @StateObject var viewModel: ObservableMovieDetailsViewModel
-    @Environment(\.dsTheme) private var theme
     @Environment(\.presentationMode) var presentationMode
     @StateObject private var storage = MovieStorage.shared
 
@@ -13,7 +12,7 @@ struct MovieDetailsView: View {
 
     var body: some View {
         ZStack {
-            DSColors.primaryBackgroundSwiftUI(for: theme)
+            DSColors.backgroundSwiftUI
                 .ignoresSafeArea()
 
             if viewModel.loading == .fullScreen {
@@ -37,19 +36,19 @@ struct MovieDetailsView: View {
     }
 
     private var loadingView: some View {
-        VStack(spacing: DSSpacing.lg) {
+        VStack(spacing: 24) {
             DSHeroCarouselSkeleton()
 
             ForEach(0..<3, id: \.self) { _ in
-                DSSkeletonView(
-                    width: UIScreen.main.bounds.width - (DSSpacing.Padding.container * 2),
-                    height: 16
-                )
+                Rectangle()
+                    .fill(DSColors.surfaceSwiftUI)
+                    .frame(width: UIScreen.main.bounds.width - 40, height: 16)
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
             }
 
             Spacer()
         }
-        .padding(DSSpacing.Padding.container)
+        .padding(20)
     }
 
     private var contentView: some View {
@@ -129,7 +128,6 @@ struct MovieDetailsView_Previews: PreviewProvider {
         return NavigationView {
             MovieDetailsView(viewModel: viewModel)
         }
-        .environment(\.dsTheme, DSTheme.dark)
         .environmentObject(DSThemeManager.shared)
     }
 }

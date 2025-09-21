@@ -13,7 +13,8 @@ final class AppAppearance {
     static func setupAppearance() {
         // This is now handled by DSThemeManager for SwiftUI
         // Keeping this for any legacy UIKit components that might still exist
-        DSThemeManager.shared.currentTheme = .dark
+        // Cinemax is dark-only theme, no need to set theme manually
+        DSThemeManager.shared.updateAppearance()
     }
 }
 

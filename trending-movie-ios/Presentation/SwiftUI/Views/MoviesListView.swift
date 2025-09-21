@@ -3,7 +3,6 @@ import SwiftUI
 @available(iOS 15.0, *)
 struct MoviesListView: View {
     @StateObject var viewModel: ObservableMoviesListViewModel
-    @Environment(\.dsTheme) private var theme
     @State private var isRefreshing = false
 
     init(viewModel: ObservableMoviesListViewModel) {
@@ -13,7 +12,7 @@ struct MoviesListView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                DSColors.primaryBackgroundSwiftUI(for: theme)
+                DSColors.backgroundSwiftUI
                     .ignoresSafeArea()
 
                 content
@@ -92,8 +91,8 @@ struct MoviesListView: View {
     private var headerView: some View {
         HStack {
             Text(viewModel.moviesListHeaderTitle)
-                .font(DSTypography.title3SwiftUI(weight: .semibold))
-                .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+                .font(DSTypography.h4SwiftUI(weight: .semibold))
+                .foregroundColor(DSColors.primaryTextSwiftUI)
 
             Spacer()
 
@@ -106,9 +105,9 @@ struct MoviesListView: View {
         Button(action: {
             DSThemeManager.shared.toggleTheme()
         }) {
-            Image(systemName: theme == .dark ? "sun.max.fill" : "moon.fill")
+            Image(systemName: "moon.fill")
                 .font(.title2)
-                .foregroundColor(DSColors.accentSwiftUI(for: theme))
+                .foregroundColor(DSColors.accentSwiftUI)
         }
     }
 
@@ -116,8 +115,8 @@ struct MoviesListView: View {
         HStack {
             DSLoadingSpinner()
             Text("Loading more movies...")
-                .font(DSTypography.caption1SwiftUI())
-                .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                .font(DSTypography.bodySmallSwiftUI())
+                .foregroundColor(DSColors.secondaryTextSwiftUI)
         }
         .padding(DSSpacing.lg)
     }
@@ -142,6 +141,5 @@ struct MoviesListView_Previews: PreviewProvider {
         )
 
         return MoviesListView(viewModel: viewModel)
-            .environment(\.dsTheme, DSTheme.dark)
     }
 }

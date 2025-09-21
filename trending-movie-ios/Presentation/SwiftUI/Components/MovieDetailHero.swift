@@ -8,7 +8,6 @@ struct MovieDetailHero: View {
     let onFavoriteTap: () -> Void
     let onShareTap: () -> Void
 
-    @Environment(\.dsTheme) private var theme
     @StateObject private var storage = MovieStorage.shared
 
     var body: some View {
@@ -21,7 +20,7 @@ struct MovieDetailHero: View {
                         .aspectRatio(contentMode: .fill)
                 } else {
                     Rectangle()
-                        .fill(DSColors.shimmerBackground(for: theme).swiftUIColor)
+                        .fill(DSColors.shimmerBackgroundSwiftUI)
                         .overlay(
                             DSLoadingSpinner()
                                 .scaleEffect(0.8)
@@ -35,9 +34,9 @@ struct MovieDetailHero: View {
             LinearGradient(
                 colors: [
                     Color.clear,
-                    DSColors.primaryBackgroundSwiftUI(for: theme).opacity(0.6),
-                    DSColors.primaryBackgroundSwiftUI(for: theme).opacity(0.9),
-                    DSColors.primaryBackgroundSwiftUI(for: theme)
+                    DSColors.backgroundSwiftUI.opacity(0.6),
+                    DSColors.backgroundSwiftUI.opacity(0.9),
+                    DSColors.backgroundSwiftUI
                 ],
                 startPoint: .top,
                 endPoint: .bottom
@@ -54,7 +53,7 @@ struct MovieDetailHero: View {
                                 .aspectRatio(2/3, contentMode: .fill)
                         } else {
                             Rectangle()
-                                .fill(DSColors.shimmerBackground(for: theme).swiftUIColor)
+                                .fill(DSColors.shimmerBackgroundSwiftUI)
                                 .aspectRatio(2/3, contentMode: .fill)
                                 .overlay(
                                     DSLoadingSpinner()
@@ -74,8 +73,8 @@ struct MovieDetailHero: View {
                     // Movie info
                     VStack(alignment: .leading, spacing: DSSpacing.sm) {
                         Text(movie.title ?? "Unknown Title")
-                            .font(DSTypography.title1SwiftUI(weight: .bold))
-                            .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+                            .font(DSTypography.h1SwiftUI(weight: .semibold))
+                            .foregroundColor(DSColors.primaryTextSwiftUI)
                             .lineLimit(3)
 
                         // Rating and metadata
@@ -87,8 +86,8 @@ struct MovieDetailHero: View {
                                         .foregroundColor(.yellow)
 
                                     Text(voteAverage)
-                                        .font(DSTypography.subheadlineSwiftUI(weight: .semibold))
-                                        .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+                                        .font(DSTypography.h4SwiftUI(weight: .semibold))
+                                        .foregroundColor(DSColors.primaryTextSwiftUI)
                                 }
                                 .padding(.horizontal, DSSpacing.sm)
                                 .padding(.vertical, DSSpacing.xs)
@@ -102,8 +101,8 @@ struct MovieDetailHero: View {
                         // Release date
                         if let releaseDate = movie.releaseDate {
                             Text(dateFormatter.string(from: releaseDate))
-                                .font(DSTypography.subheadlineSwiftUI())
-                                .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                                .font(DSTypography.bodyMediumSwiftUI())
+                                .foregroundColor(DSColors.secondaryTextSwiftUI)
                         }
 
                         Spacer()
@@ -116,26 +115,26 @@ struct MovieDetailHero: View {
                     DSActionButton(
                         title: "Play Trailer",
                         style: .primary,
-                        icon: "play.fill"
+                        icon: .pause
                     ) {
                         // Handle play trailer
                     }
 
                     DSIconButton(
-                        icon: storage.isInWatchlist(movie) ? "bookmark.fill" : "bookmark",
-                        style: .ghost,
+                        icon: storage.isInWatchlist(movie) ? .download : .download,
+                        style: .text,
                         action: onWatchlistTap
                     )
 
                     DSIconButton(
-                        icon: storage.isFavorite(movie) ? "heart.fill" : "heart",
-                        style: .ghost,
+                        icon: storage.isFavorite(movie) ? .heart : .heart,
+                        style: .text,
                         action: onFavoriteTap
                     )
 
                     DSIconButton(
-                        icon: "square.and.arrow.up",
-                        style: .ghost,
+                        icon: .share,
+                        style: .text,
                         action: onShareTap
                     )
 
@@ -158,7 +157,6 @@ struct MovieDetailTabs: View {
     let movie: Movie
     @State private var selectedTab = 0
 
-    @Environment(\.dsTheme) private var theme
 
     private let tabs = [
         DSTabItem(title: "Overview", icon: "text.alignleft"),
@@ -182,13 +180,13 @@ struct MovieDetailTabs: View {
                                     .font(.body)
 
                                 Text(tab.title)
-                                    .font(DSTypography.bodySwiftUI(weight: selectedTab == index ? .semibold : .regular))
+                                    .font(DSTypography.bodyMediumSwiftUI(weight: selectedTab == index ? .semibold : .regular))
                             }
-                            .foregroundColor(selectedTab == index ? DSColors.accentSwiftUI(for: theme) : DSColors.secondaryTextSwiftUI(for: theme))
+                            .foregroundColor(selectedTab == index ? DSColors.accentSwiftUI : DSColors.secondaryTextSwiftUI)
 
                             // Active indicator
                             Rectangle()
-                                .fill(DSColors.accentSwiftUI(for: theme))
+                                .fill(DSColors.accentSwiftUI)
                                 .frame(height: 2)
                                 .opacity(selectedTab == index ? 1 : 0)
                         }
@@ -198,7 +196,7 @@ struct MovieDetailTabs: View {
                 }
             }
             .padding(.horizontal, DSSpacing.md)
-            .background(DSColors.secondaryBackgroundSwiftUI(for: theme))
+            .background(DSColors.surfaceSwiftUI)
 
             // Tab content
             ScrollView {
@@ -221,7 +219,6 @@ struct MovieDetailTabs: View {
 struct OverviewTab: View {
     let movie: Movie
 
-    @Environment(\.dsTheme) private var theme
 
     var body: some View {
         VStack(alignment: .leading, spacing: DSSpacing.lg) {
@@ -229,12 +226,12 @@ struct OverviewTab: View {
             if let overview = movie.overview, !overview.isEmpty {
                 VStack(alignment: .leading, spacing: DSSpacing.sm) {
                     Text("Synopsis")
-                        .font(DSTypography.title3SwiftUI(weight: .semibold))
-                        .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+                        .font(DSTypography.h4SwiftUI(weight: .semibold))
+                        .foregroundColor(DSColors.primaryTextSwiftUI)
 
                     Text(overview)
-                        .font(DSTypography.bodySwiftUI())
-                        .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+                        .font(DSTypography.bodyMediumSwiftUI())
+                        .foregroundColor(DSColors.primaryTextSwiftUI)
                         .lineSpacing(4)
                 }
             }
@@ -242,8 +239,8 @@ struct OverviewTab: View {
             // Details
             VStack(alignment: .leading, spacing: DSSpacing.sm) {
                 Text("Details")
-                    .font(DSTypography.title3SwiftUI(weight: .semibold))
-                    .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+                    .font(DSTypography.h4SwiftUI(weight: .semibold))
+                    .foregroundColor(DSColors.primaryTextSwiftUI)
 
                 VStack(spacing: DSSpacing.xs) {
                     if let releaseDate = movie.releaseDate {
@@ -255,7 +252,7 @@ struct OverviewTab: View {
                     }
                 }
                 .padding(DSSpacing.Padding.card)
-                .background(DSColors.secondaryBackgroundSwiftUI(for: theme))
+                .background(DSColors.surfaceSwiftUI)
                 .cornerRadius(DSSpacing.CornerRadius.card)
             }
 
@@ -267,14 +264,14 @@ struct OverviewTab: View {
     private func detailRow(title: String, value: String) -> some View {
         HStack {
             Text(title)
-                .font(DSTypography.subheadlineSwiftUI(weight: .medium))
-                .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                .font(DSTypography.bodyMediumSwiftUI(weight: .medium))
+                .foregroundColor(DSColors.secondaryTextSwiftUI)
 
             Spacer()
 
             Text(value)
-                .font(DSTypography.subheadlineSwiftUI())
-                .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+                .font(DSTypography.bodyMediumSwiftUI())
+                .foregroundColor(DSColors.primaryTextSwiftUI)
         }
     }
 
@@ -289,7 +286,6 @@ struct OverviewTab: View {
 struct CastTab: View {
     let movie: Movie
 
-    @Environment(\.dsTheme) private var theme
 
     // Mock cast data
     private let mockCast = [
@@ -316,19 +312,18 @@ struct CastTab: View {
 struct SimilarTab: View {
     let movie: Movie
 
-    @Environment(\.dsTheme) private var theme
 
     var body: some View {
         VStack(alignment: .leading, spacing: DSSpacing.lg) {
             Text("Similar Movies")
-                .font(DSTypography.title3SwiftUI(weight: .semibold))
-                .foregroundColor(DSColors.primaryTextSwiftUI(for: theme))
+                .font(DSTypography.h4SwiftUI(weight: .semibold))
+                .foregroundColor(DSColors.primaryTextSwiftUI)
                 .padding(.horizontal, DSSpacing.Padding.container)
 
             // This would show similar movies
             Text("Similar movies would be loaded here from the API")
-                .font(DSTypography.bodySwiftUI())
-                .foregroundColor(DSColors.secondaryTextSwiftUI(for: theme))
+                .font(DSTypography.bodyMediumSwiftUI())
+                .foregroundColor(DSColors.secondaryTextSwiftUI)
                 .padding(DSSpacing.Padding.container)
 
             Spacer(minLength: DSSpacing.xxl)
