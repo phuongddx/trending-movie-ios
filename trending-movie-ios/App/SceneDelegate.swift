@@ -1,15 +1,8 @@
-//
-//  SceneDelegate.swift
-//  trending-movie-ios
-//
-//  Created by PhuongDoan on 5/6/24.
-//
-
 import UIKit
+import Factory
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
-    let appDIContainer = AppDIContainer()
     var appFlowCoordinator: AppFlowCoordinator?
     var window: UIWindow?
 
@@ -20,17 +13,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         AppAppearance.setupAppearance()
 
-        window = scene.windows.first
+        window = UIWindow(windowScene: scene)
         let navigationController = UINavigationController()
 
         window?.rootViewController = navigationController
-        appFlowCoordinator = AppFlowCoordinator(navigationController: navigationController,
-                                                appDIContainer: appDIContainer)
+        appFlowCoordinator = AppFlowCoordinator(navigationController: navigationController)
         appFlowCoordinator?.start()
         window?.makeKeyAndVisible()
     }
 
     func sceneDidEnterBackground(_ scene: UIScene) {
-        CoreDataStorage.shared.saveContext()
+        // Save context if needed
     }
 }

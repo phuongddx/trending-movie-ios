@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:trending-movie-ios.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:MoviesDomain">
+   </FileRef>
+   <FileRef
+      location = "group:MoviesData">
+   </FileRef>
+</Workspace>

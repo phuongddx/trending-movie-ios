@@ -1,10 +1,3 @@
-//
-//  MoviesListItemViewModel.swift
-//  trending-movie-ios
-//
-//  Created by PhuongDoan on 6/6/24.
-//
-
 import Foundation
 
 protocol ConnectionError: Error {
@@ -58,8 +51,9 @@ enum MoviesListDisplayViewType {
 
 final class DefaultMoviesListViewModel: MoviesListViewModel {
 
-    private let searchMoviesUseCase: SearchMoviesUseCase
-    private let trendingMoviesUseCase: TrendingMoviesUseCase
+    private let searchMoviesUseCase: SearchMoviesUseCaseProtocol
+    private let trendingMoviesUseCase: TrendingMoviesUseCaseProtocol
+    private let posterImagesRepository: PosterImagesRepository
     private let actions: MoviesListViewModelActionsProtocol?
 
     var currentPage: Int = 0
@@ -67,7 +61,6 @@ final class DefaultMoviesListViewModel: MoviesListViewModel {
     var hasMorePages: Bool { currentPage < totalPageCount }
     var nextPage: Int { hasMorePages ? currentPage + 1 : currentPage }
 
-//    private var pages: [MoviesPage] = []
     private var trendingPages = [MoviesPage]()
     private var searchResultPages = [MoviesPage]()
 
@@ -89,13 +82,15 @@ final class DefaultMoviesListViewModel: MoviesListViewModel {
     let searchBarPlaceholder = NSLocalizedString("Search Movies", comment: "")
 
     // MARK: - Init
-    
-    init(searchMoviesUseCase: SearchMoviesUseCase,
-         trendingMoviesUseCase: TrendingMoviesUseCase,
+
+    init(searchMoviesUseCase: SearchMoviesUseCaseProtocol,
+         trendingMoviesUseCase: TrendingMoviesUseCaseProtocol,
+         posterImagesRepository: PosterImagesRepository,
          actions: MoviesListViewModelActionsProtocol? = nil,
          mainQueue: DispatchQueueType = DispatchQueue.main) {
         self.searchMoviesUseCase = searchMoviesUseCase
         self.trendingMoviesUseCase = trendingMoviesUseCase
+        self.posterImagesRepository = posterImagesRepository
         self.actions = actions
         self.mainQueue = mainQueue
     }
@@ -106,9 +101,9 @@ final class DefaultMoviesListViewModel: MoviesListViewModel {
         didSet {
             switch moviesListViewType {
             case .trending:
-                items.value = trendingPages.movies.map(MoviesListItemViewModel.init)
+                items.value = trendingPages.movies.map { MoviesListItemViewModel(movie: $0, posterImagesRepository: posterImagesRepository) }
             case .search:
-                items.value = searchResultPages.movies.map(MoviesListItemViewModel.init)
+                items.value = searchResultPages.movies.map { MoviesListItemViewModel(movie: $0, posterImagesRepository: posterImagesRepository) }
             }
         }
     }
@@ -124,7 +119,7 @@ final class DefaultMoviesListViewModel: MoviesListViewModel {
         } else {
             searchResultPages = searchResultPages.filter { $0.page != moviesPage.page } + [moviesPage]
         }
-        items.value = (isTrending ? trendingPages : searchResultPages).movies.map(MoviesListItemViewModel.init)
+        items.value = (isTrending ? trendingPages : searchResultPages).movies.map { MoviesListItemViewModel(movie: $0, posterImagesRepository: posterImagesRepository) }
     }
 
     private func resetPages() {
@@ -159,9 +154,9 @@ final class DefaultMoviesListViewModel: MoviesListViewModel {
 
     func loadTrendingList(loading: MoviesListViewModelLoading = .fullScreen) {
         self.loading.value = loading
-        let requestDto = DefaultMoviesRequestDTO(page: nextPage)
+        let request = MoviesRequest(page: nextPage, timeWindow: "day")
         moviesLoadTask = trendingMoviesUseCase.execute(
-            requestable: requestDto,
+            request: request,
             cached: { [weak self] page in
                 self?.mainQueue.async {
                     self?.appendPage(page)

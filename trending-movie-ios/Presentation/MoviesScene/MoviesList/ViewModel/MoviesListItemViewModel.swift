@@ -1,10 +1,3 @@
-//
-//  MoviesListItemViewModel.swift
-//  trending-movie-ios
-//
-//  Created by PhuongDoan on 6/6/24.
-//
-
 import Foundation
 
 struct MoviesListItemViewModel: Equatable {
@@ -13,11 +6,14 @@ struct MoviesListItemViewModel: Equatable {
     let releaseDate: String
     let voteAverage: String
     let posterImagePath: String?
+    private let posterImagesRepository: PosterImagesRepository
 
-    init(movie: Movie) {
+    init(movie: Movie, posterImagesRepository: PosterImagesRepository) {
         self.title = movie.title ?? ""
         self.posterImagePath = movie.posterPath
         self.overview = movie.overview ?? ""
+        self.posterImagesRepository = posterImagesRepository
+
         if let releaseDate = movie.releaseDate {
             self.releaseDate = "\(NSLocalizedString("Release Date", comment: "")): \(dateFormatter.string(from: releaseDate))"
         } else {
@@ -28,6 +24,14 @@ struct MoviesListItemViewModel: Equatable {
         } else {
             self.voteAverage = "\(NSLocalizedString("Have no rating now", comment: ""))"
         }
+    }
+
+    func loadPosterImage(completion: @escaping (Result<Data, Error>) -> Void) -> Cancellable? {
+        guard let posterPath = posterImagePath else {
+            completion(.failure(NSError(domain: "MoviesListItemViewModel", code: 0, userInfo: [NSLocalizedDescriptionKey: "No poster path"])))
+            return nil
+        }
+        return posterImagesRepository.fetchImage(with: posterPath, completion: completion)
     }
 
     func displayText() -> NSAttributedString {
@@ -50,6 +54,14 @@ struct MoviesListItemViewModel: Equatable {
         result.appendNewline()
         result.append(voteAverage.attributedText(textColor: .white, textFont: .systemFont(ofSize: 14, weight: .regular)))
         return result
+    }
+
+    static func == (lhs: MoviesListItemViewModel, rhs: MoviesListItemViewModel) -> Bool {
+        return lhs.title == rhs.title &&
+               lhs.overview == rhs.overview &&
+               lhs.releaseDate == rhs.releaseDate &&
+               lhs.voteAverage == rhs.voteAverage &&
+               lhs.posterImagePath == rhs.posterImagePath
     }
 }
 

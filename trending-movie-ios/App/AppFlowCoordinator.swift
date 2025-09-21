@@ -1,27 +1,20 @@
-//
-//  AppFlowCoordinator.swift
-//  trending-movie-ios
-//
-//  Created by PhuongDoan on 5/6/24.
-//
-
 import UIKit
+import Factory
 
 final class AppFlowCoordinator {
     private let navigationController: UINavigationController
-    private let appDIContainer: AppDIContainer
-    
+    private let container: AppContainer
+
     init(
         navigationController: UINavigationController,
-        appDIContainer: AppDIContainer
+        container: AppContainer = AppContainer.shared
     ) {
         self.navigationController = navigationController
-        self.appDIContainer = appDIContainer
+        self.container = container
     }
 
     func start() {
-        let moviesSceneDIContainer = appDIContainer.makeMoviesSceneDIContainer()
-        let flow = moviesSceneDIContainer.makeMoviesSearchFlowCoordinator(navigationController: navigationController)
+        let flow = container.moviesSearchFlowCoordinator(navigationController: navigationController)
         flow.start()
     }
 }

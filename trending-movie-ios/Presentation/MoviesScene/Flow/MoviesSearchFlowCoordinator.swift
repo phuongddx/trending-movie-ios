@@ -1,12 +1,6 @@
-//
-//  MoviesSearchFlowCoordinator.swift
-//  trending-movie-ios
-//
-//  Created by PhuongDoan on 6/6/24.
-//
-
 import Foundation
 import UIKit
+import Factory
 
 protocol Coordinator {
     func start()
@@ -14,15 +8,15 @@ protocol Coordinator {
 
 final class MoviesSearchFlowCoordinator: Coordinator {
     private weak var navigationController: UINavigationController?
-    private let dependencies: MoviesSearchFlowCoordinatorDependencies
+    private let container: AppContainer
 
     private weak var moviesTrendingListViewController: MoviesListViewController?
     private weak var moviesListSearchResultViewViewController: ViewController?
 
     init(navigationController: UINavigationController,
-         dependencies: MoviesSearchFlowCoordinatorDependencies) {
+         container: AppContainer) {
         self.navigationController = navigationController
-        self.dependencies = dependencies
+        self.container = container
     }
 
     private var trendingMoviesListActions: MoviesListViewModelActionsProtocol {
@@ -30,14 +24,32 @@ final class MoviesSearchFlowCoordinator: Coordinator {
     }
 
     func start() {
-        let vc = dependencies.makeMovieListView(actions: trendingMoviesListActions)
+        let vc = makeMovieListView(actions: trendingMoviesListActions)
         navigationController?.pushViewController(vc, animated: true)
         moviesTrendingListViewController = vc
     }
 
     private func showMovieDetails(movie: Movie) {
-        let vc = dependencies.makeMoviesDetailsViewController(movie: movie)
+        let vc = makeMoviesDetailsViewController(movie: movie)
         navigationController?.pushViewController(vc, animated: true)
+    }
+
+    // MARK: - Factory Methods
+
+    private func makeMovieListView(actions: MoviesListViewModelActionsProtocol) -> MoviesListViewController {
+        let viewModel = DefaultMoviesListViewModel(
+            searchMoviesUseCase: container.searchMoviesUseCase(),
+            trendingMoviesUseCase: container.trendingMoviesUseCase(),
+            posterImagesRepository: container.posterImagesRepository(),
+            actions: actions
+        )
+        return MoviesListViewController.create(with: viewModel,
+                                              posterImagesRepository: container.posterImagesRepository())
+    }
+
+    private func makeMoviesDetailsViewController(movie: Movie) -> ViewController {
+        let viewModel = container.movieDetailsViewModel(movie: movie)
+        return MovieDetailsViewController.create(with: viewModel)
     }
 }
 

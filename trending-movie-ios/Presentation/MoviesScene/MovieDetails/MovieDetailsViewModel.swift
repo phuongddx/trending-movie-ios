@@ -1,10 +1,3 @@
-//
-//  MovieDetailsViewModel.swift
-//  trending-movie-ios
-//
-//  Created by PhuongDoan on 7/6/24.
-//
-
 import Foundation
 
 protocol MovieDetailsViewModelInput {
@@ -25,10 +18,10 @@ protocol MovieDetailsViewModel: MovieDetailsViewModelInput,
                                 MovieDetailsViewModelOutput {}
 
 final class DefaultMovieDetailsViewModel: MovieDetailsViewModel {
-    private let movieId: Movie.Identifier
+    private let initialMovie: Movie
     private let posterImagesRepository: PosterImagesRepository
     private let mainQueue: DispatchQueueType
-    private let detailsMovieUseCase: FetchDetailsMovieUseCase
+    private let detailsMovieUseCase: FetchDetailsMovieUseCaseProtocol
     private var moviesLoadTask: Cancellable? {
         willSet {
             moviesLoadTask?.cancel()
@@ -46,32 +39,36 @@ final class DefaultMovieDetailsViewModel: MovieDetailsViewModel {
     var loading: Observable<MoviesListViewModelLoading?> = Observable(.none)
     var error: Observable<String> = Observable("")
 
-    init(movieId: Movie.Identifier,
-         detailsMovieUseCase: FetchDetailsMovieUseCase,
+    init(movie: Movie,
+         fetchDetailsMovieUseCase: FetchDetailsMovieUseCaseProtocol,
          posterImagesRepository: PosterImagesRepository,
          mainQueue: DispatchQueueType = DispatchQueue.main) {
-        self.movieId = movieId
-        self.detailsMovieUseCase = detailsMovieUseCase
+        self.initialMovie = movie
+        self.detailsMovieUseCase = fetchDetailsMovieUseCase
         self.posterImagesRepository = posterImagesRepository
         self.mainQueue = mainQueue
+        self.movie.value = movie
     }
 
     func detailsDisplayText(movie: Movie) -> NSAttributedString {
-        let viewModelItem = MoviesListItemViewModel(movie: movie)
+        let viewModelItem = MoviesListItemViewModel(movie: movie, posterImagesRepository: posterImagesRepository)
         return viewModelItem.displayOverviewText()
     }
 
     func viewDidLoad() {
         loadDetails()
+        if let posterPath = initialMovie.posterPath {
+            updatePosterImage(posterImagePath: posterPath)
+        }
     }
 
     func loadDetails() {
         loading.value = .fullScreen
-        moviesLoadTask = detailsMovieUseCase.execute(with: movieId) { [weak self] result in
+        moviesLoadTask = detailsMovieUseCase.execute(with: initialMovie.id) { [weak self] result in
             self?.mainQueue.async {
                 switch result {
-                case .success(let responseDto):
-                    self?.movie.value = responseDto?.toDomain()
+                case .success(let movie):
+                    self?.movie.value = movie
                 case .failure(let error):
                     self?.handle(error: error)
                 }
@@ -83,7 +80,7 @@ final class DefaultMovieDetailsViewModel: MovieDetailsViewModel {
     private func handle(error: Error) {
         self.error.value = error.isInternetConnectionError ?
             NSLocalizedString("No internet connection", comment: "") :
-            NSLocalizedString("Failed loading movies", comment: "")
+            NSLocalizedString("Failed loading movie details", comment: "")
     }
 
     func updatePosterImage(posterImagePath: String) {

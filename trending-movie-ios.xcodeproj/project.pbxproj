@@ -6,6 +6,13 @@
 	objectVersion = 74;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		F23802222E7FC3DC008BD4E5 /* CombineMoya in Frameworks */ = {isa = PBXBuildFile; productRef = F23802212E7FC3DC008BD4E5 /* CombineMoya */; };
+		F23802242E7FC3DC008BD4E5 /* Moya in Frameworks */ = {isa = PBXBuildFile; productRef = F23802232E7FC3DC008BD4E5 /* Moya */; };
+		F23802272E7FC3F0008BD4E5 /* Factory in Frameworks */ = {isa = PBXBuildFile; productRef = F23802262E7FC3F0008BD4E5 /* Factory */; };
+		F23802292E7FC3F0008BD4E5 /* FactoryKit in Frameworks */ = {isa = PBXBuildFile; productRef = F23802282E7FC3F0008BD4E5 /* FactoryKit */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		79A41CF52C10103700910974 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -77,6 +84,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F23802272E7FC3F0008BD4E5 /* Factory in Frameworks */,
+				F23802242E7FC3DC008BD4E5 /* Moya in Frameworks */,
+				F23802292E7FC3F0008BD4E5 /* FactoryKit in Frameworks */,
+				F23802222E7FC3DC008BD4E5 /* CombineMoya in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -137,6 +148,10 @@
 			);
 			name = "trending-movie-ios";
 			packageProductDependencies = (
+				F23802212E7FC3DC008BD4E5 /* CombineMoya */,
+				F23802232E7FC3DC008BD4E5 /* Moya */,
+				F23802262E7FC3F0008BD4E5 /* Factory */,
+				F23802282E7FC3F0008BD4E5 /* FactoryKit */,
 			);
 			productName = "trending-movie-ios";
 			productReference = 79A41CDB2C10103500910974 /* trending-movie-ios.app */;
@@ -216,6 +231,8 @@
 			);
 			mainGroup = 79A41CD22C10103500910974;
 			packageReferences = (
+				F23802202E7FC3DC008BD4E5 /* XCRemoteSwiftPackageReference "Moya" */,
+				F23802252E7FC3F0008BD4E5 /* XCRemoteSwiftPackageReference "Factory" */,
 			);
 			preferredProjectObjectVersion = 56;
 			productRefGroup = 79A41CDC2C10103500910974 /* Products */;
@@ -614,6 +631,48 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		F23802202E7FC3DC008BD4E5 /* XCRemoteSwiftPackageReference "Moya" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Moya/Moya.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 15.0.3;
+			};
+		};
+		F23802252E7FC3F0008BD4E5 /* XCRemoteSwiftPackageReference "Factory" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/hmlongco/Factory";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		F23802212E7FC3DC008BD4E5 /* CombineMoya */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F23802202E7FC3DC008BD4E5 /* XCRemoteSwiftPackageReference "Moya" */;
+			productName = CombineMoya;
+		};
+		F23802232E7FC3DC008BD4E5 /* Moya */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F23802202E7FC3DC008BD4E5 /* XCRemoteSwiftPackageReference "Moya" */;
+			productName = Moya;
+		};
+		F23802262E7FC3F0008BD4E5 /* Factory */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F23802252E7FC3F0008BD4E5 /* XCRemoteSwiftPackageReference "Factory" */;
+			productName = Factory;
+		};
+		F23802282E7FC3F0008BD4E5 /* FactoryKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F23802252E7FC3F0008BD4E5 /* XCRemoteSwiftPackageReference "Factory" */;
+			productName = FactoryKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 79A41CD32C10103500910974 /* Project object */;
 }

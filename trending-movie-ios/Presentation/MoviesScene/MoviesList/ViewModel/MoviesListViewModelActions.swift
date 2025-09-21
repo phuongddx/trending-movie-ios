@@ -1,10 +1,3 @@
-//
-//  MoviesListViewModelActions.swift
-//  trending-movie-ios
-//
-//  Created by PhuongDoan on 8/6/24.
-//
-
 import Foundation
 
 protocol MoviesListViewModelActionsProtocol {
@@ -14,4 +7,3 @@ protocol MoviesListViewModelActionsProtocol {
 struct TrendingMoviesListViewModelActions: MoviesListViewModelActionsProtocol {
     var showMovieDetails: ((Movie) -> Void)?
 }
-
