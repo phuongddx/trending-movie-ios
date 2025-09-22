@@ -11,8 +11,7 @@ extension AppContainer {
         self {
             ObservableMoviesListViewModel(
                 searchMoviesUseCase: self.searchMoviesUseCase(),
-                trendingMoviesUseCase: self.trendingMoviesUseCase(),
-                posterImagesRepository: self.posterImagesRepository()
+                trendingMoviesUseCase: self.trendingMoviesUseCase()
             )
         }
     }
@@ -20,8 +19,7 @@ extension AppContainer {
     func observableMovieDetailsViewModel(movie: Movie) -> ObservableMovieDetailsViewModel {
         ObservableMovieDetailsViewModel(
             movie: movie,
-            fetchDetailsMovieUseCase: self.fetchDetailsMovieUseCase(),
-            posterImagesRepository: self.posterImagesRepository()
+            fetchDetailsMovieUseCase: self.fetchDetailsMovieUseCase()
         )
     }
 }

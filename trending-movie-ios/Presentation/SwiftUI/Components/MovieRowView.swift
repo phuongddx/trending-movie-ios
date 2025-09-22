@@ -1,10 +1,7 @@
 import SwiftUI
 
-@available(iOS 15.0, *)
 struct MovieRowView: View {
     let movie: MoviesListItemViewModel
-    @State private var posterImage: UIImage?
-    @State private var imageLoadTask: Cancellable?
 
     var body: some View {
         HStack(spacing: DSSpacing.md) {
@@ -15,32 +12,11 @@ struct MovieRowView: View {
         .padding(DSSpacing.Padding.card)
         .background(DSColors.surfaceSwiftUI)
         .cornerRadius(DSSpacing.CornerRadius.card)
-        .onAppear {
-            loadPosterImage()
-        }
-        .onDisappear {
-            imageLoadTask?.cancel()
-        }
     }
 
     private var posterImageView: some View {
-        Group {
-            if let posterImage = posterImage {
-                Image(uiImage: posterImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-            } else {
-                Rectangle()
-                    .fill(DSColors.shimmerBackgroundSwiftUI)
-                    .overlay(
-                        DSLoadingSpinner()
-                            .scaleEffect(0.5)
-                    )
-            }
-        }
-        .frame(width: 60, height: 90)
-        .cornerRadius(DSSpacing.CornerRadius.medium)
-        .clipped()
+        MoviePosterImage.compact(posterPath: movie.posterImagePath)
+            .frame(width: 60, height: 90)
     }
 
     private var movieInfoView: some View {
@@ -70,18 +46,6 @@ struct MovieRowView: View {
         }
     }
 
-    private func loadPosterImage() {
-        imageLoadTask = movie.loadPosterImage { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let data):
-                    posterImage = UIImage(data: data)
-                case .failure:
-                    posterImage = UIImage(named: "placeholder-bg")
-                }
-            }
-        }
-    }
 }
 
 @available(iOS 13.0, *)
@@ -112,7 +76,6 @@ struct MovieRowSkeleton: View {
 }
 
 // MARK: - Preview
-@available(iOS 15.0, *)
 struct MovieRowView_Previews: PreviewProvider {
     static var previews: some View {
         // Mock data for preview
@@ -124,8 +87,7 @@ struct MovieRowView_Previews: PreviewProvider {
                 overview: "This is a sample movie overview that shows multiple lines of text.",
                 releaseDate: Date(),
                 voteAverage: "8.5"
-            ),
-            posterImagesRepository: AppContainer.shared.posterImagesRepository()
+            )
         )
 
         return VStack {

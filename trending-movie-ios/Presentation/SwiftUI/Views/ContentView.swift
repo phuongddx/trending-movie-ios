@@ -17,7 +17,6 @@ struct ContentView: View {
 }
 
 // MARK: - iOS 15 Compatibility
-@available(iOS 15.0, *)
 struct ContentViewLegacy: View {
     private let container: AppContainer
     @StateObject private var themeManager = DSThemeManager.shared

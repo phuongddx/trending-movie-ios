@@ -1,6 +1,5 @@
 import SwiftUI
 
-@available(iOS 15.0, *)
 struct TabNavigationView: View {
     private let container: AppContainer
     @State private var selectedTab = 0
@@ -41,7 +40,6 @@ struct TabNavigationView: View {
 }
 
 // MARK: - Cinemax Tab Bar
-@available(iOS 15.0, *)
 struct CinemaxTabBar: View {
     @Binding var selectedTab: Int
 
@@ -85,7 +83,6 @@ struct TabItem {
 }
 
 // MARK: - Cinemax Tab Button
-@available(iOS 15.0, *)
 struct CinemaxTabButton: View {
     let tab: TabItem
     let isSelected: Bool
@@ -131,7 +128,6 @@ struct CinemaxTabButton: View {
     }
 }
 
-@available(iOS 15.0, *)
 struct SettingsView: View {
     @StateObject private var themeManager = DSThemeManager.shared
 

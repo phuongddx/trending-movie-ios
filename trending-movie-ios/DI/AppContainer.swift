@@ -24,7 +24,7 @@ extension AppContainer {
     // MARK: - Repositories
     var posterImagesRepository: Factory<PosterImagesRepository> {
         self {
-            RealPosterImagesRepository(networkService: self.tmdbNetworkService())
+            RealPosterImagesRepository()
         }.singleton
     }
 

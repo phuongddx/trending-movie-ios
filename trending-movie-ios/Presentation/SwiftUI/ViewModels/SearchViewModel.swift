@@ -12,7 +12,6 @@ class SearchViewModel: ObservableObject {
     @Published var selectedMovie: HomeViewModel.MovieWrapper?
 
     private let searchMoviesUseCase: SearchMoviesUseCaseProtocol
-    private let posterImagesRepository: PosterImagesRepository
     @StateObject private var storage = MovieStorage.shared
 
     private var searchCancellable: AnyCancellable?
@@ -27,10 +26,8 @@ class SearchViewModel: ObservableObject {
         "Action", "Drama", "Thriller", "Romance"
     ]
 
-    nonisolated init(searchMoviesUseCase: SearchMoviesUseCaseProtocol,
-                    posterImagesRepository: PosterImagesRepository) {
+    nonisolated init(searchMoviesUseCase: SearchMoviesUseCaseProtocol) {
         self.searchMoviesUseCase = searchMoviesUseCase
-        self.posterImagesRepository = posterImagesRepository
 
         Task { @MainActor in
             setupSearchDebouncing()
@@ -120,7 +117,7 @@ class SearchViewModel: ObservableObject {
         totalPages = moviesPage.totalPages
 
         let newMovieViewModels = moviesPage.movies.map { movie in
-            MoviesListItemViewModel(movie: movie, posterImagesRepository: posterImagesRepository)
+            MoviesListItemViewModel(movie: movie)
         }
 
         if isLoadingMore {

@@ -1,9 +1,7 @@
 import SwiftUI
 
-@available(iOS 15.0, *)
 struct MovieDetailHero: View {
     let movie: Movie
-    let posterImage: UIImage?
     let onWatchlistTap: () -> Void
     let onFavoriteTap: () -> Void
     let onShareTap: () -> Void
@@ -13,22 +11,9 @@ struct MovieDetailHero: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             // Backdrop image (using poster as backdrop)
-            Group {
-                if let posterImage = posterImage {
-                    Image(uiImage: posterImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                } else {
-                    Rectangle()
-                        .fill(DSColors.shimmerBackgroundSwiftUI)
-                        .overlay(
-                            DSLoadingSpinner()
-                                .scaleEffect(0.8)
-                        )
-                }
-            }
-            .frame(height: UIScreen.main.bounds.height * 0.5)
-            .clipped()
+            MoviePosterImage.hero(posterPath: movie.posterPath)
+                .frame(height: UIScreen.main.bounds.height * 0.5)
+                .clipped()
 
             // Gradient overlay
             LinearGradient(
@@ -46,38 +31,68 @@ struct MovieDetailHero: View {
             VStack(alignment: .leading, spacing: DSSpacing.md) {
                 HStack(alignment: .top) {
                     // Movie poster thumbnail
-                    Group {
-                        if let posterImage = posterImage {
-                            Image(uiImage: posterImage)
-                                .resizable()
-                                .aspectRatio(2/3, contentMode: .fill)
-                        } else {
-                            Rectangle()
-                                .fill(DSColors.shimmerBackgroundSwiftUI)
-                                .aspectRatio(2/3, contentMode: .fill)
-                                .overlay(
-                                    DSLoadingSpinner()
-                                        .scaleEffect(0.5)
-                                )
-                        }
-                    }
-                    .frame(width: 120)
-                    .cornerRadius(DSSpacing.CornerRadius.medium)
-                    .shadow(
-                        color: Color.black.opacity(0.3),
-                        radius: 8,
-                        x: 0,
-                        y: 4
-                    )
+                    MoviePosterImage.detail(posterPath: movie.posterPath)
+                        .frame(width: 120)
+                        .shadow(
+                            color: Color.black.opacity(0.3),
+                            radius: 8,
+                            x: 0,
+                            y: 4
+                        )
 
                     // Movie info
                     VStack(alignment: .leading, spacing: DSSpacing.sm) {
                         Text(movie.title ?? "Unknown Title")
                             .font(DSTypography.h1SwiftUI(weight: .semibold))
                             .foregroundColor(DSColors.primaryTextSwiftUI)
-                            .lineLimit(3)
+                            .lineLimit(2)
 
-                        // Rating and metadata
+                        // Movie metadata (Duration, Director, Rating)
+                        VStack(alignment: .leading, spacing: DSSpacing.xs) {
+                            // Duration and Director
+                            HStack(spacing: DSSpacing.md) {
+                                if let runtime = movie.runtime {
+                                    Text(formatDuration(runtime))
+                                        .font(DSTypography.bodySmallSwiftUI())
+                                        .foregroundColor(DSColors.secondaryTextSwiftUI)
+                                }
+
+                                if let director = movie.director {
+                                    HStack(spacing: DSSpacing.xxs) {
+                                        Text("Director:")
+                                            .font(DSTypography.bodySmallSwiftUI())
+                                            .foregroundColor(DSColors.secondaryTextSwiftUI)
+                                        Text(director)
+                                            .font(DSTypography.bodySmallSwiftUI(weight: .medium))
+                                            .foregroundColor(DSColors.primaryTextSwiftUI)
+                                    }
+                                }
+                            }
+
+                            // Age rating and genres
+                            HStack(spacing: DSSpacing.sm) {
+                                if let certification = movie.certification, !certification.isEmpty {
+                                    AgeRatingBadge(rating: certification)
+                                }
+
+                                if let genres = movie.genres, !genres.isEmpty {
+                                    Text(genres.prefix(2).joined(separator: ", "))
+                                        .font(DSTypography.bodySmallSwiftUI())
+                                        .foregroundColor(DSColors.secondaryTextSwiftUI)
+                                        .lineLimit(1)
+                                }
+                            }
+                        }
+
+                        if let tagline = movie.tagline, !tagline.isEmpty {
+                            Text(tagline)
+                                .font(DSTypography.bodyMediumSwiftUI())
+                                .foregroundColor(DSColors.secondaryTextSwiftUI)
+                                .italic()
+                                .lineLimit(1)
+                        }
+
+                        // Rating and vote count
                         HStack(spacing: DSSpacing.md) {
                             if let voteAverage = movie.voteAverage {
                                 HStack(spacing: DSSpacing.xxs) {
@@ -93,6 +108,12 @@ struct MovieDetailHero: View {
                                 .padding(.vertical, DSSpacing.xs)
                                 .background(Color.black.opacity(0.3))
                                 .cornerRadius(DSSpacing.CornerRadius.small)
+                            }
+
+                            if let voteCount = movie.voteCount {
+                                Text("(\(formatVoteCount(voteCount)))")
+                                    .font(DSTypography.captionSwiftUI())
+                                    .foregroundColor(DSColors.secondaryTextSwiftUI)
                             }
 
                             Spacer()
@@ -150,9 +171,27 @@ struct MovieDetailHero: View {
         formatter.dateStyle = .medium
         return formatter
     }()
+
+    private func formatDuration(_ minutes: Int) -> String {
+        let hours = minutes / 60
+        let remainingMinutes = minutes % 60
+        if hours > 0 {
+            return "\(hours)h \(remainingMinutes)min"
+        } else {
+            return "\(remainingMinutes)min"
+        }
+    }
+
+    private func formatVoteCount(_ count: Int) -> String {
+        if count >= 1000 {
+            let thousands = Double(count) / 1000.0
+            return String(format: "%.1fk", thousands)
+        } else {
+            return "\(count)"
+        }
+    }
 }
 
-@available(iOS 15.0, *)
 struct MovieDetailTabs: View {
     let movie: Movie
     @State private var selectedTab = 0
@@ -215,13 +254,24 @@ struct MovieDetailTabs: View {
     }
 }
 
-@available(iOS 15.0, *)
 struct OverviewTab: View {
     let movie: Movie
-
+    @State private var isShowingRateSheet = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: DSSpacing.lg) {
+            // Watch Trailer button if videos available
+            if let videos = movie.videos, !videos.isEmpty,
+               let trailer = videos.first(where: { $0.type == "Trailer" }) ?? videos.first {
+                DSActionButton(
+                    title: "Watch Trailer",
+                    style: .primary,
+                    icon: .pause
+                ) {
+                    playVideo(trailer)
+                }
+                .padding(.horizontal, DSSpacing.Padding.container)
+            }
             // Synopsis
             if let overview = movie.overview, !overview.isEmpty {
                 VStack(alignment: .leading, spacing: DSSpacing.sm) {
@@ -233,6 +283,66 @@ struct OverviewTab: View {
                         .font(DSTypography.bodyMediumSwiftUI())
                         .foregroundColor(DSColors.primaryTextSwiftUI)
                         .lineSpacing(4)
+                }
+                .padding(.horizontal, DSSpacing.Padding.container)
+            }
+
+            // Cast section
+            if let credits = movie.credits, !credits.cast.isEmpty {
+                VStack(alignment: .leading, spacing: DSSpacing.sm) {
+                    Text("Cast")
+                        .font(DSTypography.h4SwiftUI(weight: .semibold))
+                        .foregroundColor(DSColors.primaryTextSwiftUI)
+                        .padding(.horizontal, DSSpacing.Padding.container)
+
+                    CastCarousel(cast: Array(credits.cast.prefix(10))) { member in
+                        // Handle cast member tap
+                    }
+                }
+            }
+
+            // Videos section
+            if let videos = movie.videos, !videos.isEmpty {
+                VideosSection(
+                    videos: videos,
+                    onViewAll: {
+                        // Handle view all videos
+                    }
+                )
+                .padding(.horizontal, DSSpacing.Padding.container)
+            }
+
+            // Photos section
+            if let images = movie.images, !images.backdrops.isEmpty {
+                PhotosGallery(
+                    images: images,
+                    onViewAll: {
+                        // Handle view all photos
+                    }
+                )
+                .padding(.horizontal, DSSpacing.Padding.container)
+            }
+
+            // Rating section
+            if let voteAverage = movie.voteAverage,
+               let voteCount = movie.voteCount,
+               let avgDouble = Double(voteAverage) {
+                VStack(spacing: DSSpacing.md) {
+                    RatingDistribution(
+                        voteAverage: avgDouble,
+                        voteCount: voteCount,
+                        distribution: nil // We don't have distribution data from API
+                    )
+                    .padding(.horizontal, DSSpacing.Padding.container)
+
+                    // Rate this movie button
+                    DSActionButton(
+                        title: "Rate this Movie",
+                        style: .secondary
+                    ) {
+                        isShowingRateSheet = true
+                    }
+                    .padding(.horizontal, DSSpacing.Padding.container)
                 }
             }
 
@@ -250,15 +360,55 @@ struct OverviewTab: View {
                     if let voteAverage = movie.voteAverage {
                         detailRow(title: "Rating", value: voteAverage)
                     }
+
+                    if let genres = movie.genres, !genres.isEmpty {
+                        detailRow(title: "Genres", value: genres.joined(separator: ", "))
+                    }
+
+                    if let runtime = movie.runtime {
+                        let hours = runtime / 60
+                        let minutes = runtime % 60
+                        let runtimeText = hours > 0 ? "\(hours)h \(minutes)m" : "\(minutes)m"
+                        detailRow(title: "Runtime", value: runtimeText)
+                    }
+
+                    if let status = movie.status {
+                        detailRow(title: "Status", value: status)
+                    }
+
+                    if let productionCountries = movie.productionCountries, !productionCountries.isEmpty {
+                        detailRow(title: "Countries", value: productionCountries.joined(separator: ", "))
+                    }
+
+                    if let budget = movie.budget, budget > 0 {
+                        if let budgetString = currencyFormatter.string(from: NSNumber(value: budget)) {
+                            detailRow(title: "Budget", value: budgetString)
+                        }
+                    }
+
+                    if let revenue = movie.revenue, revenue > 0 {
+                        if let revenueString = currencyFormatter.string(from: NSNumber(value: revenue)) {
+                            detailRow(title: "Box Office", value: revenueString)
+                        }
+                    }
                 }
                 .padding(DSSpacing.Padding.card)
                 .background(DSColors.surfaceSwiftUI)
                 .cornerRadius(DSSpacing.CornerRadius.card)
+                .padding(.horizontal, DSSpacing.Padding.container)
             }
 
             Spacer(minLength: DSSpacing.xxl)
         }
-        .padding(DSSpacing.Padding.container)
+        .sheet(isPresented: $isShowingRateSheet) {
+            RateMovieSheet(
+                movie: movie,
+                onSubmit: { rating in
+                    // Handle rating submission
+                    print("User rated movie: \(rating)/10")
+                }
+            )
+        }
     }
 
     private func detailRow(title: String, value: String) -> some View {
@@ -280,25 +430,34 @@ struct OverviewTab: View {
         formatter.dateStyle = .long
         return formatter
     }()
+
+    private let currencyFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = "USD"
+        formatter.maximumFractionDigits = 0
+        return formatter
+    }()
+
+    private func playVideo(_ video: Video) {
+        if video.site == "YouTube" {
+            if let url = URL(string: "https://www.youtube.com/watch?v=\(video.key)") {
+                UIApplication.shared.open(url)
+            }
+        }
+    }
 }
 
-@available(iOS 15.0, *)
 struct CastTab: View {
     let movie: Movie
 
-
-    // Mock cast data
-    private let mockCast = [
-        CastMember(id: "1", name: "Actor One", character: "Main Character", profilePath: nil),
-        CastMember(id: "2", name: "Actor Two", character: "Supporting Role", profilePath: nil),
-        CastMember(id: "3", name: "Actor Three", character: "Villain", profilePath: nil),
-        CastMember(id: "4", name: "Actor Four", character: "Love Interest", profilePath: nil),
-        CastMember(id: "5", name: "Actor Five", character: "Comic Relief", profilePath: nil)
-    ]
+    private var cast: [CastMember] {
+        movie.credits?.cast ?? []
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: DSSpacing.lg) {
-            CastCarousel(cast: mockCast) { member in
+            CastCarousel(cast: cast) { member in
                 // Handle cast member tap
             }
 
@@ -308,7 +467,6 @@ struct CastTab: View {
     }
 }
 
-@available(iOS 15.0, *)
 struct SimilarTab: View {
     let movie: Movie
 

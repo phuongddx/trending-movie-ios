@@ -23,7 +23,6 @@ class ObservableMoviesListViewModel: ObservableObject {
 
     private let searchMoviesUseCase: SearchMoviesUseCaseProtocol
     private let trendingMoviesUseCase: TrendingMoviesUseCaseProtocol
-    private let posterImagesRepository: PosterImagesRepository
     private let onMovieSelected: ((Movie) -> Void)?
 
     private var currentPage: Int = 0
@@ -55,11 +54,9 @@ class ObservableMoviesListViewModel: ObservableObject {
 
     nonisolated init(searchMoviesUseCase: SearchMoviesUseCaseProtocol,
          trendingMoviesUseCase: TrendingMoviesUseCaseProtocol,
-         posterImagesRepository: PosterImagesRepository,
          onMovieSelected: ((Movie) -> Void)? = nil) {
         self.searchMoviesUseCase = searchMoviesUseCase
         self.trendingMoviesUseCase = trendingMoviesUseCase
-        self.posterImagesRepository = posterImagesRepository
         self.onMovieSelected = onMovieSelected
 
         Task { @MainActor in
@@ -200,7 +197,7 @@ class ObservableMoviesListViewModel: ObservableObject {
     private func updateMoviesList() {
         let pages = moviesListViewType == .trending ? trendingPages : searchResultPages
         movies = pages.flatMap { $0.movies }.map {
-            MoviesListItemViewModel(movie: $0, posterImagesRepository: posterImagesRepository)
+            MoviesListItemViewModel(movie: $0)
         }
     }
 

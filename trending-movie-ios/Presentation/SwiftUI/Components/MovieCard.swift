@@ -1,6 +1,5 @@
 import SwiftUI
 
-@available(iOS 15.0, *)
 struct MovieCard: View {
     enum Style {
         case hero
@@ -14,8 +13,6 @@ struct MovieCard: View {
     let onWatchlistTap: (() -> Void)?
     let onFavoriteTap: (() -> Void)?
 
-    @State private var posterImage: UIImage?
-    @State private var imageLoadTask: Cancellable?
     @StateObject private var storage = MovieStorage.shared
 
     init(movie: MoviesListItemViewModel,
@@ -45,21 +42,9 @@ struct MovieCard: View {
         Button(action: onTap) {
             ZStack(alignment: .bottom) {
                 // Backdrop image
-                Group {
-                    if let posterImage = posterImage {
-                        Image(uiImage: posterImage)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                    } else {
-                        Rectangle()
-                            .fill(DSColors.surfaceSwiftUI)
-                            .overlay(
-                                CinemaxIconView(.film, size: .extraLarge, color: DSColors.tertiaryTextSwiftUI)
-                            )
-                    }
-                }
-                .frame(height: UIScreen.main.bounds.height * 0.5)
-                .clipped()
+                MoviePosterImage.hero(posterPath: movie.posterImagePath)
+                    .frame(height: UIScreen.main.bounds.height * 0.5)
+                    .clipped()
 
                 // Gradient overlay
                 LinearGradient(
@@ -119,30 +104,14 @@ struct MovieCard: View {
                 .padding(20)
             }
         }
-        .onAppear { loadPosterImage() }
-        .onDisappear { imageLoadTask?.cancel() }
     }
 
     private var standardCard: some View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 8) {
                 // Poster image
-                Group {
-                    if let posterImage = posterImage {
-                        Image(uiImage: posterImage)
-                            .resizable()
-                            .aspectRatio(2/3, contentMode: .fill)
-                    } else {
-                        Rectangle()
-                            .fill(DSColors.surfaceSwiftUI)
-                            .aspectRatio(2/3, contentMode: .fill)
-                            .overlay(
-                                CinemaxIconView(.film, size: .large, color: DSColors.tertiaryTextSwiftUI)
-                            )
-                    }
-                }
-                .frame(width: 140)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                MoviePosterImage.standard(posterPath: movie.posterImagePath)
+                    .frame(width: 140)
 
                 // Movie info
                 VStack(alignment: .leading, spacing: 4) {
@@ -166,29 +135,14 @@ struct MovieCard: View {
                 .frame(width: 140, alignment: .leading)
             }
         }
-        .onAppear { loadPosterImage() }
-        .onDisappear { imageLoadTask?.cancel() }
     }
 
     private var compactCard: some View {
         Button(action: onTap) {
             HStack(spacing: 12) {
                 // Poster thumbnail
-                Group {
-                    if let posterImage = posterImage {
-                        Image(uiImage: posterImage)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                    } else {
-                        Rectangle()
-                            .fill(DSColors.surfaceSwiftUI)
-                            .overlay(
-                                CinemaxIconView(.film, size: .medium, color: DSColors.tertiaryTextSwiftUI)
-                            )
-                    }
-                }
-                .frame(width: 60, height: 90)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+                MoviePosterImage.compact(posterPath: movie.posterImagePath)
+                    .frame(width: 60, height: 90)
 
                 // Movie info
                 VStack(alignment: .leading, spacing: 8) {
@@ -243,8 +197,6 @@ struct MovieCard: View {
             .background(DSColors.surfaceSwiftUI)
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
-        .onAppear { loadPosterImage() }
-        .onDisappear { imageLoadTask?.cancel() }
     }
 
     private func parseRating(_ voteAverage: String) -> Double {
@@ -278,16 +230,4 @@ struct MovieCard: View {
         return storage.isFavorite(movieModel)
     }
 
-    private func loadPosterImage() {
-        imageLoadTask = movie.loadPosterImage { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let data):
-                    posterImage = UIImage(data: data)
-                case .failure:
-                    posterImage = UIImage(named: "placeholder-bg")
-                }
-            }
-        }
-    }
 }

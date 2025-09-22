@@ -1,6 +1,5 @@
 import SwiftUI
 
-@available(iOS 15.0, *)
 struct MovieDetailsView: View {
     @StateObject var viewModel: ObservableMovieDetailsViewModel
     @Environment(\.presentationMode) var presentationMode
@@ -57,7 +56,6 @@ struct MovieDetailsView: View {
             if let movie = viewModel.movie {
                 MovieDetailHero(
                     movie: movie,
-                    posterImage: viewModel.posterImage,
                     onWatchlistTap: {
                         handleWatchlistTap(movie)
                     },
@@ -106,7 +104,6 @@ struct MovieDetailsView: View {
 }
 
 // MARK: - Preview
-@available(iOS 15.0, *)
 struct MovieDetailsView_Previews: PreviewProvider {
     static var previews: some View {
         let mockMovie = Movie(
@@ -121,8 +118,7 @@ struct MovieDetailsView_Previews: PreviewProvider {
         let container = AppContainer.shared
         let viewModel = ObservableMovieDetailsViewModel(
             movie: mockMovie,
-            fetchDetailsMovieUseCase: container.fetchDetailsMovieUseCase(),
-            posterImagesRepository: container.posterImagesRepository()
+            fetchDetailsMovieUseCase: container.fetchDetailsMovieUseCase()
         )
 
         return NavigationView {

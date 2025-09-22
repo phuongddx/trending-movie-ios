@@ -132,13 +132,6 @@ struct CastCarousel: View {
     }
 }
 
-struct CastMember {
-    let id: String
-    let name: String
-    let character: String?
-    let profilePath: String?
-}
-
 @available(iOS 15.0, *)
 struct CastMemberCard: View {
     let member: CastMember
