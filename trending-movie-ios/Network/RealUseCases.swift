@@ -158,6 +158,17 @@ public final class RealFetchDetailsMovieUseCase: FetchDetailsMovieUseCaseProtoco
     public func execute(with movieId: Movie.Identifier,
                         completion: @escaping (Result<Movie, Error>) -> Void) -> Cancellable? {
 
+        print("🌐 Fetching movie details for ID: \(movieId)")
+
+        // Validate movie ID
+        guard !movieId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            print("🔴 Empty movie ID provided")
+            let error = NSError(domain: "MovieDetails", code: -1,
+                               userInfo: [NSLocalizedDescriptionKey: "Invalid movie ID: empty"])
+            completion(.failure(error))
+            return nil
+        }
+
         var movieDetail: TMDBMovieDetail?
         var videos: [Video]?
         var images: MovieImages?

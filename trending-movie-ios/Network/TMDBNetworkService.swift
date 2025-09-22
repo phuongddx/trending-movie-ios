@@ -67,13 +67,27 @@ public final class TMDBNetworkService {
             switch result {
             case .success(let response):
                 do {
-                    let filteredResponse = try response.filterSuccessfulStatusCodes()
-                    let decoded = try JSONDecoder().decode(T.self, from: filteredResponse.data)
+                    guard 200...299 ~= response.statusCode else {
+                        let errorMessage = String(data: response.data, encoding: .utf8) ?? "Unknown API error"
+                        print("🔴 TMDB API Error (\(response.statusCode)): \(errorMessage)")
+                        print("🔴 Request URL: \(target.baseURL.appendingPathComponent(target.path))")
+                        let error = NSError(domain: "TMDB", code: response.statusCode,
+                                           userInfo: [NSLocalizedDescriptionKey: "HTTP \(response.statusCode): \(errorMessage)"])
+                        completion(.failure(error))
+                        return
+                    }
+
+                    let decoded = try JSONDecoder().decode(T.self, from: response.data)
                     completion(.success(decoded))
                 } catch {
+                    print("🔴 JSON Decoding Error: \(error)")
+                    print("🔴 Raw Response: \(String(data: response.data, encoding: .utf8) ?? "No data")")
+                    print("🔴 Expected Type: \(T.self)")
                     completion(.failure(error))
                 }
             case .failure(let error):
+                print("🔴 Network Request Failed: \(error)")
+                print("🔴 Target: \(target)")
                 completion(.failure(error))
             }
         }

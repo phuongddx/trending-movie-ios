@@ -64,7 +64,7 @@ extension View {
         self.overlay(
             Group {
                 if isLoading {
-                    DSLoadingView()
+                    ProgressView()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Color.black.opacity(0.3))
                 }

@@ -97,11 +97,12 @@ struct MovieActionsCompact: View {
                 }
                 .padding(.horizontal, DSSpacing.sm)
                 .padding(.vertical, DSSpacing.xs)
-                .background(
+                .background(storage.isInWatchlist(movie) ? DSColors.accentSwiftUI.opacity(0.1) : DSColors.surfaceSwiftUI)
+                .overlay(
                     RoundedRectangle(cornerRadius: DSSpacing.CornerRadius.small)
-                        .fill(storage.isInWatchlist(movie) ? DSColors.accentSwiftUI.opacity(0.1) : DSColors.surfaceSwiftUI)
                         .stroke(storage.isInWatchlist(movie) ? DSColors.accentSwiftUI : DSColors.borderSwiftUI, lineWidth: 1)
                 )
+                .cornerRadius(DSSpacing.CornerRadius.small)
             }
 
             // Favorite
