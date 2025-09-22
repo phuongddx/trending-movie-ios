@@ -5,19 +5,30 @@ struct DSSearchBar: View {
     @Binding var text: String
     let placeholder: String
     let onCommit: () -> Void
+    let onFilterTap: (() -> Void)?
 
     @FocusState private var isFocused: Bool
 
+    init(text: Binding<String>,
+         placeholder: String = "Search a title..",
+         onCommit: @escaping () -> Void = {},
+         onFilterTap: (() -> Void)? = nil) {
+        self._text = text
+        self.placeholder = placeholder
+        self.onCommit = onCommit
+        self.onFilterTap = onFilterTap
+    }
+
     var body: some View {
-        HStack(spacing: DSSpacing.sm) {
-            HStack(spacing: DSSpacing.sm) {
+        HStack(spacing: 0) {
+            HStack(spacing: 12) {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(DSColors.secondaryTextSwiftUI)
-                    .font(.body)
+                    .font(.system(size: 16))
 
                 TextField(placeholder, text: $text)
                     .textFieldStyle(PlainTextFieldStyle())
-                    .font(DSTypography.bodyMediumSwiftUI())
+                    .font(DSTypography.h5SwiftUI(weight: .medium))
                     .foregroundColor(DSColors.primaryTextSwiftUI)
                     .focused($isFocused)
                     .onSubmit {
@@ -30,32 +41,30 @@ struct DSSearchBar: View {
                     } label: {
                         Image(systemName: "xmark.circle.fill")
                             .foregroundColor(DSColors.secondaryTextSwiftUI)
-                            .font(.body)
+                            .font(.system(size: 14))
                     }
                 }
             }
-            .padding(.horizontal, DSSpacing.md)
-            .padding(.vertical, DSSpacing.sm)
-            .background(DSColors.surfaceSwiftUI)
-            .cornerRadius(DSSpacing.CornerRadius.medium)
-            .overlay(
-                RoundedRectangle(cornerRadius: DSSpacing.CornerRadius.medium)
-                    .stroke(
-                        isFocused ? DSColors.accentSwiftUI : Color.clear,
-                        lineWidth: 2
-                    )
-            )
+            .padding(.leading, 16)
+            .padding(.trailing, onFilterTap != nil ? 8 : 16)
 
-            if isFocused {
-                Button("Cancel") {
-                    text = ""
-                    isFocused = false
+            if let onFilterTap = onFilterTap {
+                Divider()
+                    .frame(width: 1, height: 16)
+                    .background(Color(hex: "#696974"))
+                    .padding(.horizontal, 0)
+
+                Button(action: onFilterTap) {
+                    Image(systemName: "slider.horizontal.3")
+                        .foregroundColor(DSColors.primaryTextSwiftUI)
+                        .font(.system(size: 16))
+                        .frame(width: 48, height: 48)
                 }
-                .font(DSTypography.bodyMediumSwiftUI())
-                .foregroundColor(DSColors.accentSwiftUI)
-                .transition(.move(edge: .trailing))
             }
         }
+        .frame(height: 48)
+        .background(DSColors.surfaceSwiftUI)
+        .cornerRadius(24)
         .animation(.easeInOut(duration: 0.2), value: isFocused)
     }
 }
