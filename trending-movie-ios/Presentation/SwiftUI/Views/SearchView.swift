@@ -57,14 +57,26 @@ struct SearchView: View {
                         }
                     }
                 }
+
+                // Hidden NavigationLink for programmatic navigation
+                if let selectedMovie = viewModel.selectedMovie {
+                    NavigationLink(
+                        destination: MovieDetailsView(
+                            viewModel: container.observableMovieDetailsViewModel(movie: selectedMovie.movie)
+                        ),
+                        isActive: Binding(
+                            get: { viewModel.selectedMovie != nil },
+                            set: { if !$0 { viewModel.selectedMovie = nil } }
+                        )
+                    ) {
+                        EmptyView()
+                    }
+                    .hidden()
+                }
             }
             .navigationBarHidden(true)
         }
-        .sheet(item: $viewModel.selectedMovie) { movie in
-            MovieDetailsView(
-                viewModel: container.observableMovieDetailsViewModel(movie: movie.movie)
-            )
-        }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 
     private var emptySearchView: some View {

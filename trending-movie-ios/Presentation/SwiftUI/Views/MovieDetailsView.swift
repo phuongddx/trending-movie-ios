@@ -2,7 +2,7 @@ import SwiftUI
 
 struct MovieDetailsView: View {
     @StateObject var viewModel: ObservableMovieDetailsViewModel
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) var dismiss
     @StateObject private var storage = MovieStorage.shared
 
     init(viewModel: ObservableMovieDetailsViewModel) {
@@ -51,26 +51,58 @@ struct MovieDetailsView: View {
     }
 
     private var contentView: some View {
-        VStack(spacing: 0) {
-            // Hero section
-            if let movie = viewModel.movie {
-                MovieDetailHero(
-                    movie: movie,
-                    onWatchlistTap: {
-                        handleWatchlistTap(movie)
-                    },
-                    onFavoriteTap: {
-                        handleFavoriteTap(movie)
-                    },
-                    onShareTap: {
-                        handleShareTap(movie)
-                    }
-                )
-            }
+        ScrollView {
+            VStack(spacing: 0) {
+                if let movie = viewModel.movie {
+                    // Backdrop Hero with overlay
+                    ZStack {
+                        MovieBackdropHero(movie: movie, height: 500)
 
-            // Tabs section
-            if let movie = viewModel.movie {
-                MovieDetailTabs(movie: movie)
+                        // Header overlay
+                        VStack {
+                            MovieDetailsHeader(
+                                title: movie.title ?? "",
+                                isInWatchlist: storage.isInWatchlist(movie),
+                                onBackTap: {
+                                    dismiss()
+                                },
+                                onWishlistTap: {
+                                    handleWatchlistTap(movie)
+                                }
+                            )
+
+                            Spacer()
+                        }
+                    }
+                    .frame(height: 500)
+
+                    // Movie Metadata Bar
+                    MovieMetadataBar(movie: movie)
+                        .padding(.top, 24)
+
+                    // Action Buttons
+                    MovieActionButtons(
+                        onTrailerTap: {
+                            viewModel.playTrailer()
+                        },
+                        onDownloadTap: {
+                            viewModel.downloadMovie()
+                        },
+                        onShareTap: {
+                            viewModel.shareMovie()
+                        }
+                    )
+                    .padding(.top, 24)
+
+                    // Story Line Section
+                    StoryLineSection(movie: movie)
+                        .padding(.top, 24)
+
+                    // Cast and Crew Section
+                    CastCrewSection(movie: movie)
+                        .padding(.top, 24)
+                        .padding(.bottom, 40)
+                }
             }
         }
     }

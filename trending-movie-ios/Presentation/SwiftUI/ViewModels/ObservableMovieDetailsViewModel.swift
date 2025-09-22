@@ -10,6 +10,8 @@ class ObservableMovieDetailsViewModel: ObservableObject {
     @Published var loading: MoviesListViewModelLoading? = nil
     @Published var error: String = ""
     @Published var isShowingError: Bool = false
+    @Published var isTrailerLoading: Bool = false
+    @Published var isDownloading: Bool = false
 
     private let initialMovie: Movie
     private let detailsMovieUseCase: FetchDetailsMovieUseCaseProtocol
@@ -71,6 +73,32 @@ class ObservableMovieDetailsViewModel: ObservableObject {
 
         self.error = NSLocalizedString("Failed loading movie details", comment: "")
         self.isShowingError = true
+    }
+
+    // MARK: - Action Methods
+    func playTrailer() {
+        isTrailerLoading = true
+        // Simulate trailer loading
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            self.isTrailerLoading = false
+            // In a real app, this would open the trailer player
+            print("Playing trailer for: \(self.movie?.title ?? "Unknown")")
+        }
+    }
+
+    func downloadMovie() {
+        isDownloading = true
+        // Simulate download
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            self.isDownloading = false
+            // In a real app, this would start the download
+            print("Downloaded: \(self.movie?.title ?? "Unknown")")
+        }
+    }
+
+    func shareMovie() {
+        // In a real app, this would share the movie
+        print("Sharing: \(movie?.title ?? "Unknown")")
     }
 }
 

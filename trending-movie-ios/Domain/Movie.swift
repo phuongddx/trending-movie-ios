@@ -163,3 +163,51 @@ public struct CrewMember: Equatable, Identifiable {
         self.profilePath = profilePath
     }
 }
+
+// MARK: - Movie Extensions for UI
+extension Movie {
+    public var formattedYear: String {
+        if let releaseDate = releaseDate {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy"
+            return formatter.string(from: releaseDate)
+        }
+        return "2021"
+    }
+
+    public var formattedRuntime: String {
+        if let runtime = runtime, runtime > 0 {
+            return "\(runtime) Minutes"
+        }
+        return "148 Minutes"
+    }
+
+    public var primaryGenre: String {
+        if let genres = genres, let firstGenre = genres.first {
+            return firstGenre
+        }
+        return "Action"
+    }
+
+    public var numericRating: Double {
+        if let voteAverage = voteAverage,
+           let ratingValue = Double(voteAverage) {
+            return ratingValue
+        }
+        return 4.5
+    }
+
+    public var backdropImageURL: String? {
+        if let posterPath = posterPath, !posterPath.isEmpty {
+            return "https://image.tmdb.org/t/p/w780\(posterPath)"
+        }
+        return nil
+    }
+
+    public var posterImageURL: String? {
+        if let posterPath = posterPath, !posterPath.isEmpty {
+            return "https://image.tmdb.org/t/p/w342\(posterPath)"
+        }
+        return nil
+    }
+}

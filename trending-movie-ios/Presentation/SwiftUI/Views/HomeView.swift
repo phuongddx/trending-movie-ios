@@ -19,21 +19,22 @@ struct HomeView: View {
     }
 
     var body: some View {
-        ZStack {
-            DSColors.backgroundSwiftUI
-                .ignoresSafeArea()
+        NavigationView {
+            ZStack {
+                DSColors.backgroundSwiftUI
+                    .ignoresSafeArea()
 
-            ScrollView {
-                VStack(spacing: 24) {
-                    // User Profile Header
-                    UserProfileHeader(
-                        userName: "Smith",
-                        avatarImage: nil,
-                        onWishlistTap: {
-                            // Handle wishlist tap
-                        }
-                    )
-                    .padding(.top, 60)
+                ScrollView {
+                    VStack(spacing: 24) {
+                        // User Profile Header
+                        UserProfileHeader(
+                            userName: "Smith",
+                            avatarImage: nil,
+                            onWishlistTap: {
+                                // Handle wishlist tap
+                            }
+                        )
+                        .padding(.top, 60)
 
                         // Search Bar
                         DSSearchBar(
@@ -117,17 +118,30 @@ struct HomeView: View {
                         Color.clear
                             .frame(height: 40)
                     }
+                }
+
+                // Hidden NavigationLink for programmatic navigation
+                if let selectedMovie = viewModel.selectedMovie {
+                    NavigationLink(
+                        destination: MovieDetailsView(
+                            viewModel: container.observableMovieDetailsViewModel(movie: selectedMovie.movie)
+                        ),
+                        isActive: Binding(
+                            get: { viewModel.selectedMovie != nil },
+                            set: { if !$0 { viewModel.selectedMovie = nil } }
+                        )
+                    ) {
+                        EmptyView()
+                    }
+                    .hidden()
+                }
+            }
+            .ignoresSafeArea(.container, edges: .top)
+            .onAppear {
+                viewModel.loadData()
             }
         }
-        .ignoresSafeArea(.container, edges: .top)
-        .sheet(item: $viewModel.selectedMovie) { movie in
-            MovieDetailsView(
-                viewModel: container.observableMovieDetailsViewModel(movie: movie.movie)
-            )
-        }
-        .onAppear {
-            viewModel.loadData()
-        }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 }
 

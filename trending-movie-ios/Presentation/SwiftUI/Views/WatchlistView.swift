@@ -69,14 +69,26 @@ struct WatchlistView: View {
                     .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                     .animation(.easeInOut, value: selectedSegment)
                 }
+
+                // Hidden NavigationLink for programmatic navigation
+                if let selectedMovie = selectedMovie {
+                    NavigationLink(
+                        destination: MovieDetailsView(
+                            viewModel: container.observableMovieDetailsViewModel(movie: selectedMovie.movie)
+                        ),
+                        isActive: Binding(
+                            get: { self.selectedMovie != nil },
+                            set: { if !$0 { self.selectedMovie = nil } }
+                        )
+                    ) {
+                        EmptyView()
+                    }
+                    .hidden()
+                }
             }
             .navigationBarHidden(true)
         }
-        .sheet(item: $selectedMovie) { movie in
-            MovieDetailsView(
-                viewModel: container.observableMovieDetailsViewModel(movie: movie.movie)
-            )
-        }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 }
 
