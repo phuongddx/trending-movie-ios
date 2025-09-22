@@ -45,13 +45,13 @@ public final class TMDBNetworkService {
 
                 print("Curl: \(curlCommand)")
 
-                // Print response items
-                for item in items {
-                    print("📡 TMDB Response: \(item)")
-                }
+//                // Print response items
+//                for item in items {
+//                    print("📡 TMDB Response: \(item)")
+//                }
                 print("---")
             },
-            logOptions: [.requestBody, .requestHeaders, .requestMethod, .successResponseBody, .errorResponseBody]
+            logOptions: [.errorResponseBody]
         ))
 
         self.provider = MoyaProvider<TMDBTarget>(plugins: [networkLogger])
@@ -104,7 +104,12 @@ public enum TMDBTarget {
     case upcomingMovies(page: Int)
     case searchMovies(query: String, page: Int)
     case movieDetails(movieId: String)
+    case movieVideos(movieId: String)
+    case movieImages(movieId: String)
+    case movieCredits(movieId: String)
+    case movieReleaseDates(movieId: String)
     case posterImage(path: String)
+    case rateMovie(movieId: String, rating: Double)
 }
 
 extension TMDBTarget: TargetType {
@@ -133,13 +138,28 @@ extension TMDBTarget: TargetType {
             return "search/movie"
         case .movieDetails(let movieId):
             return "movie/\(movieId)"
+        case .movieVideos(let movieId):
+            return "movie/\(movieId)/videos"
+        case .movieImages(let movieId):
+            return "movie/\(movieId)/images"
+        case .movieCredits(let movieId):
+            return "movie/\(movieId)/credits"
+        case .movieReleaseDates(let movieId):
+            return "movie/\(movieId)/release_dates"
         case .posterImage(let path):
             return "w500\(path)"
+        case .rateMovie(let movieId, _):
+            return "movie/\(movieId)/rating"
         }
     }
 
     public var method: Moya.Method {
-        return .get
+        switch self {
+        case .rateMovie:
+            return .post
+        default:
+            return .get
+        }
     }
 
     public var task: Moya.Task {
@@ -165,12 +185,18 @@ extension TMDBTarget: TargetType {
                 ],
                 encoding: URLEncoding.queryString
             )
-        case .movieDetails:
+        case .movieDetails, .movieVideos, .movieImages, .movieCredits, .movieReleaseDates:
             return .requestParameters(
                 parameters: [
                     "api_key": "bbc142c0087fef1df2ad2e3230101822"
                 ],
                 encoding: URLEncoding.queryString
+            )
+        case .rateMovie(_, let rating):
+            return .requestCompositeParameters(
+                bodyParameters: ["value": rating],
+                bodyEncoding: JSONEncoding.default,
+                urlParameters: ["api_key": "bbc142c0087fef1df2ad2e3230101822"]
             )
         case .posterImage:
             return .requestPlain

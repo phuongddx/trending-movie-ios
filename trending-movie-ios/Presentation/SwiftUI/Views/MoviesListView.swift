@@ -1,6 +1,5 @@
 import SwiftUI
 
-@available(iOS 15.0, *)
 struct MoviesListView: View {
     @StateObject var viewModel: ObservableMoviesListViewModel
     @State private var isRefreshing = false
@@ -129,15 +128,13 @@ struct MoviesListView: View {
 }
 
 // MARK: - Preview
-@available(iOS 15.0, *)
 struct MoviesListView_Previews: PreviewProvider {
     static var previews: some View {
         let container = AppContainer.shared
 
         let viewModel = ObservableMoviesListViewModel(
             searchMoviesUseCase: container.searchMoviesUseCase(),
-            trendingMoviesUseCase: container.trendingMoviesUseCase(),
-            posterImagesRepository: container.posterImagesRepository()
+            trendingMoviesUseCase: container.trendingMoviesUseCase()
         )
 
         return MoviesListView(viewModel: viewModel)

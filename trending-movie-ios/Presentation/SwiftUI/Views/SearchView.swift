@@ -1,6 +1,5 @@
 import SwiftUI
 
-@available(iOS 15.0, *)
 struct SearchView: View {
     private let container: AppContainer
     @StateObject private var viewModel: SearchViewModel
@@ -8,8 +7,7 @@ struct SearchView: View {
     init(container: AppContainer) {
         self.container = container
         self._viewModel = StateObject(wrappedValue: SearchViewModel(
-            searchMoviesUseCase: container.searchMoviesUseCase(),
-            posterImagesRepository: container.posterImagesRepository()
+            searchMoviesUseCase: container.searchMoviesUseCase()
         ))
     }
 

@@ -7,13 +7,11 @@ struct MoviesListItemViewModel: Equatable {
     let releaseDate: String
     let voteAverage: String
     let posterImagePath: String?
-    private let posterImagesRepository: PosterImagesRepository
 
-    init(movie: Movie, posterImagesRepository: PosterImagesRepository) {
+    init(movie: Movie) {
         self.title = movie.title ?? ""
         self.posterImagePath = movie.posterPath
         self.overview = movie.overview ?? ""
-        self.posterImagesRepository = posterImagesRepository
 
         if let releaseDate = movie.releaseDate {
             self.releaseDate = dateFormatter.string(from: releaseDate)
@@ -28,13 +26,6 @@ struct MoviesListItemViewModel: Equatable {
         }
     }
 
-    func loadPosterImage(completion: @escaping (Result<Data, Error>) -> Void) -> Cancellable? {
-        guard let posterPath = posterImagePath else {
-            completion(.failure(NSError(domain: "MoviesListItemViewModel", code: 0, userInfo: [NSLocalizedDescriptionKey: "No poster path"])))
-            return nil
-        }
-        return posterImagesRepository.fetchImage(with: posterPath, completion: completion)
-    }
 
     static func == (lhs: MoviesListItemViewModel, rhs: MoviesListItemViewModel) -> Bool {
         return lhs.title == rhs.title &&

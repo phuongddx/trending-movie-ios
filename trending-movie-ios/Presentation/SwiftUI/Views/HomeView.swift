@@ -1,6 +1,5 @@
 import SwiftUI
 
-@available(iOS 15.0, *)
 struct HomeView: View {
     private let container: AppContainer
     @StateObject private var viewModel: HomeViewModel
@@ -13,8 +12,7 @@ struct HomeView: View {
             popularMoviesUseCase: container.popularMoviesUseCase(),
             nowPlayingMoviesUseCase: container.nowPlayingMoviesUseCase(),
             topRatedMoviesUseCase: container.topRatedMoviesUseCase(),
-            upcomingMoviesUseCase: container.upcomingMoviesUseCase(),
-            posterImagesRepository: container.posterImagesRepository()
+            upcomingMoviesUseCase: container.upcomingMoviesUseCase()
         ))
     }
 
@@ -150,7 +148,6 @@ class HomeViewModel: ObservableObject {
     private let nowPlayingMoviesUseCase: NowPlayingMoviesUseCaseProtocol
     private let topRatedMoviesUseCase: TopRatedMoviesUseCaseProtocol
     private let upcomingMoviesUseCase: UpcomingMoviesUseCaseProtocol
-    private let posterImagesRepository: PosterImagesRepository
     private var loadingTasks: [String: Cancellable] = [:]
 
     struct MovieWrapper: Identifiable {
@@ -162,14 +159,12 @@ class HomeViewModel: ObservableObject {
                     popularMoviesUseCase: PopularMoviesUseCaseProtocol,
                     nowPlayingMoviesUseCase: NowPlayingMoviesUseCaseProtocol,
                     topRatedMoviesUseCase: TopRatedMoviesUseCaseProtocol,
-                    upcomingMoviesUseCase: UpcomingMoviesUseCaseProtocol,
-                    posterImagesRepository: PosterImagesRepository) {
+                    upcomingMoviesUseCase: UpcomingMoviesUseCaseProtocol) {
         self.trendingMoviesUseCase = trendingMoviesUseCase
         self.popularMoviesUseCase = popularMoviesUseCase
         self.nowPlayingMoviesUseCase = nowPlayingMoviesUseCase
         self.topRatedMoviesUseCase = topRatedMoviesUseCase
         self.upcomingMoviesUseCase = upcomingMoviesUseCase
-        self.posterImagesRepository = posterImagesRepository
     }
 
     func loadData() {
@@ -314,7 +309,7 @@ class HomeViewModel: ObservableObject {
 
     private func processMoviesPage(_ page: MoviesPage, for keyPath: WritableKeyPath<HomeViewModel, [MoviesListItemViewModel]>) {
         let movieViewModels = page.movies.map { movie in
-            MoviesListItemViewModel(movie: movie, posterImagesRepository: posterImagesRepository)
+            MoviesListItemViewModel(movie: movie)
         }
 
         switch keyPath {

@@ -1,6 +1,5 @@
 import SwiftUI
 
-@available(iOS 15.0, *)
 struct WatchlistView: View {
     private let container: AppContainer
     @StateObject private var storage = MovieStorage.shared
@@ -81,7 +80,6 @@ struct WatchlistView: View {
     }
 }
 
-@available(iOS 15.0, *)
 struct WatchlistTab: View {
     let movies: [Movie]
     let onMovieTap: (Movie) -> Void
@@ -136,7 +134,6 @@ struct WatchlistTab: View {
     }
 }
 
-@available(iOS 15.0, *)
 struct FavoritesTab: View {
     let movies: [Movie]
     let onMovieTap: (Movie) -> Void
@@ -189,7 +186,6 @@ struct FavoritesTab: View {
     }
 }
 
-@available(iOS 15.0, *)
 struct WatchlistMovieRow: View {
     let movie: Movie
     let onTap: () -> Void
