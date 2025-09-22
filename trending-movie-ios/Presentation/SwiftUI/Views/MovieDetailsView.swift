@@ -31,7 +31,7 @@ struct MovieDetailsView: View {
         }
         .sheet(isPresented: $viewModel.isShowingTrailer) {
             if let videoID = viewModel.trailerVideoID {
-                YouTubePlayerView(
+                MovieTrailerPlayerView(
                     videoID: videoID,
                     title: viewModel.trailerTitle
                 )

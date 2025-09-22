@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F212382F2E81AF0E0073FBD0 /* YouTubePlayerKit in Frameworks */ = {isa = PBXBuildFile; productRef = F212382E2E81AF0E0073FBD0 /* YouTubePlayerKit */; };
 		F23802222E7FC3DC008BD4E5 /* CombineMoya in Frameworks */ = {isa = PBXBuildFile; productRef = F23802212E7FC3DC008BD4E5 /* CombineMoya */; };
 		F23802242E7FC3DC008BD4E5 /* Moya in Frameworks */ = {isa = PBXBuildFile; productRef = F23802232E7FC3DC008BD4E5 /* Moya */; };
 		F23802272E7FC3F0008BD4E5 /* Factory in Frameworks */ = {isa = PBXBuildFile; productRef = F23802262E7FC3F0008BD4E5 /* Factory */; };
@@ -87,6 +88,7 @@
 			files = (
 				F23802272E7FC3F0008BD4E5 /* Factory in Frameworks */,
 				F23802242E7FC3DC008BD4E5 /* Moya in Frameworks */,
+				F212382F2E81AF0E0073FBD0 /* YouTubePlayerKit in Frameworks */,
 				F23802292E7FC3F0008BD4E5 /* FactoryKit in Frameworks */,
 				F23802222E7FC3DC008BD4E5 /* CombineMoya in Frameworks */,
 				F23808782E80FB2F008BD4E5 /* SDWebImage in Frameworks */,
@@ -155,6 +157,7 @@
 				F23802262E7FC3F0008BD4E5 /* Factory */,
 				F23802282E7FC3F0008BD4E5 /* FactoryKit */,
 				F23808772E80FB2F008BD4E5 /* SDWebImage */,
+				F212382E2E81AF0E0073FBD0 /* YouTubePlayerKit */,
 			);
 			productName = "trending-movie-ios";
 			productReference = 79A41CDB2C10103500910974 /* trending-movie-ios.app */;
@@ -237,6 +240,7 @@
 				F23802202E7FC3DC008BD4E5 /* XCRemoteSwiftPackageReference "Moya" */,
 				F23802252E7FC3F0008BD4E5 /* XCRemoteSwiftPackageReference "Factory" */,
 				F23808762E80FB2E008BD4E5 /* XCRemoteSwiftPackageReference "SDWebImage" */,
+				F212382D2E81AF0E0073FBD0 /* XCRemoteSwiftPackageReference "YouTubePlayerKit" */,
 			);
 			preferredProjectObjectVersion = 56;
 			productRefGroup = 79A41CDC2C10103500910974 /* Products */;
@@ -637,6 +641,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		F212382D2E81AF0E0073FBD0 /* XCRemoteSwiftPackageReference "YouTubePlayerKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SvenTiigi/YouTubePlayerKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.2;
+			};
+		};
 		F23802202E7FC3DC008BD4E5 /* XCRemoteSwiftPackageReference "Moya" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Moya/Moya.git";
@@ -664,6 +676,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		F212382E2E81AF0E0073FBD0 /* YouTubePlayerKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F212382D2E81AF0E0073FBD0 /* XCRemoteSwiftPackageReference "YouTubePlayerKit" */;
+			productName = YouTubePlayerKit;
+		};
 		F23802212E7FC3DC008BD4E5 /* CombineMoya */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = F23802202E7FC3DC008BD4E5 /* XCRemoteSwiftPackageReference "Moya" */;
