@@ -12,6 +12,9 @@ class ObservableMovieDetailsViewModel: ObservableObject {
     @Published var isShowingError: Bool = false
     @Published var isTrailerLoading: Bool = false
     @Published var isDownloading: Bool = false
+    @Published var isShowingTrailer: Bool = false
+    @Published var trailerVideoID: String?
+    @Published var trailerTitle: String = ""
 
     private let initialMovie: Movie
     private let detailsMovieUseCase: FetchDetailsMovieUseCaseProtocol
@@ -77,12 +80,16 @@ class ObservableMovieDetailsViewModel: ObservableObject {
 
     // MARK: - Action Methods
     func playTrailer() {
-        isTrailerLoading = true
-        // Simulate trailer loading
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.isTrailerLoading = false
-            // In a real app, this would open the trailer player
-            print("Playing trailer for: \(self.movie?.title ?? "Unknown")")
+        guard let movie = movie else { return }
+
+        if let videoID = movie.youTubeTrailerID {
+            trailerVideoID = videoID
+            trailerTitle = "\(movie.title ?? "Unknown") - Trailer"
+            isShowingTrailer = true
+        } else {
+            // No trailer available
+            error = NSLocalizedString("No trailer available for this movie", comment: "")
+            isShowingError = true
         }
     }
 

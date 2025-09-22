@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct MovieActionButtons: View {
+    let hasTrailer: Bool
     let onTrailerTap: () -> Void
     let onDownloadTap: () -> Void
     let onShareTap: () -> Void
@@ -8,21 +9,22 @@ struct MovieActionButtons: View {
     var body: some View {
         HStack(spacing: 16) {
             // Trailer Button (Primary)
-            Button(action: onTrailerTap) {
+            Button(action: hasTrailer ? onTrailerTap : {}) {
                 HStack(spacing: 8) {
-                    Image(systemName: "play.fill")
+                    Image(systemName: hasTrailer ? "play.fill" : "play.slash")
                         .font(.system(size: 18))
                         .foregroundColor(.white)
 
-                    Text("Trailer")
+                    Text(hasTrailer ? "Trailer" : "No Trailer")
                         .font(DSTypography.h4SwiftUI(weight: .medium))
                         .foregroundColor(.white)
                 }
                 .padding(.horizontal, 24)
                 .padding(.vertical, 12)
-                .background(Color(hex: "#12CDD9"))
+                .background(hasTrailer ? Color(hex: "#12CDD9") : DSColors.surfaceSwiftUI)
                 .cornerRadius(32)
             }
+            .disabled(!hasTrailer)
 
             Spacer()
 
@@ -55,11 +57,21 @@ struct MovieActionButtons_Previews: PreviewProvider {
         ZStack {
             DSColors.backgroundSwiftUI.ignoresSafeArea()
 
-            MovieActionButtons(
-                onTrailerTap: {},
-                onDownloadTap: {},
-                onShareTap: {}
-            )
+            VStack(spacing: 20) {
+                MovieActionButtons(
+                    hasTrailer: true,
+                    onTrailerTap: {},
+                    onDownloadTap: {},
+                    onShareTap: {}
+                )
+
+                MovieActionButtons(
+                    hasTrailer: false,
+                    onTrailerTap: {},
+                    onDownloadTap: {},
+                    onShareTap: {}
+                )
+            }
         }
     }
 }

@@ -29,6 +29,14 @@ struct MovieDetailsView: View {
                 viewModel.isShowingError = false
             }
         }
+        .sheet(isPresented: $viewModel.isShowingTrailer) {
+            if let videoID = viewModel.trailerVideoID {
+                YouTubePlayerView(
+                    videoID: videoID,
+                    title: viewModel.trailerTitle
+                )
+            }
+        }
         .onAppear {
             viewModel.viewDidLoad()
         }
@@ -82,6 +90,7 @@ struct MovieDetailsView: View {
 
                     // Action Buttons
                     MovieActionButtons(
+                        hasTrailer: movie.hasTrailer,
                         onTrailerTap: {
                             viewModel.playTrailer()
                         },

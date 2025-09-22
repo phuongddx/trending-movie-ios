@@ -210,4 +210,27 @@ extension Movie {
         }
         return nil
     }
+
+    public var youTubeTrailerID: String? {
+        guard let videos = videos else { return nil }
+
+        // Find YouTube trailer - prioritize official trailers
+        let youTubeTrailers = videos.filter { video in
+            video.site.lowercased() == "youtube" &&
+            video.type.lowercased() == "trailer"
+        }
+
+        // Sort by name to prioritize "Official Trailer" or similar
+        let sortedTrailers = youTubeTrailers.sorted { first, second in
+            let firstIsOfficial = first.name.lowercased().contains("official")
+            let secondIsOfficial = second.name.lowercased().contains("official")
+            return firstIsOfficial && !secondIsOfficial
+        }
+
+        return sortedTrailers.first?.key
+    }
+
+    public var hasTrailer: Bool {
+        return youTubeTrailerID != nil
+    }
 }
