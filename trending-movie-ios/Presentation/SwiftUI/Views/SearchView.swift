@@ -167,7 +167,7 @@ struct SearchView: View {
     private var searchResultsList: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
-                ForEach(viewModel.searchResults, id: \.title) { movie in
+                ForEach(viewModel.searchResults, id: \.id) { movie in
                     MovieCard(
                         movie: movie,
                         style: .compact,

@@ -108,33 +108,74 @@ struct MovieCard: View {
 
     private var standardCard: some View {
         Button(action: onTap) {
-            VStack(alignment: .leading, spacing: 8) {
-                // Poster image
-                MoviePosterImage.standard(posterPath: movie.posterImagePath)
-                    .frame(width: 140)
+            VStack(spacing: 0) {
+                ZStack(alignment: .topTrailing) {
+                    // Poster image
+                    if let posterPath = movie.posterImagePath {
+                        AsyncImage(url: URL(string: "https://image.tmdb.org/t/p/w342\(posterPath)")) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            Rectangle()
+                                .fill(DSColors.surfaceSwiftUI)
+                        }
+                    } else {
+                        Rectangle()
+                            .fill(DSColors.surfaceSwiftUI)
+                    }
+
+                    // Rating badge
+                    HStack(spacing: 4) {
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 12))
+                            .foregroundColor(Color(hex: "#FF8700"))
+
+                        Text(String(format: "%.1f", min(parseRating(movie.voteAverage) * 2, 10)))
+                            .font(DSTypography.h6SwiftUI(weight: .semibold))
+                            .foregroundColor(Color(hex: "#FF8700"))
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(
+                        VisualEffectBlur(blurStyle: .systemUltraThinMaterialDark)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.black.opacity(0.1), lineWidth: 1)
+                    )
+                    .padding(8)
+                }
+                .frame(width: 135, height: 178)
+                .clipped()
+                .cornerRadius(12, corners: [.topLeft, .topRight])
 
                 // Movie info
                 VStack(alignment: .leading, spacing: 4) {
                     Text(movie.title)
-                        .font(DSTypography.bodyMediumSwiftUI(weight: .semibold))
+                        .font(DSTypography.h5SwiftUI(weight: .semibold))
                         .foregroundColor(DSColors.primaryTextSwiftUI)
-                        .lineLimit(2)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
 
-                    Text(movie.releaseDate)
-                        .font(DSTypography.bodySmallSwiftUI())
+                    Text(getGenreText())
+                        .font(DSTypography.h7SwiftUI(weight: .medium))
                         .foregroundColor(DSColors.secondaryTextSwiftUI)
                         .lineLimit(1)
-
-                    DSRating(
-                        rating: parseRating(movie.voteAverage),
-                        maxRating: 5,
-                        size: .small,
-                        showValue: false
-                    )
                 }
-                .frame(width: 140, alignment: .leading)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 12)
+                .frame(width: 135, alignment: .leading)
             }
+            .background(DSColors.surfaceSwiftUI)
+            .cornerRadius(12)
         }
+    }
+
+    private func getGenreText() -> String {
+        // In real implementation, this would come from movie genres
+        return "Action"
     }
 
     private var compactCard: some View {
@@ -208,7 +249,7 @@ struct MovieCard: View {
 
     private var isInWatchlist: Bool {
         let movieModel = Movie(
-            id: movie.title, // Using title as ID since MoviesListItemViewModel doesn't expose the actual ID
+            id: movie.id, // Now using the actual TMDB movie ID
             title: movie.title,
             posterPath: movie.posterImagePath,
             overview: movie.overview,
@@ -220,7 +261,7 @@ struct MovieCard: View {
 
     private var isFavorite: Bool {
         let movieModel = Movie(
-            id: movie.title,
+            id: movie.id, // Now using the actual TMDB movie ID
             title: movie.title,
             posterPath: movie.posterImagePath,
             overview: movie.overview,

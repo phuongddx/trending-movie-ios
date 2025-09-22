@@ -4,6 +4,8 @@ struct HomeView: View {
     private let container: AppContainer
     @StateObject private var viewModel: HomeViewModel
     @StateObject private var storage = MovieStorage.shared
+    @State private var searchText = ""
+    @State private var selectedCategory = "All"
 
     init(container: AppContainer) {
         self.container = container
@@ -17,118 +19,114 @@ struct HomeView: View {
     }
 
     var body: some View {
-        NavigationView {
-            ZStack {
-                DSColors.backgroundSwiftUI
-                    .ignoresSafeArea()
+        ZStack {
+            DSColors.backgroundSwiftUI
+                .ignoresSafeArea()
 
-                if viewModel.isLoading && viewModel.heroMovies.isEmpty {
-                    loadingView
-                } else {
-                    contentView
-                }
-            }
-            .refreshable {
-                await viewModel.refresh()
-            }
-            .navigationBarHidden(true)
-        }
-        .onAppear {
-            viewModel.loadData()
-        }
-    }
+            ScrollView {
+                VStack(spacing: 24) {
+                    // User Profile Header
+                    UserProfileHeader(
+                        userName: "Smith",
+                        avatarImage: nil,
+                        onWishlistTap: {
+                            // Handle wishlist tap
+                        }
+                    )
+                    .padding(.top, 60)
 
-    private var loadingView: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                DSHeroCarouselSkeleton()
+                        // Search Bar
+                        DSSearchBar(
+                            text: $searchText,
+                            placeholder: "Search a title..",
+                            onCommit: {
+                                // Handle search
+                            },
+                            onFilterTap: {
+                                // Handle filter tap
+                            }
+                        )
+                        .padding(.horizontal, 24)
 
-                ForEach(0..<3, id: \.self) { _ in
-                    DSCarouselSkeleton()
-                }
-            }
-        }
-    }
+                        // Date subtitle
+                        HStack {
+                            Text("On March 2, 2022")
+                                .font(DSTypography.h6SwiftUI(weight: .medium))
+                                .foregroundColor(DSColors.secondaryTextSwiftUI)
+                            Spacer()
+                        }
+                        .padding(.horizontal, 56)
 
-    private var contentView: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                // Hero Carousel
-                HeroCarousel(
-                    movies: viewModel.heroMovies,
-                    onTap: { movie in
-                        viewModel.selectMovie(movie)
-                    },
-                    onWatchlistTap: { movie in
-                        handleWatchlistTap(movie)
-                    },
-                    onFavoriteTap: { movie in
-                        handleFavoriteTap(movie)
+                        // Hero Carousel
+                        if viewModel.isLoading && viewModel.heroMovies.isEmpty {
+                            DSHeroCarouselSkeleton()
+                        } else {
+                            HeroCarousel(
+                                movies: viewModel.heroMovies,
+                                onTap: { movie in
+                                    viewModel.selectMovie(movie)
+                                },
+                                onWatchlistTap: nil,
+                                onFavoriteTap: nil
+                            )
+                        }
+
+                        // Categories Section
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Categories")
+                                .font(DSTypography.h4SwiftUI(weight: .semibold))
+                                .foregroundColor(DSColors.primaryTextSwiftUI)
+                                .padding(.horizontal, 24)
+
+                            CategoryTabs(selectedCategory: $selectedCategory)
+                                .padding(.horizontal, 24)
+                        }
+
+                        // Most Popular Section
+                        VStack(alignment: .leading, spacing: 16) {
+                            HStack {
+                                Text("Most popular")
+                                    .font(DSTypography.h4SwiftUI(weight: .semibold))
+                                    .foregroundColor(DSColors.primaryTextSwiftUI)
+
+                                Spacer()
+
+                                Button("See All") {
+                                    // Handle see all
+                                }
+                                .font(DSTypography.h5SwiftUI(weight: .medium))
+                                .foregroundColor(Color(hex: "#12CDD9"))
+                            }
+                            .padding(.horizontal, 24)
+
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 12) {
+                                    ForEach(viewModel.popularMovies.prefix(6), id: \.id) { movie in
+                                        MovieCard(
+                                            movie: movie,
+                                            style: .standard,
+                                            onTap: { viewModel.selectMovie(movie) }
+                                        )
+                                    }
+                                }
+                                .padding(.horizontal, 24)
+                            }
+                        }
+
+                        // Add bottom padding for tab bar
+                        Color.clear
+                            .frame(height: 40)
                     }
-                )
-
-                // Category Carousels
-                VStack(spacing: 32) {
-                    CategoryCarousel(
-                        title: "Popular Movies",
-                        movies: viewModel.popularMovies,
-                        onTap: { movie in
-                            viewModel.selectMovie(movie)
-                        },
-                        onSeeAll: nil
-                    )
-
-                    CategoryCarousel(
-                        title: "Now Playing",
-                        movies: viewModel.nowPlayingMovies,
-                        onTap: { movie in
-                            viewModel.selectMovie(movie)
-                        },
-                        onSeeAll: nil
-                    )
-
-                    CategoryCarousel(
-                        title: "Top Rated",
-                        movies: viewModel.topRatedMovies,
-                        onTap: { movie in
-                            viewModel.selectMovie(movie)
-                        },
-                        onSeeAll: nil
-                    )
-
-                    CategoryCarousel(
-                        title: "Upcoming",
-                        movies: viewModel.upcomingMovies,
-                        onTap: { movie in
-                            viewModel.selectMovie(movie)
-                        },
-                        onSeeAll: nil
-                    )
-                }
             }
         }
+        .ignoresSafeArea(.container, edges: .top)
         .sheet(item: $viewModel.selectedMovie) { movie in
             MovieDetailsView(
                 viewModel: container.observableMovieDetailsViewModel(movie: movie.movie)
             )
         }
-    }
-
-    private func handleWatchlistTap(_ movieViewModel: MoviesListItemViewModel) {
-        let movie = movieViewModel.movie
-        if storage.isInWatchlist(movie) {
-            storage.removeFromWatchlist(movie)
-        } else {
-            storage.addToWatchlist(movie)
-        }
-    }
-
-    private func handleFavoriteTap(_ movieViewModel: MoviesListItemViewModel) {
-        let movie = movieViewModel.movie
-        if storage.isFavorite(movie) {
-            storage.removeFromFavorites(movie)
-        } else {
-            storage.addToFavorites(movie)
+        .onAppear {
+            viewModel.loadData()
         }
     }
 }
@@ -174,21 +172,11 @@ class HomeViewModel: ObservableObject {
         // Load trending movies for hero carousel
         loadTrendingMovies()
 
-        // Load other categories (these would be separate endpoints in a real app)
+        // Load other categories
         loadPopularMovies()
         loadNowPlayingMovies()
         loadTopRatedMovies()
         loadUpcomingMovies()
-    }
-
-    func refresh() async {
-        heroMovies.removeAll()
-        popularMovies.removeAll()
-        nowPlayingMovies.removeAll()
-        topRatedMovies.removeAll()
-        upcomingMovies.removeAll()
-
-        loadData()
     }
 
     func selectMovie(_ movieViewModel: MoviesListItemViewModel) {
@@ -211,7 +199,7 @@ class HomeViewModel: ObservableObject {
                     case .success(let page):
                         self?.processMoviesPage(page, for: \.heroMovies)
                     case .failure:
-                        break // Handle error if needed
+                        break
                     }
                     self?.checkLoadingComplete()
                 }
@@ -339,7 +327,7 @@ class HomeViewModel: ObservableObject {
 extension MoviesListItemViewModel {
     var movie: Movie {
         return Movie(
-            id: self.title, // Using title as ID for now
+            id: self.id, // Now using the actual TMDB movie ID
             title: self.title,
             posterPath: self.posterImagePath,
             overview: self.overview,

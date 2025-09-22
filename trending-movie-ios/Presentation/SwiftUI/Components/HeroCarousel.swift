@@ -14,31 +14,33 @@ struct HeroCarousel: View {
         if movies.isEmpty {
             DSHeroCarouselSkeleton()
         } else {
-            TabView(selection: $currentIndex) {
-                ForEach(Array(movies.enumerated()), id: \.element.title) { index, movie in
-                    MovieCard(
-                        movie: movie,
-                        style: .hero,
-                        onTap: { onTap(movie) },
-                        onWatchlistTap: onWatchlistTap != nil ? { onWatchlistTap?(movie) } : nil,
-                        onFavoriteTap: onFavoriteTap != nil ? { onFavoriteTap?(movie) } : nil
-                    )
-                    .tag(index)
+            ZStack(alignment: .bottom) {
+                TabView(selection: $currentIndex) {
+                    ForEach(Array(movies.prefix(3).enumerated()), id: \.element.id) { index, movie in
+                        HeroSlide(
+                            movie: movie,
+                            onTap: { onTap(movie) }
+                        )
+                        .tag(index)
+                    }
                 }
-            }
-            .frame(height: UIScreen.main.bounds.height * 0.6)
-            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
-            .onAppear {
-                startAutoScroll()
-            }
-            .onDisappear {
-                stopAutoScroll()
-            }
-            .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
-                startAutoScroll()
-            }
-            .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { _ in
-                stopAutoScroll()
+                .frame(height: 174)
+                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                .onAppear {
+                    startAutoScroll()
+                }
+                .onDisappear {
+                    stopAutoScroll()
+                }
+                .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+                    startAutoScroll()
+                }
+                .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { _ in
+                    stopAutoScroll()
+                }
+
+                CustomPageIndicator(numberOfPages: min(movies.count, 3), currentIndex: $currentIndex)
+                    .padding(.bottom, 8)
             }
         }
     }
@@ -56,6 +58,82 @@ struct HeroCarousel: View {
     private func stopAutoScroll() {
         timer?.invalidate()
         timer = nil
+    }
+}
+
+struct HeroSlide: View {
+    let movie: MoviesListItemViewModel
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            ZStack(alignment: .bottomLeading) {
+                GeometryReader { geometry in
+                    ZStack {
+                        if let posterPath = movie.posterImagePath {
+                            AsyncImage(url: URL(string: "https://image.tmdb.org/t/p/w780\(posterPath)")) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: geometry.size.width, height: geometry.size.height)
+                            } placeholder: {
+                                Rectangle()
+                                    .fill(DSColors.surfaceSwiftUI)
+                            }
+                        } else {
+                            Rectangle()
+                                .fill(DSColors.surfaceSwiftUI)
+                        }
+
+                        LinearGradient(
+                            gradient: Gradient(stops: [
+                                .init(color: Color.black.opacity(0.2), location: 0),
+                                .init(color: Color.black.opacity(1), location: 0.84)
+                            ]),
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        .opacity(0.32)
+                    }
+                }
+                .cornerRadius(16)
+
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(movie.title)
+                        .font(DSTypography.h4SwiftUI(weight: .semibold))
+                        .foregroundColor(.white)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                }
+                .padding(.leading, 16)
+                .padding(.bottom, 16)
+            }
+            .frame(height: 154)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .padding(.horizontal, 40)
+    }
+}
+
+struct CustomPageIndicator: View {
+    let numberOfPages: Int
+    @Binding var currentIndex: Int
+
+    var body: some View {
+        HStack(spacing: 8) {
+            ForEach(0..<numberOfPages, id: \.self) { index in
+                if index == currentIndex {
+                    Capsule()
+                        .fill(Color(hex: "#12CDD9"))
+                        .frame(width: 24, height: 8)
+                } else {
+                    Circle()
+                        .fill(Color(hex: "#12CDD9").opacity(0.32))
+                        .frame(width: 8, height: 8)
+                }
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: currentIndex)
     }
 }
 
@@ -90,7 +168,7 @@ struct CategoryCarousel: View {
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 16) {
-                        ForEach(movies, id: \.title) { movie in
+                        ForEach(movies, id: \.id) { movie in
                             MovieCard(
                                 movie: movie,
                                 style: .standard,

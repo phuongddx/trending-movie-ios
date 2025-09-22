@@ -2,6 +2,7 @@ import Foundation
 import Combine
 
 struct MoviesListItemViewModel: Equatable {
+    let id: String
     let title: String
     let overview: String
     let releaseDate: String
@@ -9,6 +10,7 @@ struct MoviesListItemViewModel: Equatable {
     let posterImagePath: String?
 
     init(movie: Movie) {
+        self.id = movie.id
         self.title = movie.title ?? ""
         self.posterImagePath = movie.posterPath
         self.overview = movie.overview ?? ""
@@ -28,7 +30,8 @@ struct MoviesListItemViewModel: Equatable {
 
 
     static func == (lhs: MoviesListItemViewModel, rhs: MoviesListItemViewModel) -> Bool {
-        return lhs.title == rhs.title &&
+        return lhs.id == rhs.id &&
+               lhs.title == rhs.title &&
                lhs.overview == rhs.overview &&
                lhs.releaseDate == rhs.releaseDate &&
                lhs.voteAverage == rhs.voteAverage &&
