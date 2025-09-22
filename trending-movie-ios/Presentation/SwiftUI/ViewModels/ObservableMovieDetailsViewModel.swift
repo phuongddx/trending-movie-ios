@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 import Combine
+import Moya
 
 @MainActor
 class ObservableMovieDetailsViewModel: ObservableObject {
@@ -17,7 +18,7 @@ class ObservableMovieDetailsViewModel: ObservableObject {
 
     var screenTitle: String { movie?.title ?? initialMovie.title ?? "Movie Details" }
 
-    nonisolated init(movie: Movie,
+    init(movie: Movie,
          fetchDetailsMovieUseCase: FetchDetailsMovieUseCaseProtocol) {
         self.initialMovie = movie
         self.detailsMovieUseCase = fetchDetailsMovieUseCase
@@ -38,7 +39,7 @@ class ObservableMovieDetailsViewModel: ObservableObject {
 
         moviesLoadTask?.cancel()
         moviesLoadTask = detailsMovieUseCase.execute(with: initialMovie.id) { [weak self] result in
-            Task { @MainActor in
+            DispatchQueue.main.async {
                 switch result {
                 case .success(let movie):
                     self?.movie = movie
@@ -52,6 +53,22 @@ class ObservableMovieDetailsViewModel: ObservableObject {
 
 
     private func handleError(_ error: Error) {
+        print("🔴 Movie Details Error: \(error)")
+        print("🔴 Movie ID: \(initialMovie.id)")
+        print("🔴 Movie Title: \(initialMovie.title ?? "Unknown")")
+
+        if let moyaError = error as? MoyaError {
+            switch moyaError {
+            case .statusCode(let response):
+                print("🔴 HTTP Status: \(response.statusCode)")
+                print("🔴 Response: \(String(data: response.data, encoding: .utf8) ?? "No data")")
+            case .underlying(let underlyingError, _):
+                print("🔴 Underlying error: \(underlyingError)")
+            default:
+                print("🔴 Other Moya error: \(moyaError.localizedDescription)")
+            }
+        }
+
         self.error = NSLocalizedString("Failed loading movie details", comment: "")
         self.isShowingError = true
     }

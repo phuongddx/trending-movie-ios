@@ -16,6 +16,7 @@ extension AppContainer {
         }
     }
 
+    @MainActor
     func observableMovieDetailsViewModel(movie: Movie) -> ObservableMovieDetailsViewModel {
         ObservableMovieDetailsViewModel(
             movie: movie,
