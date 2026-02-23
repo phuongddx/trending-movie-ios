@@ -3,8 +3,21 @@ import SwiftUI
 struct CastCrewSection: View {
     let movie: Movie
 
-    private var director: String {
-        movie.director ?? "Jon Watts"
+    // Filter directors from crew
+    private var directors: [CrewMember] {
+        guard let crew = movie.credits?.crew else { return [] }
+        return crew.filter { $0.job.lowercased() == "director" }
+    }
+
+    // Filter writers from crew
+    private var writers: [CrewMember] {
+        guard let crew = movie.credits?.crew else { return [] }
+        return crew.filter { $0.department.lowercased() == "writing" }
+    }
+
+    // Fallback director from movie.director if no credits
+    private var fallbackDirector: String {
+        movie.director ?? "Unknown"
     }
 
     var body: some View {
@@ -15,23 +28,34 @@ struct CastCrewSection: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 16) {
-                    CrewMemberCard(
-                        name: director,
-                        role: "Directors",
-                        avatarImage: nil
-                    )
+                    // Directors
+                    if !directors.isEmpty {
+                        ForEach(directors.prefix(2)) { director in
+                            CrewMemberCard(
+                                name: director.name,
+                                role: "Director",
+                                avatarImage: director.profilePath
+                            )
+                        }
+                    } else {
+                        // Fallback if no credits loaded
+                        CrewMemberCard(
+                            name: fallbackDirector,
+                            role: "Director",
+                            avatarImage: nil
+                        )
+                    }
 
-                    CrewMemberCard(
-                        name: "Chris McKenna",
-                        role: "Writers",
-                        avatarImage: nil
-                    )
-
-                    CrewMemberCard(
-                        name: "Erik Sommers",
-                        role: "Writers",
-                        avatarImage: nil
-                    )
+                    // Writers
+                    if !writers.isEmpty {
+                        ForEach(writers.prefix(3)) { writer in
+                            CrewMemberCard(
+                                name: writer.name,
+                                role: writer.job,
+                                avatarImage: writer.profilePath
+                            )
+                        }
+                    }
                 }
                 .padding(.horizontal, 24)
             }
@@ -47,14 +71,24 @@ struct CrewMemberCard: View {
     var body: some View {
         HStack(spacing: 12) {
             // Avatar
-            Circle()
-                .fill(Color(hex: "#E8E8E6"))
+            if let profilePath = avatarImage {
+                AsyncImage(url: URL(string: "https://image.tmdb.org/t/p/w185\(profilePath)")) { image in
+                    image.resizable().aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    Circle().fill(Color(hex: "#E8E8E6"))
+                }
                 .frame(width: 40, height: 40)
-                .overlay(
-                    Image(systemName: "person.fill")
-                        .foregroundColor(.gray)
-                        .font(.system(size: 20))
-                )
+                .clipShape(Circle())
+            } else {
+                Circle()
+                    .fill(Color(hex: "#E8E8E6"))
+                    .frame(width: 40, height: 40)
+                    .overlay(
+                        Image(systemName: "person.fill")
+                            .foregroundColor(.gray)
+                            .font(.system(size: 20))
+                    )
+            }
 
             // Info
             VStack(alignment: .leading, spacing: 4) {

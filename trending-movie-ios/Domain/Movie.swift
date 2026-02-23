@@ -6,6 +6,7 @@ public struct Movie: Equatable, Identifiable {
     public let id: Identifier
     public let title: String?
     public let posterPath: String?
+    public let backdropPath: String?
     public let overview: String?
     public let releaseDate: Date?
     public let voteAverage: String?
@@ -24,10 +25,13 @@ public struct Movie: Equatable, Identifiable {
     public let videos: [Video]?
     public let images: MovieImages?
     public let credits: MovieCredits?
+    public let watchProviders: WatchProviders?
+    public let reviews: [Review]?
 
     public init(id: Identifier,
                 title: String?,
                 posterPath: String?,
+                backdropPath: String? = nil,
                 overview: String?,
                 releaseDate: Date?,
                 voteAverage: String?,
@@ -45,10 +49,13 @@ public struct Movie: Equatable, Identifiable {
                 voteCount: Int? = nil,
                 videos: [Video]? = nil,
                 images: MovieImages? = nil,
-                credits: MovieCredits? = nil) {
+                credits: MovieCredits? = nil,
+                watchProviders: WatchProviders? = nil,
+                reviews: [Review]? = nil) {
         self.id = id
         self.title = title
         self.posterPath = posterPath
+        self.backdropPath = backdropPath
         self.overview = overview
         self.releaseDate = releaseDate
         self.voteAverage = voteAverage
@@ -67,6 +74,8 @@ public struct Movie: Equatable, Identifiable {
         self.videos = videos
         self.images = images
         self.credits = credits
+        self.watchProviders = watchProviders
+        self.reviews = reviews
     }
 }
 
@@ -164,6 +173,70 @@ public struct CrewMember: Equatable, Identifiable {
     }
 }
 
+// MARK: - Watch Providers
+
+public struct WatchProviders: Equatable {
+    public let link: String?
+    public let flatrate: [WatchProvider]
+    public let rent: [WatchProvider]
+    public let buy: [WatchProvider]
+
+    public init(link: String?, flatrate: [WatchProvider], rent: [WatchProvider], buy: [WatchProvider]) {
+        self.link = link
+        self.flatrate = flatrate
+        self.rent = rent
+        self.buy = buy
+    }
+}
+
+public struct WatchProvider: Equatable, Identifiable, Hashable {
+    public let id: Int
+    public let name: String
+    public let logoPath: String?
+
+    public init(id: Int, name: String, logoPath: String?) {
+        self.id = id
+        self.name = name
+        self.logoPath = logoPath
+    }
+
+    public var logoURL: URL? {
+        guard let logoPath else { return nil }
+        return URL(string: "https://image.tmdb.org/t/p/w500\(logoPath)")
+    }
+}
+
+// MARK: - Review
+
+public struct Review: Equatable, Identifiable {
+    public let id: String
+    public let author: String
+    public let authorAvatarPath: String?
+    public let authorRating: Double?
+    public let content: String
+    public let createdAt: String
+    public let url: String
+
+    public init(id: String, author: String, authorAvatarPath: String?, authorRating: Double?, content: String, createdAt: String, url: String) {
+        self.id = id
+        self.author = author
+        self.authorAvatarPath = authorAvatarPath
+        self.authorRating = authorRating
+        self.content = content
+        self.createdAt = createdAt
+        self.url = url
+    }
+
+    public var avatarURL: URL? {
+        guard let avatarPath = authorAvatarPath else { return nil }
+        // Handle both full URLs and relative paths
+        if avatarPath.hasPrefix("http") {
+            return URL(string: avatarPath)
+        }
+        return URL(string: "https://image.tmdb.org/t/p/w185\(avatarPath)")
+    }
+}
+
 // MARK: - Movie Extensions for UI
 extension Movie {
     public var formattedYear: String {
@@ -198,6 +271,10 @@ extension Movie {
     }
 
     public var backdropImageURL: String? {
+        if let backdropPath = backdropPath, !backdropPath.isEmpty {
+            return "https://image.tmdb.org/t/p/w780\(backdropPath)"
+        }
+        // Fallback to poster if no backdrop
         if let posterPath = posterPath, !posterPath.isEmpty {
             return "https://image.tmdb.org/t/p/w780\(posterPath)"
         }

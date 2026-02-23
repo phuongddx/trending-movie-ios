@@ -11,9 +11,19 @@ struct MovieBackdropHero: View {
 
     var body: some View {
         ZStack {
-            // Backdrop Image
+            // Backdrop Image - FIXED: Use backdropPath instead of posterPath
             Group {
-                if let posterPath = movie.posterPath, !posterPath.isEmpty {
+                if let backdropPath = movie.backdropPath, !backdropPath.isEmpty {
+                    AsyncImage(url: URL(string: "https://image.tmdb.org/t/p/w780\(backdropPath)")) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Rectangle()
+                            .fill(DSColors.surfaceSwiftUI)
+                    }
+                } else if let posterPath = movie.posterPath, !posterPath.isEmpty {
+                    // Fallback to poster if no backdrop
                     AsyncImage(url: URL(string: "https://image.tmdb.org/t/p/w780\(posterPath)")) { image in
                         image
                             .resizable()
@@ -79,6 +89,7 @@ struct MovieBackdropHero_Previews: PreviewProvider {
             id: "1",
             title: "Sample Movie",
             posterPath: "/sample-poster.jpg",
+            backdropPath: "/sample-backdrop.jpg",
             overview: "Sample overview",
             releaseDate: Date(),
             voteAverage: "8.5"

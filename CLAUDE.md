@@ -31,7 +31,20 @@ xcodebuild -project trending-movie-ios.xcodeproj -scheme trending-movie-ios buil
 bundle exec fastlane tests
 
 # Run tests directly
-xcodebuild test -project trending-movie-ios.xcodeproj -scheme trending-movie-ios -destination 'platform=iOS Simulator,name=iPhone 16 Pro Max'
+xcodebuild test -project trending-movie-ios.xcodeproj -scheme trending-movie-ios -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max'
+```
+
+### XcodeBuildMCP (Recommended for iOS Development)
+Use XcodeBuildMCP tools for Apple platform development instead of raw bash commands:
+- `mcp__XcodeBuildMCP__build_sim` - Build for iOS Simulator
+- `mcp__XcodeBuildMCP__build_run_sim` - Build and run on simulator
+- `mcp__XcodeBuildMCP__test_sim` - Run tests on simulator
+- `mcp__XcodeBuildMCP__screenshot` - Capture simulator screenshot
+- `mcp__XcodeBuildMCP__snapshot_ui` - Print view hierarchy
+
+First, set session defaults:
+```
+mcp__XcodeBuildMCP__session_set_defaults with projectPath, scheme, simulatorName
 ```
 
 ### Requirements

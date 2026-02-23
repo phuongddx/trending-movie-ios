@@ -122,6 +122,9 @@ public enum TMDBTarget {
     case movieImages(movieId: String)
     case movieCredits(movieId: String)
     case movieReleaseDates(movieId: String)
+    case watchProviders(movieId: String)
+    case movieReviews(movieId: String, page: Int)
+    case similarMovies(movieId: String, page: Int)
     case posterImage(path: String)
     case rateMovie(movieId: String, rating: Double)
 }
@@ -160,6 +163,12 @@ extension TMDBTarget: TargetType {
             return "movie/\(movieId)/credits"
         case .movieReleaseDates(let movieId):
             return "movie/\(movieId)/release_dates"
+        case .watchProviders(let movieId):
+            return "movie/\(movieId)/watch/providers"
+        case .movieReviews(let movieId, _):
+            return "movie/\(movieId)/reviews"
+        case .similarMovies(let movieId, _):
+            return "movie/\(movieId)/similar"
         case .posterImage(let path):
             return "w500\(path)"
         case .rateMovie(let movieId, _):
@@ -199,10 +208,18 @@ extension TMDBTarget: TargetType {
                 ],
                 encoding: URLEncoding.queryString
             )
-        case .movieDetails, .movieVideos, .movieImages, .movieCredits, .movieReleaseDates:
+        case .movieDetails, .movieVideos, .movieImages, .movieCredits, .movieReleaseDates, .watchProviders:
             return .requestParameters(
                 parameters: [
                     "api_key": "bbc142c0087fef1df2ad2e3230101822"
+                ],
+                encoding: URLEncoding.queryString
+            )
+        case .movieReviews(_, let page), .similarMovies(_, let page):
+            return .requestParameters(
+                parameters: [
+                    "api_key": "bbc142c0087fef1df2ad2e3230101822",
+                    "page": page
                 ],
                 encoding: URLEncoding.queryString
             )

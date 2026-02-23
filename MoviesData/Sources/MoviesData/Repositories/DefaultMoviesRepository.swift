@@ -186,6 +186,60 @@ public final class DefaultMoviesRepository: MoviesRepository {
 
         return cancellable
     }
+
+    public func fetchWatchProviders(movieId: Movie.Identifier,
+                                    completion: @escaping WatchProvidersResult) -> MoviesDomain.Cancellable? {
+        let cancellable = networkService.request(
+            .watchProviders(movieId: movieId),
+            type: TMDBWatchProvidersResponse.self
+        ) { result in
+            switch result {
+            case .success(let response):
+                // Default to US region
+                let usProviders = response.results["US"]?.toDomain()
+                completion(.success(usProviders))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+        return cancellable
+    }
+
+    public func fetchReviews(movieId: Movie.Identifier,
+                             page: Int,
+                             completion: @escaping ReviewsResult) -> MoviesDomain.Cancellable? {
+        let cancellable = networkService.request(
+            .movieReviews(movieId: movieId, page: page),
+            type: TMDBReviewsResponse.self
+        ) { result in
+            switch result {
+            case .success(let response):
+                let reviews = response.results.map { $0.toDomain() }
+                completion(.success(reviews))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+        return cancellable
+    }
+
+    public func fetchSimilarMovies(movieId: Movie.Identifier,
+                                   page: Int,
+                                   completion: @escaping MoviesPageResult) -> MoviesDomain.Cancellable? {
+        let cancellable = networkService.request(
+            .similarMovies(movieId: movieId, page: page),
+            type: TMDBMoviesResponse.self
+        ) { result in
+            switch result {
+            case .success(let responseDTO):
+                let moviesPage = responseDTO.toDomain()
+                completion(.success(moviesPage))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+        return cancellable
+    }
 }
 
 // MARK: - Cache Protocol

@@ -2,6 +2,8 @@ import Foundation
 
 public typealias MoviesPageResult = (Result<MoviesPage, Error>) -> Void
 public typealias MovieDetailsResult = (Result<MovieDetails, Error>) -> Void
+public typealias WatchProvidersResult = (Result<WatchProviders?, Error>) -> Void
+public typealias ReviewsResult = (Result<[Review], Error>) -> Void
 
 public protocol MoviesRepository {
     @discardableResult
@@ -38,4 +40,18 @@ public protocol MoviesRepository {
     @discardableResult
     func fetchDetailsMovie(of movieId: Movie.Identifier,
                            completion: @escaping MovieDetailsResult) -> Cancellable?
+
+    @discardableResult
+    func fetchWatchProviders(movieId: Movie.Identifier,
+                             completion: @escaping WatchProvidersResult) -> Cancellable?
+
+    @discardableResult
+    func fetchReviews(movieId: Movie.Identifier,
+                      page: Int,
+                      completion: @escaping ReviewsResult) -> Cancellable?
+
+    @discardableResult
+    func fetchSimilarMovies(movieId: Movie.Identifier,
+                            page: Int,
+                            completion: @escaping MoviesPageResult) -> Cancellable?
 }

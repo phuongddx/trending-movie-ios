@@ -261,6 +261,81 @@ public struct TMDBRelease: Codable {
     }
 }
 
+// MARK: - Watch Providers Response
+
+public struct TMDBWatchProvidersResponse: Codable {
+    public let id: Int
+    public let results: [String: TMDBCountryWatchProviders]
+}
+
+public struct TMDBCountryWatchProviders: Codable {
+    public let link: String?
+    public let flatrate: [TMDBWatchProvider]?
+    public let rent: [TMDBWatchProvider]?
+    public let buy: [TMDBWatchProvider]?
+    public let free: [TMDBWatchProvider]?
+    public let ads: [TMDBWatchProvider]?
+}
+
+public struct TMDBWatchProvider: Codable, Hashable {
+    public let providerId: Int
+    public let providerName: String
+    public let logoPath: String?
+    public let displayPriority: Int
+
+    enum CodingKeys: String, CodingKey {
+        case providerId = "provider_id"
+        case providerName = "provider_name"
+        case logoPath = "logo_path"
+        case displayPriority = "display_priority"
+    }
+}
+
+// MARK: - Reviews Response
+
+public struct TMDBReviewsResponse: Codable {
+    public let id: Int
+    public let page: Int
+    public let results: [TMDBReview]
+    public let totalPages: Int
+    public let totalResults: Int
+
+    enum CodingKeys: String, CodingKey {
+        case id, page, results
+        case totalPages = "total_pages"
+        case totalResults = "total_results"
+    }
+}
+
+public struct TMDBReview: Codable, Identifiable {
+    public let id: String
+    public let author: String
+    public let authorDetails: TMDBAuthorDetails?
+    public let content: String
+    public let createdAt: String
+    public let updatedAt: String?
+    public let url: String
+
+    enum CodingKeys: String, CodingKey {
+        case id, author, content, url
+        case authorDetails = "author_details"
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+    }
+}
+
+public struct TMDBAuthorDetails: Codable {
+    public let name: String?
+    public let username: String
+    public let avatarPath: String?
+    public let rating: Double?
+
+    enum CodingKeys: String, CodingKey {
+        case name, username, rating
+        case avatarPath = "avatar_path"
+    }
+}
+
 // MARK: - Conversion Extensions
 
 extension TMDBMoviesResponse {
@@ -280,6 +355,7 @@ extension TMDBMovie {
             id: String(id),
             title: title,
             posterPath: posterPath,
+            backdropPath: backdropPath,
             overview: overview,
             releaseDate: parsedDate,
             voteAverage: String(format: "%.1f", voteAverage),
@@ -312,6 +388,7 @@ extension TMDBMovieDetail {
             id: String(id),
             title: title,
             posterPath: posterPath,
+            backdropPath: backdropPath,
             overview: overview,
             releaseDate: parsedDate,
             voteAverage: String(format: "%.1f", voteAverage),
@@ -383,6 +460,45 @@ extension TMDBCrewMember {
             job: job,
             department: department,
             profilePath: profilePath
+        )
+    }
+}
+
+// MARK: - Watch Providers Conversion
+
+extension TMDBWatchProvider {
+    func toDomain() -> WatchProvider {
+        return WatchProvider(
+            id: providerId,
+            name: providerName,
+            logoPath: logoPath
+        )
+    }
+}
+
+extension TMDBCountryWatchProviders {
+    func toDomain() -> WatchProviders {
+        return WatchProviders(
+            link: link,
+            flatrate: flatrate?.map { $0.toDomain() } ?? [],
+            rent: rent?.map { $0.toDomain() } ?? [],
+            buy: buy?.map { $0.toDomain() } ?? []
+        )
+    }
+}
+
+// MARK: - Review Conversion
+
+extension TMDBReview {
+    func toDomain() -> Review {
+        return Review(
+            id: id,
+            author: author,
+            authorAvatarPath: authorDetails?.avatarPath,
+            authorRating: authorDetails?.rating,
+            content: content,
+            createdAt: createdAt,
+            url: url
         )
     }
 }

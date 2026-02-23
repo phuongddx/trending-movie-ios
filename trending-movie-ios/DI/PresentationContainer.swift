@@ -20,7 +20,8 @@ extension AppContainer {
     func observableMovieDetailsViewModel(movie: Movie) -> ObservableMovieDetailsViewModel {
         ObservableMovieDetailsViewModel(
             movie: movie,
-            fetchDetailsMovieUseCase: self.fetchDetailsMovieUseCase()
+            fetchDetailsMovieUseCase: self.fetchDetailsMovieUseCase(),
+            networkService: self.tmdbNetworkService()
         )
     }
 }

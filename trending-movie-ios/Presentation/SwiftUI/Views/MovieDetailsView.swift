@@ -103,6 +103,10 @@ struct MovieDetailsView: View {
                     )
                     .padding(.top, 24)
 
+                    // Where to Watch Section
+                    WhereToWatchSection(watchProviders: viewModel.watchProviders)
+                        .padding(.top, 24)
+
                     // Story Line Section
                     StoryLineSection(movie: movie)
                         .padding(.top, 24)
@@ -110,7 +114,30 @@ struct MovieDetailsView: View {
                     // Cast and Crew Section
                     CastCrewSection(movie: movie)
                         .padding(.top, 24)
-                        .padding(.bottom, 40)
+
+                    // Cast Carousel with Photos
+                    if let credits = movie.credits, !credits.cast.isEmpty {
+                        CastCarouselSection(cast: credits.cast)
+                            .padding(.top, 24)
+                    }
+
+                    // Full Metadata Section
+                    FullMetadataSection(movie: movie)
+                        .padding(.top, 24)
+
+                    // Reviews Section
+                    ReviewsSection(reviews: viewModel.reviews)
+                        .padding(.top, 24)
+
+                    // Similar Movies Section
+                    SimilarMoviesSection(
+                        movies: viewModel.similarMovies,
+                        onMovieTap: { similarMovie in
+                            viewModel.selectSimilarMovie(similarMovie)
+                        }
+                    )
+                    .padding(.top, 24)
+                    .padding(.bottom, 40)
                 }
             }
         }
@@ -159,7 +186,8 @@ struct MovieDetailsView_Previews: PreviewProvider {
         let container = AppContainer.shared
         let viewModel = ObservableMovieDetailsViewModel(
             movie: mockMovie,
-            fetchDetailsMovieUseCase: container.fetchDetailsMovieUseCase()
+            fetchDetailsMovieUseCase: container.fetchDetailsMovieUseCase(),
+            networkService: container.tmdbNetworkService()
         )
 
         return NavigationView {

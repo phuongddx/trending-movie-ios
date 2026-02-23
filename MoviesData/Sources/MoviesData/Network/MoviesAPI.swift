@@ -12,6 +12,8 @@ public enum MoviesAPI {
     case movieDetails(movieId: String)
     case movieCredits(movieId: String)
     case similarMovies(movieId: String, page: Int)
+    case watchProviders(movieId: String)
+    case movieReviews(movieId: String, page: Int)
     case posterImage(path: String)
 }
 
@@ -45,6 +47,10 @@ extension MoviesAPI: TargetType {
             return "movie/\(movieId)/credits"
         case .similarMovies(let movieId, _):
             return "movie/\(movieId)/similar"
+        case .watchProviders(let movieId):
+            return "movie/\(movieId)/watch/providers"
+        case .movieReviews(let movieId, _):
+            return "movie/\(movieId)/reviews"
         case .posterImage(let path):
             return "w500\(path)"
         }
@@ -69,13 +75,15 @@ extension MoviesAPI: TargetType {
              .nowPlayingMovies(let page),
              .topRatedMovies(let page),
              .upcomingMovies(let page),
-             .similarMovies(_, let page):
+             .similarMovies(_, let page),
+             .movieReviews(_, let page):
             return .requestParameters(
                 parameters: ["page": page],
                 encoding: URLEncoding.queryString
             )
         case .movieDetails,
              .movieCredits,
+             .watchProviders,
              .posterImage:
             return .requestPlain
         }

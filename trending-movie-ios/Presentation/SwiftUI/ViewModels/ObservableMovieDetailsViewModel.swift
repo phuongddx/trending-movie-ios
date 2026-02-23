@@ -16,22 +16,33 @@ class ObservableMovieDetailsViewModel: ObservableObject {
     @Published var trailerVideoID: String?
     @Published var trailerTitle: String = ""
 
+    // Supplementary data for new sections
+    @Published var watchProviders: WatchProviders?
+    @Published var reviews: [Review] = []
+    @Published var similarMovies: [Movie] = []
+    @Published var selectedSimilarMovie: Movie?
+
     private let initialMovie: Movie
     private let detailsMovieUseCase: FetchDetailsMovieUseCaseProtocol
+    private let networkService: TMDBNetworkService
 
     private var moviesLoadTask: Cancellable?
+    private var supplementaryLoadTask: Cancellable?
 
     var screenTitle: String { movie?.title ?? initialMovie.title ?? "Movie Details" }
 
     init(movie: Movie,
-         fetchDetailsMovieUseCase: FetchDetailsMovieUseCaseProtocol) {
+         fetchDetailsMovieUseCase: FetchDetailsMovieUseCaseProtocol,
+         networkService: TMDBNetworkService) {
         self.initialMovie = movie
         self.detailsMovieUseCase = fetchDetailsMovieUseCase
+        self.networkService = networkService
     }
 
     func viewDidLoad() {
         movie = initialMovie
         loadDetails()
+        loadSupplementaryData()
     }
 
     func refreshDetails() async {
@@ -52,6 +63,55 @@ class ObservableMovieDetailsViewModel: ObservableObject {
                     self?.handleError(error)
                 }
                 self?.loading = nil
+            }
+        }
+    }
+
+    private func loadSupplementaryData() {
+        // Load watch providers
+        _ = networkService.request(
+            .watchProviders(movieId: initialMovie.id),
+            type: TMDBWatchProvidersResponse.self
+        ) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let response):
+                    // Default to US region
+                    self?.watchProviders = response.results["US"]?.toDomain()
+                case .failure(let error):
+                    // Silent fail - section will be hidden, but log for debugging
+                    print("⚠️ Watch providers load failed: \(error.localizedDescription)")
+                }
+            }
+        }
+
+        // Load reviews (first page only)
+        _ = networkService.request(
+            .movieReviews(movieId: initialMovie.id, page: 1),
+            type: TMDBReviewsResponse.self
+        ) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let response):
+                    self?.reviews = response.results.map { $0.toDomain() }
+                case .failure(let error):
+                    print("⚠️ Reviews load failed: \(error.localizedDescription)")
+                }
+            }
+        }
+
+        // Load similar movies
+        _ = networkService.request(
+            .similarMovies(movieId: initialMovie.id, page: 1),
+            type: TMDBMoviesResponse.self
+        ) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let response):
+                    self?.similarMovies = response.results.map { $0.toDomain() }
+                case .failure(let error):
+                    print("⚠️ Similar movies load failed: \(error.localizedDescription)")
+                }
             }
         }
     }
@@ -106,6 +166,14 @@ class ObservableMovieDetailsViewModel: ObservableObject {
     func shareMovie() {
         // In a real app, this would share the movie
         print("Sharing: \(movie?.title ?? "Unknown")")
+    }
+
+    func selectSimilarMovie(_ movie: Movie) {
+        selectedSimilarMovie = movie
+    }
+
+    func clearSelection() {
+        selectedSimilarMovie = nil
     }
 }
 
