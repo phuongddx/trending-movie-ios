@@ -120,6 +120,111 @@ struct HomeView: View {
                             }
                         }
 
+                        // MARK: - Now Playing Section
+                        VStack(alignment: .leading, spacing: 16) {
+                            HStack {
+                                Text("Now Playing")
+                                    .font(DSTypography.h4SwiftUI(weight: .semibold))
+                                    .foregroundColor(DSColors.primaryTextSwiftUI)
+
+                                Spacer()
+
+                                Button("See All") { }
+                                    .font(DSTypography.h5SwiftUI(weight: .medium))
+                                    .foregroundColor(Color(hex: "#12CDD9"))
+                            }
+                            .padding(.horizontal, 24)
+
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 12) {
+                                    if viewModel.isLoading && viewModel.nowPlayingMovies.isEmpty {
+                                        ForEach(0..<6, id: \.self) { _ in
+                                            MovieCardSkeleton(style: .standard)
+                                        }
+                                    } else {
+                                        ForEach(viewModel.nowPlayingMovies.prefix(6), id: \.id) { movie in
+                                            MovieCard(
+                                                movie: movie,
+                                                style: .standard,
+                                                onTap: { viewModel.selectMovie(movie) }
+                                            )
+                                        }
+                                    }
+                                }
+                                .padding(.horizontal, 24)
+                            }
+                        }
+
+                        // MARK: - Top Rated Section
+                        VStack(alignment: .leading, spacing: 16) {
+                            HStack {
+                                Text("Top Rated")
+                                    .font(DSTypography.h4SwiftUI(weight: .semibold))
+                                    .foregroundColor(DSColors.primaryTextSwiftUI)
+
+                                Spacer()
+
+                                Button("See All") { }
+                                    .font(DSTypography.h5SwiftUI(weight: .medium))
+                                    .foregroundColor(Color(hex: "#12CDD9"))
+                            }
+                            .padding(.horizontal, 24)
+
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 12) {
+                                    if viewModel.isLoading && viewModel.topRatedMovies.isEmpty {
+                                        ForEach(0..<6, id: \.self) { _ in
+                                            MovieCardSkeleton(style: .standard)
+                                        }
+                                    } else {
+                                        ForEach(viewModel.topRatedMovies.prefix(6), id: \.id) { movie in
+                                            MovieCard(
+                                                movie: movie,
+                                                style: .standard,
+                                                onTap: { viewModel.selectMovie(movie) }
+                                            )
+                                        }
+                                    }
+                                }
+                                .padding(.horizontal, 24)
+                            }
+                        }
+
+                        // MARK: - Coming Soon Section
+                        VStack(alignment: .leading, spacing: 16) {
+                            HStack {
+                                Text("Coming Soon")
+                                    .font(DSTypography.h4SwiftUI(weight: .semibold))
+                                    .foregroundColor(DSColors.primaryTextSwiftUI)
+
+                                Spacer()
+
+                                Button("See All") { }
+                                    .font(DSTypography.h5SwiftUI(weight: .medium))
+                                    .foregroundColor(Color(hex: "#12CDD9"))
+                            }
+                            .padding(.horizontal, 24)
+
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 12) {
+                                    if viewModel.isLoading && viewModel.upcomingMovies.isEmpty {
+                                        ForEach(0..<6, id: \.self) { _ in
+                                            MovieCardSkeleton(style: .standard)
+                                        }
+                                    } else {
+                                        ForEach(viewModel.upcomingMovies.prefix(6), id: \.id) { movie in
+                                            MovieCard(
+                                                movie: movie,
+                                                style: .standard,
+                                                onTap: { viewModel.selectMovie(movie) }
+                                            )
+                                        }
+                                    }
+                                }
+                                .padding(.horizontal, 24)
+                            }
+                        }
+
                         // Add bottom padding for tab bar
                         Color.clear
                             .frame(height: 40)
