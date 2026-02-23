@@ -49,17 +49,26 @@ struct DSTag: View {
     let title: String
     let isSelected: Bool
     let isDisabled: Bool
+    let style: TagStyle
     let action: () -> Void
+
+    enum TagStyle {
+        case `default`
+        case pill
+        case outlined
+    }
 
     init(
         title: String,
         isSelected: Bool = false,
         isDisabled: Bool = false,
+        style: TagStyle = .default,
         action: @escaping () -> Void = {}
     ) {
         self.title = title
         self.isSelected = isSelected
         self.isDisabled = isDisabled
+        self.style = style
         self.action = action
     }
 
@@ -68,45 +77,74 @@ struct DSTag: View {
             Text(title)
                 .font(DSTypography.bodySmallSwiftUI(weight: .medium))
                 .foregroundColor(foregroundColor)
-                .padding(.horizontal, 16)
+                .padding(.horizontal, paddingHorizontal)
                 .padding(.vertical, 8)
                 .background(backgroundColor)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12)
+                    RoundedRectangle(cornerRadius: cornerRadius)
                         .stroke(borderColor, lineWidth: borderWidth)
                 )
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
         }
         .disabled(isDisabled)
         .opacity(isDisabled ? 0.5 : 1.0)
     }
 
+    // MARK: - Private Computed Properties
+
+    private var cornerRadius: CGFloat {
+        switch style {
+        case .default, .outlined: return 12
+        case .pill: return 20
+        }
+    }
+
+    private var paddingHorizontal: CGFloat {
+        switch style {
+        case .default, .outlined: return 16
+        case .pill: return 20
+        }
+    }
+
     private var backgroundColor: Color {
-        if isSelected {
-            return DSColors.accentSwiftUI
-        } else {
-            return DSColors.surfaceSwiftUI
+        switch style {
+        case .default, .outlined:
+            return isSelected ? DSColors.accentSwiftUI : DSColors.surfaceSwiftUI
+        case .pill:
+            return isSelected
+                ? DSColors.accentSwiftUI.opacity(0.15)
+                : DSColors.surfaceSwiftUI.opacity(0.8)
         }
     }
 
     private var foregroundColor: Color {
-        if isSelected {
-            return DSColors.backgroundSwiftUI
-        } else {
-            return DSColors.secondaryTextSwiftUI
+        switch style {
+        case .default:
+            return isSelected ? DSColors.backgroundSwiftUI : DSColors.secondaryTextSwiftUI
+        case .outlined:
+            return isSelected ? DSColors.accentSwiftUI : DSColors.secondaryTextSwiftUI
+        case .pill:
+            return isSelected ? DSColors.accentSwiftUI : DSColors.secondaryTextSwiftUI
         }
     }
 
     private var borderColor: Color {
-        if isSelected {
-            return Color.clear
-        } else {
-            return DSColors.borderSwiftUI.opacity(0.3)
+        switch style {
+        case .default:
+            return isSelected ? Color.clear : DSColors.borderSwiftUI.opacity(0.3)
+        case .outlined:
+            return isSelected ? DSColors.accentSwiftUI : DSColors.borderSwiftUI.opacity(0.5)
+        case .pill:
+            return DSColors.accentSwiftUI.opacity(isSelected ? 0.8 : 0.3)
         }
     }
 
     private var borderWidth: CGFloat {
-        isSelected ? 0 : 1
+        switch style {
+        case .default: return isSelected ? 0 : 1
+        case .outlined: return 1
+        case .pill: return 1
+        }
     }
 }
 
@@ -130,16 +168,22 @@ struct DSSearchField: View {
     var body: some View {
         HStack(spacing: 12) {
             CinemaxIconView(.search, size: .small, color: DSColors.secondaryTextSwiftUI)
+                .accessibilityHidden(true) // Decorative icon
 
             TextField(placeholder, text: $text)
                 .font(DSTypography.bodyMediumSwiftUI())
                 .foregroundColor(DSColors.primaryTextSwiftUI)
                 .textFieldStyle(PlainTextFieldStyle())
+                .accessibilityLabel("Search movies")
+                .accessibilityHint("Type to search for movies")
+                .accessibilityAddTraits(.isSearchField)
 
             if !text.isEmpty {
                 Button(action: { text = "" }) {
                     CinemaxIconView(.remove, size: .small, color: DSColors.tertiaryTextSwiftUI)
                 }
+                .accessibilityLabel("Clear search")
+                .accessibilityHint("Removes all text from search field")
             }
         }
         .padding(.horizontal, 16)
@@ -336,5 +380,45 @@ struct DSDropdown: View {
             }
         }
         .opacity(isDisabled ? 0.5 : 1.0)
+    }
+}
+
+// MARK: - Section Header Component
+@available(iOS 15.0, *)
+struct DSSectionHeader<TrailingContent: View>: View {
+    let title: String
+    let icon: CinemaxIcon
+    let trailingContent: TrailingContent
+
+    init(
+        title: String,
+        icon: CinemaxIcon,
+        @ViewBuilder trailingContent: () -> TrailingContent = { EmptyView() }
+    ) {
+        self.title = title
+        self.icon = icon
+        self.trailingContent = trailingContent()
+    }
+
+    var body: some View {
+        HStack {
+            CinemaxIconView(icon, size: .small, color: DSColors.accentSwiftUI)
+                .accessibilityHidden(true)
+
+            Text(title)
+                .font(DSTypography.h5SwiftUI(weight: .semibold))
+                .foregroundColor(DSColors.primaryTextSwiftUI)
+
+            Spacer()
+
+            trailingContent
+        }
+    }
+}
+
+// MARK: - Section Header without trailing content convenience init
+extension DSSectionHeader where TrailingContent == EmptyView {
+    init(title: String, icon: CinemaxIcon) {
+        self.init(title: title, icon: icon, trailingContent: { EmptyView() })
     }
 }

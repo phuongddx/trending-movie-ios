@@ -10,15 +10,29 @@ class SearchViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var isLoadingMore = false
     @Published var selectedMovie: HomeViewModel.MovieWrapper?
+    @Published var searchHistory: [String] = []
+    @Published var trendingMovies: [MoviesListItemViewModel] = []
 
     private let searchMoviesUseCase: SearchMoviesUseCaseProtocol
+    private let historyStore: SearchHistoryStore
+    private let trendingUseCase: TrendingMoviesUseCaseProtocol?
     @StateObject private var storage = MovieStorage.shared
 
     private var searchCancellable: AnyCancellable?
     private var currentSearchTask: Cancellable?
-    private var currentPage = 1
+    private(set) var currentPage = 1
     private var totalPages = 1
     private var hasMorePages: Bool { currentPage < totalPages }
+
+    // MARK: - Configuration
+    private enum Configuration {
+        static let debounceInterval: Int = 300 // milliseconds (optimized from 500ms)
+    }
+
+    // MARK: - Performance Tracking (Debug Only)
+    #if DEBUG
+    private var searchStartTime: Date?
+    #endif
 
     let popularSearches = [
         "Avengers", "Spider-Man", "Batman", "Star Wars",
@@ -26,17 +40,45 @@ class SearchViewModel: ObservableObject {
         "Action", "Drama", "Thriller", "Romance"
     ]
 
-    nonisolated init(searchMoviesUseCase: SearchMoviesUseCaseProtocol) {
+    nonisolated init(
+        searchMoviesUseCase: SearchMoviesUseCaseProtocol,
+        historyStore: SearchHistoryStore = SearchHistoryStore(),
+        trendingUseCase: TrendingMoviesUseCaseProtocol? = nil
+    ) {
         self.searchMoviesUseCase = searchMoviesUseCase
+        self.historyStore = historyStore
+        self.trendingUseCase = trendingUseCase
 
         Task { @MainActor in
+            self.searchHistory = historyStore.recentSearches
             setupSearchDebouncing()
+            loadTrendingMovies()
         }
+    }
+
+    nonisolated deinit {
+        Task { @MainActor in
+            cancelAllOperations()
+        }
+    }
+
+    // MARK: - Cleanup
+    func cancelAllOperations() {
+        currentSearchTask?.cancel()
+        searchCancellable?.cancel()
+    }
+
+    // MARK: - Memory Management
+    func handleMemoryWarning() {
+        // Clear cached data if needed
+        searchResults.removeAll()
+        trendingMovies.removeAll()
+        clearSuggestions()
     }
 
     private func setupSearchDebouncing() {
         searchCancellable = $searchQuery
-            .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
+            .debounce(for: .milliseconds(Configuration.debounceInterval), scheduler: DispatchQueue.main)
             .removeDuplicates()
             .sink { [weak self] query in
                 if query.isEmpty {
@@ -47,8 +89,24 @@ class SearchViewModel: ObservableObject {
             }
     }
 
+    // MARK: - Accessibility
+    func announceSearchResults(count: Int) {
+        let message = count == 0
+            ? "No movies found"
+            : "\(count) movies found"
+        UIAccessibility.post(notification: .announcement, argument: message)
+    }
+
     func performSearch() {
         guard !searchQuery.isEmpty else { return }
+
+        #if DEBUG
+        searchStartTime = Date()
+        #endif
+
+        // Add to history
+        historyStore.add(searchQuery)
+        searchHistory = historyStore.recentSearches
 
         clearSuggestions()
         isLoading = true
@@ -56,6 +114,51 @@ class SearchViewModel: ObservableObject {
         searchResults.removeAll()
 
         executeSearch(page: currentPage)
+    }
+
+    // MARK: - Search History Management
+    func removeFromHistory(_ query: String) {
+        historyStore.remove(query)
+        searchHistory = historyStore.recentSearches
+    }
+
+    func clearSearchHistory() {
+        historyStore.clear()
+        searchHistory = []
+    }
+
+    // MARK: - Trending Movies
+    func loadTrendingMovies() {
+        guard let trendingUseCase = trendingUseCase else { return }
+
+        trendingUseCase.execute(
+            request: MoviesRequest(page: 1),
+            cached: { [weak self] moviesPage in
+                Task { @MainActor in
+                    self?.trendingMovies = moviesPage.movies.map {
+                        MoviesListItemViewModel(movie: $0)
+                    }
+                }
+            },
+            completion: { _ in }
+        )
+    }
+
+    // MARK: - Alternative Suggestions
+    func getAlternativeSuggestions(for query: String) -> [String] {
+        let lowercase = query.lowercased()
+
+        // Find similar popular searches
+        let similar = popularSearches.filter { search in
+            search.lowercased().contains(lowercase) ||
+            lowercase.contains(search.lowercased())
+        }
+
+        // Add some default suggestions if not enough
+        let defaults = ["Marvel", "Comedy", "Action", "2024"]
+        let combined = similar + defaults.filter { !similar.contains($0) }
+
+        return Array(combined.prefix(5))
     }
 
     func loadNextPage() {
@@ -126,8 +229,23 @@ class SearchViewModel: ObservableObject {
         } else {
             searchResults = newMovieViewModels
             isLoading = false
+            // Announce results for accessibility
+            announceSearchResults(count: searchResults.count)
+
+            #if DEBUG
+            logSearchPerformance()
+            #endif
         }
     }
+
+    #if DEBUG
+    private func logSearchPerformance() {
+        if let start = searchStartTime {
+            let duration = Date().timeIntervalSince(start)
+            print("[Performance] Search completed in \(String(format: "%.2f", duration * 1000))ms")
+        }
+    }
+    #endif
 
     private func handleSearchError() {
         isLoading = false
