@@ -102,12 +102,18 @@ struct HomeView: View {
 
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 12) {
-                                    ForEach(viewModel.popularMovies.prefix(6), id: \.id) { movie in
-                                        MovieCard(
-                                            movie: movie,
-                                            style: .standard,
-                                            onTap: { viewModel.selectMovie(movie) }
-                                        )
+                                    if viewModel.isLoading && viewModel.popularMovies.isEmpty {
+                                        ForEach(0..<6, id: \.self) { _ in
+                                            MovieCardSkeleton(style: .standard)
+                                        }
+                                    } else {
+                                        ForEach(viewModel.popularMovies.prefix(6), id: \.id) { movie in
+                                            MovieCard(
+                                                movie: movie,
+                                                style: .standard,
+                                                onTap: { viewModel.selectMovie(movie) }
+                                            )
+                                        }
                                     }
                                 }
                                 .padding(.horizontal, 24)
@@ -118,6 +124,9 @@ struct HomeView: View {
                         Color.clear
                             .frame(height: 40)
                     }
+                }
+                .refreshable {
+                    await viewModel.refresh()
                 }
 
                 // Hidden NavigationLink for programmatic navigation
@@ -187,6 +196,32 @@ class HomeViewModel: ObservableObject {
         loadTrendingMovies()
 
         // Load other categories
+        loadPopularMovies()
+        loadNowPlayingMovies()
+        loadTopRatedMovies()
+        loadUpcomingMovies()
+    }
+
+    /// Refresh all data (for pull-to-refresh)
+    func refresh() async {
+        // Clear existing tasks
+        loadingTasks.values.forEach { $0.cancel() }
+        loadingTasks.removeAll()
+
+        // Reset state
+        isLoading = true
+
+        // Small delay for UX (feels more natural)
+        do {
+            try await Task.sleep(nanoseconds: 300_000_000) // 0.3s
+        } catch {
+            // Task was cancelled, reset loading state and return
+            isLoading = false
+            return
+        }
+
+        // Reload all data
+        loadTrendingMovies()
         loadPopularMovies()
         loadNowPlayingMovies()
         loadTopRatedMovies()

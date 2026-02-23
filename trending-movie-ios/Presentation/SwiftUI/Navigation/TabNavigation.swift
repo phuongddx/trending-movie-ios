@@ -130,11 +130,39 @@ struct CinemaxTabButton: View {
 
 struct SettingsView: View {
     @StateObject private var themeManager = DSThemeManager.shared
+    @ObservedObject private var appSettings = AppSettings.shared
 
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 24) {
+                    // Accessibility Section
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Accessibility")
+                            .font(DSTypography.h3SwiftUI(weight: .semibold))
+                            .foregroundColor(DSColors.primaryTextSwiftUI)
+
+                        VStack(spacing: 0) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Haptic Feedback")
+                                        .font(DSTypography.bodyMediumSwiftUI())
+                                        .foregroundColor(DSColors.primaryTextSwiftUI)
+                                    Text("Provides tactile feedback when tapping buttons and switching tabs.")
+                                        .font(DSTypography.bodySmallSwiftUI())
+                                        .foregroundColor(DSColors.secondaryTextSwiftUI)
+                                }
+                                Spacer()
+                                Toggle("", isOn: $appSettings.isHapticEnabled)
+                                    .tint(DSColors.accentSwiftUI)
+                                    .labelsHidden()
+                            }
+                            .padding(16)
+                        }
+                        .background(DSColors.surfaceSwiftUI)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+
                     // Profile Section
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Profile")

@@ -180,14 +180,34 @@ extension View {
 
     // MARK: - Animation Utilities
 
-    /// Bounce animation
-    func bounceAnimation() -> some View {
-        self.animation(.spring(response: 0.3, dampingFraction: 0.6, blendDuration: 0), value: UUID())
+    /// Bounce animation (respects Reduce Motion)
+    func bounceAnimation<V: Equatable>(value: V) -> some View {
+        modifier(AccessibleAnimationModifier(
+            animation: .spring(response: 0.3, dampingFraction: 0.6, blendDuration: 0),
+            value: value
+        ))
     }
 
-    /// Smooth animation
-    func smoothAnimation(duration: Double = 0.3) -> some View {
-        self.animation(.easeInOut(duration: duration), value: UUID())
+    /// Smooth animation (respects Reduce Motion)
+    func smoothAnimation<V: Equatable>(duration: Double = 0.3, value: V) -> some View {
+        modifier(AccessibleAnimationModifier(
+            animation: .easeInOut(duration: duration),
+            value: value
+        ))
+    }
+
+    // MARK: - Touch Target Compliance
+
+    /// Expand touch target to minimum 44x44
+    func minimumTouchTarget() -> some View {
+        self.frame(minWidth: TouchTarget.minimumSize, minHeight: TouchTarget.minimumSize)
+            .contentShape(Rectangle())
+    }
+
+    /// Expand touch target with custom minimum size
+    func touchTarget(minSize: CGFloat = TouchTarget.minimumSize) -> some View {
+        self.frame(minWidth: minSize, minHeight: minSize)
+            .contentShape(Rectangle())
     }
 
     // MARK: - Debug Utilities
@@ -229,6 +249,34 @@ private struct RoundedCorner: Shape {
             cornerRadii: CGSize(width: radius, height: radius)
         )
         return Path(path.cgPath)
+    }
+}
+
+// MARK: - Reduce Motion Support
+
+/// Animation that respects accessibility Reduce Motion setting
+struct AccessibleAnimationModifier<V: Equatable>: ViewModifier {
+    @Environment(\.accessibilityReduceMotion) var reduceMotion
+    let animation: Animation
+    let value: V
+
+    func body(content: Content) -> some View {
+        content.animation(reduceMotion ? .none : animation, value: value)
+    }
+}
+
+/// Conditional animation that respects Reduce Motion
+struct ConditionalAnimationModifier<V: Equatable>: ViewModifier {
+    @Environment(\.accessibilityReduceMotion) var reduceMotion
+    let normalAnimation: Animation
+    let reducedAnimation: Animation
+    let value: V
+
+    func body(content: Content) -> some View {
+        content.animation(
+            reduceMotion ? reducedAnimation : normalAnimation,
+            value: value
+        )
     }
 }
 

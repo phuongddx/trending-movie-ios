@@ -86,6 +86,7 @@ struct MovieCard: View {
                             DSIconButton(
                                 icon: isInWatchlist ? .download : .downloadOffline,
                                 style: .secondary,
+                                accessibilityLabel: isInWatchlist ? "Remove from watchlist" : "Add to watchlist",
                                 action: onWatchlistTap
                             )
                         }
@@ -94,6 +95,7 @@ struct MovieCard: View {
                             DSIconButton(
                                 icon: isFavorite ? .heart : .heart,
                                 style: .secondary,
+                                accessibilityLabel: isFavorite ? "Remove from favorites" : "Add to favorites",
                                 action: onFavoriteTap
                             )
                         }
@@ -104,6 +106,9 @@ struct MovieCard: View {
                 .padding(20)
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(movie.title), \(movie.releaseDate), \(formatRating()) out of 10")
+        .accessibilityHint("Featured movie. Double tap to view details.")
     }
 
     private var standardCard: some View {
@@ -119,6 +124,7 @@ struct MovieCard: View {
                         } placeholder: {
                             Rectangle()
                                 .fill(DSColors.surfaceSwiftUI)
+                                .shimmer()
                         }
                     } else {
                         Rectangle()
@@ -171,11 +177,18 @@ struct MovieCard: View {
             .background(DSColors.surfaceSwiftUI)
             .cornerRadius(12)
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(movie.title), \(getGenreText()), \(formatRating()) stars")
+        .accessibilityHint("Double tap to view details")
     }
 
     private func getGenreText() -> String {
         // In real implementation, this would come from movie genres
         return "Action"
+    }
+
+    private func formatRating() -> String {
+        String(format: "%.1f", min(parseRating(movie.voteAverage) * 2, 10))
     }
 
     private var compactCard: some View {
@@ -220,6 +233,7 @@ struct MovieCard: View {
                             icon: isInWatchlist ? .download : .downloadOffline,
                             style: .secondary,
                             size: .small,
+                            accessibilityLabel: isInWatchlist ? "Remove from watchlist" : "Add to watchlist",
                             action: onWatchlistTap
                         )
                     }
@@ -229,6 +243,7 @@ struct MovieCard: View {
                             icon: .heart,
                             style: .secondary,
                             size: .small,
+                            accessibilityLabel: isFavorite ? "Remove from favorites" : "Add to favorites",
                             action: onFavoriteTap
                         )
                     }
@@ -238,6 +253,9 @@ struct MovieCard: View {
             .background(DSColors.surfaceSwiftUI)
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(movie.title), \(movie.releaseDate), \(formatRating()) stars")
+        .accessibilityHint("Double tap to view details")
     }
 
     private func parseRating(_ voteAverage: String) -> Double {

@@ -13,6 +13,7 @@ struct MoviePosterImage: View {
     @Injected(\AppContainer.posterImagesRepository) private var posterImagesRepository: PosterImagesRepository
     @State private var image: UIImage?
     @State private var isLoading: Bool = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var imageURL: URL? {
         guard let path = posterPath else { return nil }
@@ -41,7 +42,7 @@ struct MoviePosterImage: View {
                 Image(uiImage: image)
                     .resizable()
                     .aspectRatio(aspectRatio, contentMode: .fill)
-                    .transition(.opacity.animation(.easeInOut(duration: 0.3)))
+                    .transition(reduceMotion ? .opacity : .opacity.animation(.easeInOut(duration: 0.3)))
             } else {
                 placeholderView
                     .aspectRatio(aspectRatio, contentMode: .fill)
@@ -68,6 +69,7 @@ struct MoviePosterImage: View {
                         color: DSColors.tertiaryTextSwiftUI
                     )
                 )
+                .shimmer()
         } else {
             EmptyView()
         }
