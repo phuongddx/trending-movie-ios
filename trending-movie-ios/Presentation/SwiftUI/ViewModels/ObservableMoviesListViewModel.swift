@@ -10,6 +10,7 @@ enum MoviesListViewModelLoading {
 enum MoviesListDisplayViewType {
     case trending
     case search
+    case discover
 }
 
 @MainActor
@@ -21,8 +22,13 @@ class ObservableMoviesListViewModel: ObservableObject {
     @Published var error: String = ""
     @Published var isShowingError: Bool = false
 
+    // MARK: - Filter & View Mode Properties
+    @Published var activeFilters: MovieFilters = .default
+    @AppStorage("moviesViewMode") var viewMode: ViewMode = .list
+
     private let searchMoviesUseCase: SearchMoviesUseCaseProtocol
     private let trendingMoviesUseCase: TrendingMoviesUseCaseProtocol
+    private let discoverMoviesUseCase: DiscoverMoviesUseCaseProtocol
     private let onMovieSelected: ((Movie) -> Void)?
 
     private var currentPage: Int = 0
@@ -32,8 +38,10 @@ class ObservableMoviesListViewModel: ObservableObject {
 
     private var trendingPages = [MoviesPage]()
     private var searchResultPages = [MoviesPage]()
+    private var discoverResultPages = [MoviesPage]()
     private var moviesLoadTask: Cancellable?
     private var searchCancellable: AnyCancellable?
+    private var filterCancellable: AnyCancellable?
 
     private var moviesListViewType: MoviesListDisplayViewType = .trending {
         didSet {
@@ -46,21 +54,30 @@ class ObservableMoviesListViewModel: ObservableObject {
     var errorTitle: String { NSLocalizedString("Error", comment: "") }
     var searchBarPlaceholder: String { NSLocalizedString("Search Movies", comment: "") }
     var moviesListHeaderTitle: String {
-        moviesListViewType == .trending ? "Trending Result" : "Search Result"
+        switch moviesListViewType {
+        case .trending: return "Trending Result"
+        case .search: return "Search Result"
+        case .discover: return "Filtered Result"
+        }
     }
     var shouldShowEmptyView: Bool {
-        moviesListViewType == .search && movies.isEmpty
+        (moviesListViewType == .search || moviesListViewType == .discover) && movies.isEmpty && loading == nil
     }
 
-    nonisolated init(searchMoviesUseCase: SearchMoviesUseCaseProtocol,
-         trendingMoviesUseCase: TrendingMoviesUseCaseProtocol,
-         onMovieSelected: ((Movie) -> Void)? = nil) {
+    nonisolated init(
+        searchMoviesUseCase: SearchMoviesUseCaseProtocol,
+        trendingMoviesUseCase: TrendingMoviesUseCaseProtocol,
+        discoverMoviesUseCase: DiscoverMoviesUseCaseProtocol,
+        onMovieSelected: ((Movie) -> Void)? = nil
+    ) {
         self.searchMoviesUseCase = searchMoviesUseCase
         self.trendingMoviesUseCase = trendingMoviesUseCase
+        self.discoverMoviesUseCase = discoverMoviesUseCase
         self.onMovieSelected = onMovieSelected
 
         Task { @MainActor in
             setupSearchDebouncing()
+            setupFilterObservation()
         }
     }
 
@@ -77,9 +94,20 @@ class ObservableMoviesListViewModel: ObservableObject {
             }
     }
 
+    private func setupFilterObservation() {
+        filterCancellable = $activeFilters
+            .removeDuplicates()
+            .sink { [weak self] _ in
+                Task { @MainActor in
+                    self?.resetPages()
+                    self?.loadMovies()
+                }
+            }
+    }
+
     // MARK: - Public Methods
     func viewDidLoad() {
-        loadTrendingMovies()
+        loadMovies()
     }
 
     func loadNextPage() {
@@ -90,27 +118,64 @@ class ObservableMoviesListViewModel: ObservableObject {
             loadTrendingMovies(loading: .nextPage)
         case .search:
             performSearch(query: searchQuery, loading: .nextPage)
+        case .discover:
+            loadDiscoverMovies(loading: .nextPage)
         }
     }
 
     func refreshMovies() async {
         resetPages()
-        switch moviesListViewType {
-        case .trending:
-            loadTrendingMovies()
-        case .search:
-            if !searchQuery.isEmpty {
-                performSearch(query: searchQuery)
-            }
-        }
+        loadMovies()
     }
 
     func selectMovie(at index: Int) {
-        let pages = moviesListViewType == .trending ? trendingPages : searchResultPages
+        let pages: [MoviesPage]
+        switch moviesListViewType {
+        case .trending: pages = trendingPages
+        case .search: pages = searchResultPages
+        case .discover: pages = discoverResultPages
+        }
         let allMovies = pages.flatMap { $0.movies }
 
         guard index < allMovies.count else { return }
         onMovieSelected?(allMovies[index])
+    }
+
+    func removeFilter(_ chip: FilterChip) {
+        let currentYear = Calendar.current.component(.year, from: Date())
+        switch chip.category {
+        case .sort:
+            activeFilters.sortBy = .popularity
+        case .genre:
+            if let genreId = Int(chip.id.replacingOccurrences(of: "genre_", with: "")) {
+                activeFilters.genres.remove(genreId)
+            }
+        case .rating:
+            activeFilters.minimumRating = 0
+        case .year:
+            activeFilters.yearRange = 1990...currentYear
+        }
+    }
+
+    // MARK: - Load Movies
+    private func loadMovies(loading: MoviesListViewModelLoading = .fullScreen) {
+        self.loading = loading
+
+        // Cancel pending request
+        moviesLoadTask?.cancel()
+
+        if !searchQuery.isEmpty {
+            // Search mode
+            performSearch(query: searchQuery, loading: loading)
+        } else if activeFilters.isActive {
+            // Filtered mode - use discover
+            moviesListViewType = .discover
+            loadDiscoverMovies(loading: loading)
+        } else {
+            // Default - trending
+            moviesListViewType = .trending
+            loadTrendingMovies(loading: loading)
+        }
     }
 
     private func performSearch(query: String, loading: MoviesListViewModelLoading = .fullScreen) {
@@ -180,22 +245,57 @@ class ObservableMoviesListViewModel: ObservableObject {
         )
     }
 
+    private func loadDiscoverMovies(loading: MoviesListViewModelLoading = .fullScreen) {
+        self.loading = loading
+        moviesListViewType = .discover
+
+        moviesLoadTask?.cancel()
+        moviesLoadTask = discoverMoviesUseCase.execute(
+            filters: activeFilters,
+            page: nextPage,
+            cached: { [weak self] page in
+                Task { @MainActor in
+                    self?.appendPage(page)
+                }
+            },
+            completion: { [weak self] result in
+                Task { @MainActor in
+                    switch result {
+                    case .success(let page):
+                        self?.appendPage(page)
+                    case .failure(let error):
+                        self?.handleError(error)
+                    }
+                    self?.loading = nil
+                }
+            }
+        )
+    }
+
     // MARK: - Private Methods
     private func appendPage(_ moviesPage: MoviesPage) {
         currentPage = moviesPage.page
         totalPageCount = moviesPage.totalPages
 
-        if moviesListViewType == .trending {
+        switch moviesListViewType {
+        case .trending:
             trendingPages = trendingPages.filter { $0.page != moviesPage.page } + [moviesPage]
-        } else {
+        case .search:
             searchResultPages = searchResultPages.filter { $0.page != moviesPage.page } + [moviesPage]
+        case .discover:
+            discoverResultPages = discoverResultPages.filter { $0.page != moviesPage.page } + [moviesPage]
         }
 
         updateMoviesList()
     }
 
     private func updateMoviesList() {
-        let pages = moviesListViewType == .trending ? trendingPages : searchResultPages
+        let pages: [MoviesPage]
+        switch moviesListViewType {
+        case .trending: pages = trendingPages
+        case .search: pages = searchResultPages
+        case .discover: pages = discoverResultPages
+        }
         movies = pages.flatMap { $0.movies }.map {
             MoviesListItemViewModel(movie: $0)
         }
@@ -206,6 +306,7 @@ class ObservableMoviesListViewModel: ObservableObject {
         totalPageCount = 1
         trendingPages.removeAll()
         searchResultPages.removeAll()
+        discoverResultPages.removeAll()
         movies.removeAll()
     }
 
@@ -214,6 +315,14 @@ class ObservableMoviesListViewModel: ObservableObject {
             currentPage = 0
             totalPageCount = 1
             searchResultPages.removeAll()
+        }
+    }
+
+    private func resetDiscoverPages() {
+        if moviesListViewType == .discover {
+            currentPage = 0
+            totalPageCount = 1
+            discoverResultPages.removeAll()
         }
     }
 

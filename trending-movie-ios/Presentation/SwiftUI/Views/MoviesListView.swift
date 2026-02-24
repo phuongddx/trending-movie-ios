@@ -3,6 +3,7 @@ import SwiftUI
 struct MoviesListView: View {
     @StateObject var viewModel: ObservableMoviesListViewModel
     @State private var isRefreshing = false
+    @State private var showFilterSheet = false
 
     init(viewModel: ObservableMoviesListViewModel) {
         self._viewModel = StateObject(wrappedValue: viewModel)
@@ -32,6 +33,9 @@ struct MoviesListView: View {
             .onAppear {
                 viewModel.viewDidLoad()
             }
+            .sheet(isPresented: $showFilterSheet) {
+                MoviesFilterView(filters: $viewModel.activeFilters)
+            }
         }
         .environmentObject(DSThemeManager.shared)
     }
@@ -43,7 +47,7 @@ struct MoviesListView: View {
         } else if viewModel.shouldShowEmptyView {
             emptyView
         } else {
-            moviesList
+            moviesContent
         }
     }
 
@@ -62,21 +66,36 @@ struct MoviesListView: View {
         )
     }
 
-    private var moviesList: some View {
+    // MARK: - Movies Content with View Mode Toggle
+    @ViewBuilder
+    private var moviesContent: some View {
         ScrollView {
             LazyVStack(spacing: DSSpacing.md) {
                 headerView
 
-                ForEach(Array(viewModel.movies.enumerated()), id: \.element.title) { index, movie in
-                    MovieRowView(movie: movie)
-                        .onTapGesture {
-                            viewModel.selectMovie(at: index)
-                        }
-                        .onAppear {
-                            if index == viewModel.movies.count - 3 {
-                                viewModel.loadNextPage()
-                            }
-                        }
+                // Active filters bar
+                if viewModel.searchQuery.isEmpty {
+                    ActiveFiltersBar(
+                        filters: $viewModel.activeFilters,
+                        showFilterSheet: $showFilterSheet
+                    )
+                    .padding(.bottom, DSSpacing.sm)
+                }
+
+                // Conditional content based on view mode
+                switch viewModel.viewMode {
+                case .list:
+                    moviesListView
+                        .transition(.asymmetric(
+                            insertion: .opacity.combined(with: .scale(scale: 0.95)),
+                            removal: .opacity
+                        ))
+                case .grid:
+                    moviesGridView
+                        .transition(.asymmetric(
+                            insertion: .opacity.combined(with: .scale(scale: 0.95)),
+                            removal: .opacity
+                        ))
                 }
 
                 if viewModel.loading == .nextPage {
@@ -84,6 +103,45 @@ struct MoviesListView: View {
                 }
             }
             .padding(DSSpacing.Padding.container)
+        }
+        .animation(
+            UIAccessibility.isReduceMotionEnabled ? .none : .easeInOut(duration: 0.25),
+            value: viewModel.viewMode
+        )
+    }
+
+    // MARK: - List View
+    private var moviesListView: some View {
+        ForEach(Array(viewModel.movies.enumerated()), id: \.element.id) { index, movie in
+            MovieRowView(movie: movie)
+                .onTapGesture {
+                    viewModel.selectMovie(at: index)
+                }
+                .onAppear {
+                    if index == viewModel.movies.count - 3 {
+                        viewModel.loadNextPage()
+                    }
+                }
+        }
+    }
+
+    // MARK: - Grid View
+    private var moviesGridView: some View {
+        let columns = [
+            GridItem(.adaptive(minimum: 135, maximum: 180), spacing: DSSpacing.md)
+        ]
+
+        return LazyVGrid(columns: columns, spacing: DSSpacing.md) {
+            ForEach(Array(viewModel.movies.enumerated()), id: \.element.id) { index, movie in
+                MovieCard(movie: movie, style: .standard) {
+                    viewModel.selectMovie(at: index)
+                }
+                .onAppear {
+                    if index == viewModel.movies.count - 3 {
+                        viewModel.loadNextPage()
+                    }
+                }
+            }
         }
     }
 
@@ -94,6 +152,25 @@ struct MoviesListView: View {
                 .foregroundColor(DSColors.primaryTextSwiftUI)
 
             Spacer()
+
+            // View mode toggle
+            ViewModeToggle(mode: $viewModel.viewMode)
+
+            // Filter button (only when not searching)
+            if viewModel.searchQuery.isEmpty {
+                Button(action: { showFilterSheet = true }) {
+                    Image(systemName: viewModel.activeFilters.isActive
+                        ? "line.3.horizontal.decrease.circle.fill"
+                        : "line.3.horizontal.decrease.circle")
+                        .font(.title2)
+                        .foregroundColor(viewModel.activeFilters.isActive
+                            ? DSColors.accentSwiftUI
+                            : DSColors.secondaryTextSwiftUI)
+                }
+                .accessibilityLabel(viewModel.activeFilters.isActive
+                    ? "Open filters, \(viewModel.activeFilters.activeChips.count) filters active"
+                    : "Open filters")
+            }
 
             themeToggleButton
         }
@@ -108,6 +185,7 @@ struct MoviesListView: View {
                 .font(.title2)
                 .foregroundColor(DSColors.accentSwiftUI)
         }
+        .accessibilityLabel("Toggle theme")
     }
 
     private var loadingNextPageView: some View {
@@ -134,7 +212,8 @@ struct MoviesListView_Previews: PreviewProvider {
 
         let viewModel = ObservableMoviesListViewModel(
             searchMoviesUseCase: container.searchMoviesUseCase(),
-            trendingMoviesUseCase: container.trendingMoviesUseCase()
+            trendingMoviesUseCase: container.trendingMoviesUseCase(),
+            discoverMoviesUseCase: container.discoverMoviesUseCase()
         )
 
         return MoviesListView(viewModel: viewModel)

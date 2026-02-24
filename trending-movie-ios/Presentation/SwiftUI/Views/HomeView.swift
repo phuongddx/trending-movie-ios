@@ -6,6 +6,7 @@ struct HomeView: View {
     @StateObject private var storage = MovieStorage.shared
     @State private var searchText = ""
     @State private var selectedCategory = "All"
+    @State private var navigateToMoviesList = false
 
     init(container: AppContainer) {
         self.container = container
@@ -93,7 +94,7 @@ struct HomeView: View {
                                 Spacer()
 
                                 Button("See All") {
-                                    // Handle see all
+                                    navigateToMoviesList = true
                                 }
                                 .font(DSTypography.h5SwiftUI(weight: .medium))
                                 .foregroundColor(Color(hex: "#12CDD9"))
@@ -249,6 +250,15 @@ struct HomeView: View {
                     }
                     .hidden()
                 }
+
+                // Navigation to MoviesListView with filters
+                NavigationLink(
+                    destination: MoviesListView(viewModel: container.observableMoviesListViewModel()),
+                    isActive: $navigateToMoviesList
+                ) {
+                    EmptyView()
+                }
+                .hidden()
             }
             .ignoresSafeArea(.container, edges: .top)
             .onAppear {
