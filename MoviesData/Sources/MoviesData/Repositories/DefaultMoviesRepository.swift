@@ -240,6 +240,34 @@ public final class DefaultMoviesRepository: MoviesRepository {
         }
         return cancellable
     }
+
+    public func fetchDiscoverMovies(filters: MovieFilters,
+                                    page: Int,
+                                    cached: @escaping (MoviesPage) -> Void,
+                                    completion: @escaping MoviesPageResult) -> MoviesDomain.Cancellable? {
+        // Check cache first
+        let cacheKey = RequestCacheKey(query: "discover_\(filters.cacheKey)", page: page)
+        if let cachedResponse = cache?.getResponse(for: cacheKey) {
+            cached(cachedResponse)
+        }
+
+        // Fetch from network
+        let cancellable = networkService.request(
+            .discoverMovies(filters: filters, page: page),
+            type: MoviesResponseDTO.self
+        ) { [weak self] result in
+            switch result {
+            case .success(let responseDTO):
+                let moviesPage = responseDTO.toDomain()
+                self?.cache?.save(response: moviesPage, for: cacheKey)
+                completion(.success(moviesPage))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+
+        return cancellable
+    }
 }
 
 // MARK: - Cache Protocol

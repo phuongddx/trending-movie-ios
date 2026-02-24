@@ -15,6 +15,7 @@ public enum MoviesAPI {
     case watchProviders(movieId: String)
     case movieReviews(movieId: String, page: Int)
     case posterImage(path: String)
+    case discoverMovies(filters: MovieFilters, page: Int)
 }
 
 extension MoviesAPI: TargetType {
@@ -53,6 +54,8 @@ extension MoviesAPI: TargetType {
             return "movie/\(movieId)/reviews"
         case .posterImage(let path):
             return "w500\(path)"
+        case .discoverMovies:
+            return "discover/movie"
         }
     }
 
@@ -86,6 +89,32 @@ extension MoviesAPI: TargetType {
              .watchProviders,
              .posterImage:
             return .requestPlain
+        case .discoverMovies(let filters, let page):
+            var params: [String: Any] = ["page": page]
+
+            // Genres (comma-separated)
+            if !filters.genres.isEmpty {
+                params["with_genres"] = filters.genres.sorted().map(String.init).joined(separator: ",")
+            }
+
+            // Sort
+            params["sort_by"] = filters.sortBy.rawValue
+
+            // Minimum rating
+            if filters.minimumRating > 0 {
+                params["vote_average.gte"] = filters.minimumRating
+            }
+
+            // Year range
+            let currentYear = Calendar.current.component(.year, from: Date())
+            if filters.yearRange.lowerBound > 1990 {
+                params["primary_release_date.gte"] = "\(filters.yearRange.lowerBound)-01-01"
+            }
+            if filters.yearRange.upperBound < currentYear {
+                params["primary_release_date.lte"] = "\(filters.yearRange.upperBound)-12-31"
+            }
+
+            return .requestParameters(parameters: params, encoding: URLEncoding.queryString)
         }
     }
 

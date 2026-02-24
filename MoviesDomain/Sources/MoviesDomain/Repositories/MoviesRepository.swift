@@ -54,4 +54,10 @@ public protocol MoviesRepository {
     func fetchSimilarMovies(movieId: Movie.Identifier,
                             page: Int,
                             completion: @escaping MoviesPageResult) -> Cancellable?
+
+    @discardableResult
+    func fetchDiscoverMovies(filters: MovieFilters,
+                             page: Int,
+                             cached: @escaping (MoviesPage) -> Void,
+                             completion: @escaping MoviesPageResult) -> Cancellable?
 }
