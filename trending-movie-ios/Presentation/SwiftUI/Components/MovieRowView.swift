@@ -2,16 +2,65 @@ import SwiftUI
 
 struct MovieRowView: View {
     let movie: MoviesListItemViewModel
+    let onWatchlistToggle: (() -> Void)?
+    let onFavoriteToggle: (() -> Void)?
+    let onShare: (() -> Void)?
+
+    @StateObject private var storage = MovieStorage.shared
+
+    init(
+        movie: MoviesListItemViewModel,
+        onWatchlistToggle: (() -> Void)? = nil,
+        onFavoriteToggle: (() -> Void)? = nil,
+        onShare: (() -> Void)? = nil
+    ) {
+        self.movie = movie
+        self.onWatchlistToggle = onWatchlistToggle
+        self.onFavoriteToggle = onFavoriteToggle
+        self.onShare = onShare
+    }
+
+    private var movieModel: Movie {
+        Movie(
+            id: movie.id,
+            title: movie.title,
+            posterPath: movie.posterImagePath,
+            overview: movie.overview,
+            releaseDate: dateFormatter.date(from: movie.releaseDate),
+            voteAverage: movie.voteAverage
+        )
+    }
+
+    private var isInWatchlist: Bool {
+        storage.isInWatchlist(movieModel)
+    }
+
+    private var isFavorite: Bool {
+        storage.isFavorite(movieModel)
+    }
 
     var body: some View {
         HStack(spacing: DSSpacing.md) {
             posterImageView
             movieInfoView
             Spacer()
+            actionButtonsView
         }
         .padding(DSSpacing.Padding.card)
+        .frame(minHeight: 100)
         .background(DSColors.surfaceSwiftUI)
         .cornerRadius(DSSpacing.CornerRadius.card)
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(movie.title), \(movie.releaseDate), rated \(movie.voteAverage) out of 10")
+        .accessibilityHint("Double tap to view details")
+    }
+
+    // MARK: - Date Formatter
+    private var dateFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy"
+        return formatter
     }
 
     private var posterImageView: some View {
@@ -46,6 +95,64 @@ struct MovieRowView: View {
         }
     }
 
+    // MARK: - Action Buttons View
+    private var actionButtonsView: some View {
+        HStack(spacing: DSSpacing.sm) {
+            // Primary: Watchlist
+            Button(action: { toggleWatchlist() }) {
+                Image(systemName: isInWatchlist ? "bookmark.fill" : "bookmark")
+                    .font(.system(size: 20))
+                    .foregroundColor(isInWatchlist ? DSColors.accentSwiftUI : DSColors.secondaryTextSwiftUI)
+            }
+            .frame(width: 44, height: 44)
+            .accessibilityLabel(isInWatchlist ? "Remove from watchlist" : "Add to watchlist")
+            .accessibilityAction(named: isInWatchlist ? "Remove from watchlist" : "Add to watchlist") {
+                toggleWatchlist()
+            }
+
+            // Overflow menu
+            Menu {
+                Button(action: { toggleFavorite() }) {
+                    Label(
+                        isFavorite ? "Remove from favorites" : "Add to favorites",
+                        systemImage: isFavorite ? "heart.fill" : "heart"
+                    )
+                }
+                Button(action: { shareMovie() }) {
+                    Label("Share", systemImage: "square.and.arrow.up")
+                }
+            } label: {
+                Image(systemName: "ellipsis")
+                    .font(.system(size: 20))
+                    .foregroundColor(DSColors.secondaryTextSwiftUI)
+                    .frame(width: 44, height: 44)
+            }
+            .accessibilityLabel("More options")
+        }
+    }
+
+    // MARK: - Actions
+    private func toggleWatchlist() {
+        if isInWatchlist {
+            storage.removeFromWatchlist(movieModel)
+        } else {
+            storage.addToWatchlist(movieModel)
+        }
+        onWatchlistToggle?()
+    }
+
+    private func toggleFavorite() {
+        if isFavorite {
+            storage.removeFromFavorites(movieModel)
+        } else {
+            storage.addToFavorites(movieModel)
+        }
+        onFavoriteToggle?()
+    }
+
+    private func shareMovie() {
+        onShare?()
+    }
 }
 
 @available(iOS 13.0, *)
