@@ -319,3 +319,29 @@ public final class RealPosterImagesRepository: PosterImagesRepository {
         return URL(string: "\(baseImageURL)\(size.rawValue)\(fullPath)")
     }
 }
+
+// MARK: - Discover Movies Use Case
+public final class RealDiscoverMoviesUseCase: DiscoverMoviesUseCaseProtocol {
+    private let networkService: TMDBNetworkService
+
+    public init(networkService: TMDBNetworkService) {
+        self.networkService = networkService
+    }
+
+    public func execute(filters: MovieFilters,
+                        page: Int,
+                        cached: @escaping (MoviesPage) -> Void,
+                        completion: @escaping MoviesPageResult) -> Cancellable? {
+        return networkService.request(
+            .discoverMovies(filters: filters, page: page),
+            type: TMDBMoviesResponse.self
+        ) { result in
+            switch result {
+            case .success(let response):
+                completion(.success(response.toDomain()))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+}

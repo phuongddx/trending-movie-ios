@@ -11,7 +11,8 @@ extension AppContainer {
         self {
             ObservableMoviesListViewModel(
                 searchMoviesUseCase: self.searchMoviesUseCase(),
-                trendingMoviesUseCase: self.trendingMoviesUseCase()
+                trendingMoviesUseCase: self.trendingMoviesUseCase(),
+                discoverMoviesUseCase: self.discoverMoviesUseCase()
             )
         }
     }

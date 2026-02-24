@@ -72,6 +72,13 @@ public protocol UpcomingMoviesUseCaseProtocol {
                  completion: @escaping MoviesPageResult) -> Cancellable?
 }
 
+public protocol DiscoverMoviesUseCaseProtocol {
+    func execute(filters: MovieFilters,
+                 page: Int,
+                 cached: @escaping (MoviesPage) -> Void,
+                 completion: @escaping MoviesPageResult) -> Cancellable?
+}
+
 // MARK: - Repository Protocols
 
 public enum ImageSize: String {

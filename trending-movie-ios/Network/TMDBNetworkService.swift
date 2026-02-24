@@ -127,6 +127,7 @@ public enum TMDBTarget {
     case similarMovies(movieId: String, page: Int)
     case posterImage(path: String)
     case rateMovie(movieId: String, rating: Double)
+    case discoverMovies(filters: MovieFilters, page: Int)
 }
 
 extension TMDBTarget: TargetType {
@@ -173,6 +174,8 @@ extension TMDBTarget: TargetType {
             return "w500\(path)"
         case .rateMovie(let movieId, _):
             return "movie/\(movieId)/rating"
+        case .discoverMovies:
+            return "discover/movie"
         }
     }
 
@@ -231,6 +234,35 @@ extension TMDBTarget: TargetType {
             )
         case .posterImage:
             return .requestPlain
+        case .discoverMovies(let filters, let page):
+            var params: [String: Any] = [
+                "api_key": "bbc142c0087fef1df2ad2e3230101822",
+                "page": page
+            ]
+
+            // Genres (comma-separated)
+            if !filters.genres.isEmpty {
+                params["with_genres"] = filters.genres.sorted().map(String.init).joined(separator: ",")
+            }
+
+            // Sort
+            params["sort_by"] = filters.sortBy.rawValue
+
+            // Minimum rating
+            if filters.minimumRating > 0 {
+                params["vote_average.gte"] = filters.minimumRating
+            }
+
+            // Year range
+            let currentYear = Calendar.current.component(.year, from: Date())
+            if filters.yearRange.lowerBound > 1990 {
+                params["primary_release_date.gte"] = "\(filters.yearRange.lowerBound)-01-01"
+            }
+            if filters.yearRange.upperBound < currentYear {
+                params["primary_release_date.lte"] = "\(filters.yearRange.upperBound)-12-31"
+            }
+
+            return .requestParameters(parameters: params, encoding: URLEncoding.queryString)
         }
     }
 

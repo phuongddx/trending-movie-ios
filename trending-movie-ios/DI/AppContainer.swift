@@ -70,6 +70,12 @@ extension AppContainer {
             RealFetchDetailsMovieUseCase(networkService: self.tmdbNetworkService())
         }
     }
+
+    var discoverMoviesUseCase: Factory<DiscoverMoviesUseCaseProtocol> {
+        self {
+            RealDiscoverMoviesUseCase(networkService: self.tmdbNetworkService())
+        }
+    }
 }
 
 // MARK: - AppConfiguration
