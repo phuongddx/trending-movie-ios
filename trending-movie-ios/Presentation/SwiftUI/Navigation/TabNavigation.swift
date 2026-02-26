@@ -32,7 +32,11 @@ struct TabNavigationView: View {
         case 2:
             WatchlistView(container: container)
         case 3:
-            SettingsView()
+            if #available(iOS 15.0, *) {
+                SettingsView()
+            } else {
+                LegacySettingsView()
+            }
         default:
             HomeView(container: container)
         }
@@ -128,7 +132,8 @@ struct CinemaxTabButton: View {
     }
 }
 
-struct SettingsView: View {
+/// Legacy settings view for iOS < 15 compatibility
+struct LegacySettingsView: View {
     @StateObject private var themeManager = DSThemeManager.shared
     @ObservedObject private var appSettings = AppSettings.shared
 
