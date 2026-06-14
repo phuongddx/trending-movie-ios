@@ -57,9 +57,11 @@ class SearchViewModel: ObservableObject {
     }
 
     nonisolated deinit {
-        Task { @MainActor in
-            cancelAllOperations()
-        }
+        // Cancel directly - no Task wrapper needed
+        // cancel() is synchronous and safe from any context
+        // Using Task in deinit creates a dangling reference to self
+        currentSearchTask?.cancel()
+        searchCancellable?.cancel()
     }
 
     // MARK: - Cleanup
