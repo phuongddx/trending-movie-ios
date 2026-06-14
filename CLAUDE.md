@@ -2,82 +2,84 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Structure
+## Build & Test Commands
 
-This is an iOS app that showcases trending movies using The Movie Database (TMDB) API. The codebase follows Clean Architecture principles with distinct layers:
+**Open `TrendingMovies.xcworkspace`** (root), not the `.xcodeproj`. The workspace groups the app target together with the two local SPM packages (`MoviesDomain`, `MoviesData`).
 
-### Architecture Layers
-- **Domain Layer**: Core business logic, entities (Movie, MovieQuery), and use case protocols in `Domain/` and separate `MoviesDomain` module
-- **Data Layer**: Network services, repositories, and storage implementations in `Data/` and separate `MoviesData` module
-- **Presentation Layer**: SwiftUI views, ViewModels, design system components in `Presentation/`
-
-### Dependency Injection
-Uses Factory pattern for DI with two main containers:
-- `AppContainer`: Core dependencies (network, repositories, use cases)
-- `PresentationContainer`: UI-specific ViewModels
-
-Key files:
-- `DI/AppContainer.swift`: Main DI container with singletons for network service and repositories
-- `DI/PresentationContainer.swift`: Extension for SwiftUI ViewModels
-
-## Development Commands
-
-### Building and Testing
 ```bash
-# Build the project (use Xcode or xcodebuild)
-xcodebuild -project trending-movie-ios.xcodeproj -scheme trending-movie-ios build
+# Build / test / build+run via fastlane (CI uses this path)
+bundle exec fastlane tests                                      # scan — runs full unit suite
 
-# Run tests via Fastlane
-bundle exec fastlane tests
+# xcodebuild directly
+xcodebuild -workspace TrendingMovies.xcworkspace -scheme trending-movie-ios \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max' build
 
-# Run tests directly
-xcodebuild test -project trending-movie-ios.xcodeproj -scheme trending-movie-ios -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max'
+xcodebuild test -workspace TrendingMovies.xcworkspace -scheme trending-movie-ios \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max'
+
+# Run a SINGLE test class or method
+xcodebuild test -workspace TrendingMovies.xcworkspace -scheme trending-movie-ios \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max' \
+  -only-testing:trending-movie-iosTests/MoviesListViewModelTests \
+  -only-testing:trending-movie-iosTests/MoviesListViewModelTests/testExample
 ```
 
-### XcodeBuildMCP (Recommended for iOS Development)
-Use XcodeBuildMCP tools for Apple platform development instead of raw bash commands:
-- `mcp__XcodeBuildMCP__build_sim` - Build for iOS Simulator
-- `mcp__XcodeBuildMCP__build_run_sim` - Build and run on simulator
-- `mcp__XcodeBuildMCP__test_sim` - Run tests on simulator
-- `mcp__XcodeBuildMCP__screenshot` - Capture simulator screenshot
-- `mcp__XcodeBuildMCP__snapshot_ui` - Print view hierarchy
+Prefer the **XcodeBuildMCP** tools over raw `xcodebuild` for build/run/test/screenshot. First call in a session must be `mcp__XcodeBuildMCP__session_show_defaults` to confirm project/scheme/simulator, then `build_run_sim` to launch.
 
-First, set session defaults:
+CI (`.github/workflows/objective-c-xcode.yml`) runs `bundle exec fastlane tests` on every PR to `master` — keep this green.
+
+- **Target:** iOS 14.0+, Swift 5.10, Xcode 15.4+
+- **Tests:** `trending-movie-iosTests/` (Domain, Infrastructure, Presentation) + `trending-movie-iosUITests/`. Mocks live in `trending-movie-iosTests/Mocks/`.
+
+## ⚠️ Critical: Two Parallel Domain/Data Layers
+
+This is the single biggest trap in the repo. There are **two** copies of the domain + data layer:
+
+| Where | Status | Notes |
+|-------|--------|-------|
+| `trending-movie-ios/Domain/`, `trending-movie-ios/Network/`, `trending-movie-ios/Data/` | **Active** — the app target compiles these | `Movie.swift`, `MovieFilters.swift`, `MovieQuery.swift`, `UseCases.swift`, `RealUseCases.swift`, `TMDBNetworkService.swift`, `TMDBResponseModels.swift`, `MovieStorage.swift` |
+| `MoviesDomain/` + `MoviesData/` (local SPM packages) | **Dormant** — `grep` shows **0 `import MoviesDomain`/`import MoviesData`** anywhere in the app | Cleaner design (separate DTOs, `MoviesAPI` Moya enum, repository abstractions) but **not wired into the app target** |
+
+The workspace references the SPM packages as groups, so they appear in Xcode, but the app does not depend on them. **Before editing domain/data code, confirm you are in the in-app `trending-movie-ios/` folders, not the SPM `Sources/` folders** — or you will edit code that nothing calls.
+
+## Architecture (Clean Architecture + MVVM, callback-based)
+
+Data flows **View → ViewModel → UseCase → `TMDBNetworkService` → Moya → TMDB API**, with DTOs mapped back to domain entities.
+
+**Dependency Injection — Factory, one container.** `AppContainer` (`SharedContainer`) is the only container. All network service, repository, and use-case registrations live in `DI/AppContainer.swift` as `Factory<T>` properties (singletons for `tmdbNetworkService` + `posterImagesRepository`; use cases resolved fresh each call). `DI/PresentationContainer.swift` is an **extension of `AppContainer`** that adds SwiftUI ViewModels — there is no separate `PresentationContainer` type. ViewModels resolve their use cases via `self.someUseCase()`.
+
+**Use-case contract — completion handlers, not async/await.** Every use case follows:
+```swift
+func execute(request: ..., cached: @escaping (MoviesPage) -> Void,
+             completion: @escaping (Result<MoviesPage, Error>) -> Void) -> Cancellable?
 ```
-mcp__XcodeBuildMCP__session_set_defaults with projectPath, scheme, simulatorName
-```
+The `cached` closure fires first with disk/memory-cached data (instant UI), then `completion` fires with the fresh network result. `Cancellable?` lets the caller cancel in-flight requests. Implementations live in `Network/RealUseCases.swift`; protocols + `MoviesRequest`/`MovieFilters` value objects live in `Domain/UseCases.swift`.
 
-### Requirements
-- iOS 14.0+
-- Xcode 15.4+
-- Swift 5.10
+**Networking.** `TMDBNetworkService` is a concrete `final class` (no protocol abstraction in the app layer) wrapping Moya. Call shape: `networkService.request(.trendingMovies(timeWindow:page:), type: TMDBMoviesResponse.self) { result in ... }`. The enum cases (`TMDBAPI`/endpoint cases) define the Moya `TargetType`; response DTOs in `Network/TMDBResponseModels.swift` implement `toDomain()` to map into `Movie`/`MoviesPage`.
 
-## Key Dependencies
-- **Factory**: Dependency injection framework
-- **Moya**: Network abstraction layer
-- **CombineMoya**: Combine integration for Moya
-
-## Network Configuration
-TMDB API configuration is hardcoded in `AppContainer.swift`:
-- Base URL: `https://api.themoviedb.org/3/`
-- Images URL: `https://image.tmdb.org/t/p/`
-- API Key: Embedded in AppConfig (consider moving to environment variables)
-
-## Testing
-Test files are organized in `trending-movie-iosTests/` with:
-- Unit tests for ViewModels, Use Cases, and Network services
-- Mock implementations for testing
-- Test coverage for both UIKit and SwiftUI components
+**Presentation — SwiftUI + MVVM.** Screens in `Presentation/SwiftUI/Views/`, ViewModels in `Presentation/SwiftUI/ViewModels/`, reusable components in `Presentation/SwiftUI/Components/`. Navigation via `TabNavigation` (4 tabs: Home, Search, Downloads/Watchlist, Settings) + `AppDestination` route enum + Coordinator pattern.
 
 ## Design System
-Custom design system in `Presentation/DesignSystem/` includes:
-- Colors (`DSColors`)
-- Typography (`DSTypography`)
-- Spacing (`DSSpacing`)
-- Reusable components (`DSActionButton`, `DSTabView`, etc.)
 
-## Navigation
-Uses SwiftUI navigation with:
-- `TabNavigation` for main app structure
-- `AppDestination` for route definitions
-- Coordinator pattern for navigation flow
+`Presentation/DesignSystem/` — `DSColors`, `DSTypography` (Montserrat, h1–h7 + body scale), `DSSpacing` (8pt grid), `DSThemeManager`, and components (`DSActionButton`, `DSIconButton`, `DSSearchBar`, `HeroCarousel`, `MovieCard`, `CategoryTabs`, `CinemaxTabBar`). Dark-theme-first (Cinemax-inspired). Full spec in `docs/cinemax-design-system-overview.md` + the `docs/figma-*.md` analyses.
+
+## Network Configuration
+
+TMDB config is hardcoded in `AppConfig` (`DI/AppContainer.swift`):
+- Base URL: `https://api.themoviedb.org/3/`
+- Images URL: `https://image.tmdb.org/t/p/`
+- **API key is embedded in source and committed** — a real secret currently in git. Prefer moving it to an `.xcconfig`/env var before any further work that touches config.
+
+## Key Dependencies
+
+| Dependency | Purpose |
+|------------|---------|
+| Factory | DI (one `SharedContainer`, all registrations in `AppContainer`) |
+| Moya + CombineMoya | Network abstraction over `URLSession`; `TargetType` enum endpoints |
+| YouTubePlayerKit | In-app trailer playback on the movie detail screen |
+
+## Conventions
+
+- Use-case naming: protocol `XxxMoviesUseCaseProtocol` + impl `RealXxxMoviesUseCase`; each takes `TMDBNetworkService` in its initializer.
+- DTOs map to domain via `toDomain()` — keep TMDB response shapes out of the domain layer.
+- When adding a feature, wire it through all four layers: endpoint case → DTO (+`toDomain`) → use case protocol + `Real…` impl → `AppContainer` registration → ViewModel → View.
